@@ -68,8 +68,14 @@ func NewFrameApplication(appName, version string) *FrameApplication {
 
 func (fa *FrameApplication) Start() chan os.Signal {
 	fa.Logger.WithFields(logrus.Fields{
-		"host": fa.Config.ServerHost,
+		"host":    fa.Config.ServerHost,
+		"debug":   fa.Config.Debug,
+		"version": fa.Config.Version,
 	}).Info("starting HTTP server...")
+
+	if fa.Config.Debug {
+		fa.router.Use(requestLoggerMiddleware(fa.Logger))
+	}
 
 	fa.Server = &http.Server{
 		Addr:         fa.Config.ServerHost,

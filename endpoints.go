@@ -6,6 +6,8 @@ import (
 	"os"
 	"sort"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 /*
@@ -72,11 +74,22 @@ func (fa *FrameApplication) SetupEndpoints(webAppFS fs.FS, endpoints Endpoints) 
 	sort.Sort(endpoints)
 
 	for _, e := range endpoints {
+		if fa.Config.Debug {
+			fa.Logger.WithFields(logrus.Fields{
+				"path":    e.Path,
+				"methods": e.Methods,
+			}).Info("registering endpoint")
+		}
+
 		if e.HandlerFunc != nil {
 			fa.router.HandleFunc(e.Path, e.HandlerFunc).Methods(e.Methods...)
 		} else {
 			fa.router.Handle(e.Path, e.Handler).Methods(e.Methods...)
 		}
+	}
+
+	if fa.Config.Debug {
+		fa.Logger.Info("registering /static endpoint")
 	}
 
 	fa.router.PathPrefix("/static/").Handler(fs).Methods(http.MethodGet)

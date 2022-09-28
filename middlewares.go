@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -19,6 +21,35 @@ const (
 	AllowHeaderCSRF           string = "X-CSRF-Token"
 	AllowHeaderAuthorization  string = "Authorization"
 )
+
+func realIP(r *http.Request) string {
+	result := r.RemoteAddr
+	xForwardedFor := r.Header.Get("X-Forwarded-For")
+
+	if xForwardedFor != "" {
+		result = xForwardedFor
+	}
+
+	return result
+}
+
+type statusRecorder struct {
+	http.ResponseWriter
+	Status int
+}
+
+func (sr *statusRecorder) Header() http.Header {
+	return sr.ResponseWriter.Header()
+}
+
+func (sr *statusRecorder) Write(b []byte) (int, error) {
+	return sr.ResponseWriter.Write(b)
+}
+
+func (sr *statusRecorder) WriteHeader(code int) {
+	sr.Status = code
+	sr.ResponseWriter.WriteHeader(code)
+}
 
 type accessControl struct {
 	handler      http.Handler
@@ -76,4 +107,53 @@ func allow(next http.HandlerFunc, allowedMethod string) http.HandlerFunc {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+type requestLogger struct {
+	handler http.Handler
+	logger  *logrus.Entry
+}
+
+func (m *requestLogger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	recorder := &statusRecorder{
+		ResponseWriter: w,
+		Status:         http.StatusOK,
+	}
+
+	startTime := time.Now()
+	ip := realIP(r)
+
+	m.handler.ServeHTTP(recorder, r)
+	diff := time.Since(startTime)
+
+	m.logger.WithFields(logrus.Fields{
+		"ip":            ip,
+		"method":        r.Method,
+		"status":        recorder.Status,
+		"executionTime": diff,
+		"queryParams":   r.URL.RawQuery,
+	}).Info(r.URL.Path)
+}
+
+/*
+RequestLogger returns a middleware for logging all requests.
+
+Example:
+
+  mux := nerdweb.NewServeMux()
+  mux.HandleFunc("/endpoint", handler)
+
+  mux.Use(middlewares.RequestLogger(logger))
+*/
+func requestLoggerMiddleware(logger *logrus.Entry) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			handler := &requestLogger{
+				handler: next,
+				logger:  logger,
+			}
+
+			handler.ServeHTTP(w, r)
+		})
+	}
 }
