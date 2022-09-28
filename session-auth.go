@@ -11,6 +11,7 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/google"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -157,11 +158,21 @@ func (fa *FrameApplication) setupMiddleware(pathsExcludedFromAuth, htmlPaths []s
 			email, ok = session.Values["email"].(string)
 
 			if !ok {
+				fa.Logger.WithFields(logrus.Fields{
+					"ip":   realIP(r),
+					"path": r.URL.Path,
+				}).Error("user is not authorized")
+
 				fa.sendUnauthorizedResponse(w, r, htmlPaths)
 				return
 			}
 
 			if email == "" {
+				fa.Logger.WithFields(logrus.Fields{
+					"ip":   realIP(r),
+					"path": r.URL.Path,
+				}).Error("user is not authorized")
+
 				fa.sendUnauthorizedResponse(w, r, htmlPaths)
 				return
 			}
@@ -169,6 +180,11 @@ func (fa *FrameApplication) setupMiddleware(pathsExcludedFromAuth, htmlPaths []s
 			approved, _ := session.Values["approved"].(bool)
 
 			if !approved {
+				fa.Logger.WithFields(logrus.Fields{
+					"ip":   realIP(r),
+					"path": r.URL.Path,
+				}).Error("user has an account but it is not yet approved")
+
 				http.Redirect(w, r, fa.accountAwaitingApprovalPath, http.StatusTemporaryRedirect)
 				return
 			}
