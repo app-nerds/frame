@@ -97,8 +97,16 @@ func (fa *FrameApplication) SetupEndpoints(webAppFS fs.FS, endpoints Endpoints) 
 }
 
 func (fa *FrameApplication) getStaticFileSystem() http.FileSystem {
-	if fa.Config.Debug {
+	if fa.Config.Version == "development" {
+		if fa.Config.Debug {
+			fa.Logger.Infof("serving static assets from filesystem out of '%s'", fa.webAppFolder)
+		}
+
 		return http.FS(os.DirFS(fa.webAppFolder))
+	}
+
+	if fa.Config.Debug {
+		fa.Logger.Infof("serving static assets from embedded content at '%s'", fa.webAppFolder)
 	}
 
 	fsys, err := fs.Sub(fa.webAppFS, fa.webAppFolder)
