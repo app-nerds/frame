@@ -1,0 +1,30 @@
+{{template "layout" .}}
+{{define "title"}}Login{{end}}
+
+{{define "content"}}
+  <div class="login-page">
+    <h2>Log In</h2>
+
+    {{if .ErrorMessage}}
+      <p class="error-message">{{.ErrorMessage}}</p>
+    {{else}}
+      <p>
+        Please enter your user name and password to log in.
+      </p>
+    {{end}}
+
+    <form method="post">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required autofocus />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required />
+
+      <footer>
+        <button id="login" class="action-button">Log In</button>
+
+        <input type="hidden" name="referer" value="{{.Referer}}" />
+      </footer>
+    </form>
+  </div>
+{{end}}

@@ -2,11 +2,13 @@ package frame
 
 import (
 	"context"
+	"embed"
 	"html/template"
 	"io/fs"
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -17,7 +19,12 @@ import (
 	"gorm.io/gorm"
 )
 
+//go:embed templates/*
+var internalTemplatesFS embed.FS
+
 type FrameApplication struct {
+	*sync.Mutex
+
 	appName       string
 	externalAuths []goth.Provider
 	router        *mux.Router
@@ -29,10 +36,10 @@ type FrameApplication struct {
 	webAppFS      fs.FS
 
 	// Paths
-	accountAwaitingApprovalPath string
-	unauthorizedPath            string
-	unexpectedErrorPath         string
-	webAppFolder                string
+	webAppFolder string
+
+	// Template setup
+	primaryLayoutName string
 
 	// Public
 	Config        *Config
@@ -47,6 +54,8 @@ type FrameApplication struct {
 
 func NewFrameApplication(appName, version string) *FrameApplication {
 	result := &FrameApplication{
+		Mutex: &sync.Mutex{},
+
 		appName: appName,
 		Logger: logrus.New().WithFields(logrus.Fields{
 			"who":     appName,

@@ -1,10 +1,13 @@
 package frame
 
 import (
+	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
 	"path/filepath"
+
+	"github.com/laher/mergefs"
 )
 
 type Template struct {
@@ -31,20 +34,23 @@ func (fa *FrameApplication) RenderTemplate(w http.ResponseWriter, name string, d
 	}
 }
 
-func (fa *FrameApplication) Templates(templateFS fs.FS, rootPath string, manifest TemplateCollection) *FrameApplication {
+func (fa *FrameApplication) Templates(templateFS fs.FS, manifest TemplateCollection) *FrameApplication {
 	var (
 		err            error
 		tmplDefinition Template
 	)
 
-	fa.templateFS = templateFS
+	// fa.templateFS = templateFS
+	fa.templateFS = mergefs.Merge(templateFS, internalTemplatesFS)
 	fa.templates = make(map[string]*template.Template)
+
+	manifest = fa.registerInternalTemplates(manifest)
 
 	for _, tmplDefinition = range manifest {
 		var parsedTemplate *template.Template
 
-		tmplPath := filepath.Join(rootPath, tmplDefinition.Name)
-		layoutPath := filepath.Join(rootPath, tmplDefinition.UseLayout)
+		tmplPath := filepath.Join("templates", tmplDefinition.Name)
+		layoutPath := filepath.Join("templates", tmplDefinition.UseLayout)
 
 		if tmplDefinition.IsLayout {
 			if parsedTemplate, err = template.ParseFS(fa.templateFS, tmplPath); err != nil {
@@ -60,4 +66,40 @@ func (fa *FrameApplication) Templates(templateFS fs.FS, rootPath string, manifes
 	}
 
 	return fa
+}
+
+func (fa *FrameApplication) registerInternalTemplates(manifest TemplateCollection) TemplateCollection {
+	manifest = append(manifest, Template{Name: "account-pending.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
+	manifest = append(manifest, Template{Name: "login.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
+	manifest = append(manifest, Template{Name: "unexpected-error.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
+
+	return manifest
+}
+
+func (fa *FrameApplication) setupInternalTemplate(templateString, layoutName, newTemplateName string) {
+	var (
+		err error
+	)
+
+	fa.Lock()
+	defer fa.Unlock()
+
+	// Validate the layout template exists first
+	layoutFileName := fmt.Sprintf("%s.tmpl", layoutName)
+
+	if _, ok := fa.templates[layoutFileName]; !ok {
+		fa.Logger.Fatalf("The layout template name '%s' does not exist", layoutName)
+	}
+
+	// Render the login template and add it to the template cache
+	// newTemplate, err := template.New(newTemplateName).Parse(templateString)
+	// newTemplate, err := fa.templates[layoutFileName].Parse(templateString)
+	newTemplate, err := fa.templates[layoutFileName].New(newTemplateName).Parse(templateString)
+
+	if err != nil {
+		fa.Logger.WithError(err).Fatalf("error parsing %s template", newTemplateName)
+	}
+
+	fa.templates[newTemplateName] = newTemplate
+	fmt.Printf("\n%+v\n", fa.templates)
 }

@@ -1,16 +1,20 @@
 package frame
 
-import "gorm.io/gorm"
+import (
+	"github.com/app-nerds/kit/v6/passwords"
+	"gorm.io/gorm"
+)
 
 type Member struct {
 	gorm.Model
 
-	Approved   bool   `json:"approved"`
-	AvatarURL  string `json:"avatarURL"`
-	Email      string `json:"email"`
-	ExternalID string `json:"-"`
-	FirstName  string `json:"firstName"`
-	LastName   string `json:"lastName"`
+	Approved   bool                           `json:"approved"`
+	AvatarURL  string                         `json:"avatarURL"`
+	Email      string                         `json:"email"`
+	ExternalID string                         `json:"-"`
+	FirstName  string                         `json:"firstName"`
+	LastName   string                         `json:"lastName"`
+	Password   passwords.HashedPasswordString `json:"password"`
 }
 
 type MemberService struct {
@@ -24,6 +28,7 @@ func newMemberService(frame *FrameApplication) MemberService {
 }
 
 func (s MemberService) CreateMember(member *Member) error {
+	member.Password = member.Password.Hash()
 	dbResult := s.frame.DB.Create(&member)
 	return dbResult.Error
 }
