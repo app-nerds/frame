@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Base Example</title>
+  <link rel="stylesheet" href="base.min.css" />
+  <link rel="stylesheet" href="components.min.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+</head>
+
+<body>
+  <main>
+    <h1>Base Example</h1>
+
+    <p>
+      Welcome to the Base Example for the Nerd JS Library. This showcases the base CSS settings.
+    </p>
+
+    <h2>Components</h2>
+
+    <p>
+      Here are the components provided by this library.
+    </p>
+
+    <h3>Dialogs</h3>
+
+    <p>
+      Dialogs are window-based components that display or prompt user for information.
+    </p>
+
+    <ul>
+      <li>Alert Dialog</li>
+      <li>Confirmation dialog</li>
+    </ul>
+
+    <div style="margin-bottom: 1rem;">
+      <button id="showAlert">Show Alert</button>
+      <button id="showConfirm">Show Confirm</button>
+    </div>
+
+    <h3>Menus</h3>
+
+    <ul>
+      <li>Popup Menu</li>
+    </ul>
+
+    <div style="margin-bottom: 1rem;">
+      <button id="showPopup">Show popup menu</button>
+      <popup-menu id="popup" trigger="#showPopup">
+        <popup-menu-item id="menuItem1" text="Menu Item 1" icon="airplay"></popup-menu-item>
+        <popup-menu-item id="menuItem2" text="Menu Item 2" icon="archive"></popup-menu-item>
+        <popup-menu-item id="menuItem3" text="Menu Item 3" icon="bar-chart-2"></popup-menu-item>
+      </popup-menu>
+    </div>
+
+    <h3>Shim and Spinner</h3>
+
+    <ul>
+      <li>Shim</li>
+      <li>Spinner</li>
+    </ul>
+
+    <div style="margin-bottom: 1rem;">
+      <button id="showSpinner">Show Spinner</button>
+    </div>
+
+    <h2>Styles</h2>
+
+    <p>
+      A number of styles are built-in.
+    </p>
+
+    <h3>Tables</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Col 1</th>
+          <th>Col 2</th>
+          <th>Col 3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Value 1</td>
+          <td>Value 2</td>
+          <td>Value 3</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Forms</h3>
+
+    <form>
+      <label for="first">First</label>
+      <input type="text" id="first" />
+
+      <label for="second">Second</label>
+      <select id="second">
+        <option value="value1">Value 1</option>
+        <option value="value2">Value 2</option>
+        <option value="value3">Value 3</option>
+      </select>
+
+      <label for="third">Third</label>
+      <textarea id="third">Text goes here</textarea>
+
+      <button type="button">Cancel</button>
+      <button type="button" class="action-button">Action!</button>
+    </form>
+  </main>
+
+  <script src="base.js" type="module"></script>
+</body>
+
+</html>

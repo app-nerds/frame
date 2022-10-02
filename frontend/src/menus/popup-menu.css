@@ -1,0 +1,25 @@
+/* 
+ * Popup menus 
+ * Copyright © 2022 App Nerds LLC
+ */
+popup-menu {
+	border: 1px solid var(--border-color);
+	position: absolute;
+	z-index: 1;
+	background-color: var(--dialog-background-color);
+	padding: 10px;
+}
+
+popup-menu popup-menu-item div {
+	padding: 8px;
+	color: black;
+	background-color: var(--dialog-background-color);
+	border: none;
+	cursor: pointer;
+}
+
+popup-menu popup-menu-item div:hover {
+	background-color: var(--primary-color);
+  color: var(--popup-menu-item-hover-color);
+}
+

@@ -1,0 +1,262 @@
+/*
+ * Copyright © 2022 App Nerds LLC
+ */
+:root {
+  /* Elements */
+  --sidebar-width: 240px;
+}
+
+/*
+ * Base
+ */
+html, body {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) calc(100% - var(--sidebar-width));
+  grid-template-rows: 0px 1fr 50px;
+  grid-template-areas: "sidenav header" "sidenav main" "sidenav footer";
+}
+
+/* 
+ * Header 
+ */
+header {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--secondary-color);
+}
+
+/*
+ * Side navigation
+ */
+nav.sidenav {
+  position: relative;
+  transform: translateX(0);
+  grid-area: sidenav;
+  height: 100%;
+  overflow-y: auto;
+  background-color: var(--primary-color);
+  color: #FFF;
+  width: var(--sidebar-width);
+  transition: all 0.6s ease-in-out;
+  box-shadow: 0 2px 20x 0 var(--shadow-color), 0 0 0 1px var(--shadow-color);
+  z-index: 2;
+}
+
+nav h1 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: 50px;
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+nav div.profile {
+  display: flex;
+  align-items: center;
+  min-height: 90px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+}
+
+nav div.profile p {
+  font-size: 17px;
+  letter-spacing: 1px;
+  font-weight: 300;
+}
+
+nav div.menu-container {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+nav div.menu-container ul {
+  width: var(--sidebar-width);
+  padding: 0;
+  margin: 0;
+  background-color: var(--primary-color);
+  list-style-type: none;
+}
+
+nav div.menu-container ul li {
+  position: relative;
+  padding: 0.5rem 0.8rem;
+  color: #fff;
+  font-size: 16px;
+  text-transform: capitalize;
+  align-items: center;
+  display: flex;
+}
+
+nav div.menu-container ul li  svg {
+  margin-right: 0.5rem;
+}
+
+nav div.menu-container ul li a {
+  text-decoration: none;
+  color: #fff;
+}
+nav div.menu-container ul li:hover {
+  background-color: var(--third-color);
+  cursor: pointer;
+}
+
+nav div.menu-container ul li.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 3px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  font-size: 15px;
+}
+
+nav div.menu-container ul li.header:hover {
+  cursor: auto;
+  background-color: var(--primary-color);
+}
+
+footer {
+  grid-area: footer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  color: #777;
+  background-color: #fff;
+}
+
+/*
+ * Buttons
+ */
+.action-button {
+  color: var(--light-text-color);
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 0.25rem;
+  margin: 0.5rem 0.5rem 0.5rem 0;
+  height: 3rem;
+}
+
+.cancel-button {
+  color: var(--text-color);
+  background-color: var(--secondary-color);
+  border: none;
+  border-radius: 0.25rem;
+  margin: 0.5rem 0.5rem 0.5rem 0;
+  height: 3rem;
+}
+
+.delete-button {
+  color: var(--text-color);
+  background-color: var(--secondary-color);
+  border: none;
+  border-radius: 0.25rem;
+  margin: 0.5rem 0.5rem 0.5rem 0;
+  height: 3rem;
+}
+
+/*
+ * Card
+ */
+div.card {
+  display: inline-flex;
+  flex-direction: column;
+  width: 30rem;
+  margin-bottom: 1rem;
+  -webkit-column-break-inside: avoid;
+  margin-right: 2rem;
+}
+
+div.card h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 50px;
+  background-color: #394263;
+  color: #FFF;
+  font-size: 20px;
+  letter-spacing: 1.2px;
+  padding: 0 0.2rem 0.1rem 0.5rem;
+  width: 100%;
+}
+
+div.card div.content {
+  background-color: #f0f0f0;
+  width: 100%;
+  padding: 0.5rem;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  min-height: 225px;
+  position: relative;
+}
+
+div.card div.content p {
+  margin-bottom: 0.6rem;
+  margin-top: 0.6rem;
+}
+
+div.card div.button-row {
+  position: absolute;
+  bottom: 10px;
+}
+
+/*
+ * Filters
+ */
+section.filters {
+  background-color: #ccc4;
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  margin: 1rem 0 1rem 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1rem 1rem;
+}
+
+section.filters input, section.filters textarea, section.filters select {
+	margin-bottom: 0.5rem;
+	padding: 0.5rem 0.75rem;
+	font-size: 1rem;
+	border: 1px solid var(--border-color);
+	border-radius: 0.25rem;
+}
+
+section.filters input[type="checkbox"] {
+	width: auto;
+}
+
+section.filters input:focus, section.filters textarea:focus, section.filters select:focus {
+	border-color: var(--primary-color);
+	outline: 0;
+	box-shadow: 0 0 0 .20rem var(--primary-color);
+}
+
+section.filters button {
+  background-color: #fff;
+  color: #000;
+  opacity: 0.8;
+  border: 1px solid var(--border-color);
+  align-items: center;
+  display: inline-flex;
+  padding: 0.3rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}
+
+section.filters button.action {
+  margin-left: auto;
+}
+
+section.filters button:disabled {
+  color: var(--border-color);
+  cursor: default;
+}
+
+
