@@ -1,0 +1,41 @@
+{{template "layout" .}}
+{{define "title"}}Create An Account{{end}}
+
+{{define "content"}}
+<div class="sign-up-page">
+  {{if .errorMessage}}
+    <message-bar 
+      message-type="error"
+      message="{{.errorMessage}}"
+    ></message-bar>
+  {{else}}
+    <message-bar 
+      message-type="info" 
+      message="To create a new member account fill out the form below. After you submit the form 
+        your account will be created in a <em>Pending Approval</em> status. You will not 
+        be able to log in or access member-only pages until your account is approved."
+      ></message-bar>
+  {{end}}
+
+  <form method="post">
+    <label for="firstName">First Name</label>
+    <input type="text" id="firstName" name="firstName" value="{{.user.firstName}}" required autofocus />
+
+    <label for="lastName">Last Name</label>
+    <input type="text" id="lastName" name="lastName" value="{{.user.lastName}}" required />
+
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" value="{{.user.email}}" required />
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" required />
+
+    <label for="reenterPassword">Re-enter Password</label>
+    <input type="password" id="reenterPassword" name="reenterPassword" required />
+
+    <footer>
+      <button id="createAccount" class="action-button">Create Account</button>
+    </footer>
+  </form>
+</div>
+{{end}}

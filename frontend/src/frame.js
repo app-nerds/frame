@@ -17,6 +17,7 @@ import { BaseView } from "./spa/base-view.js";
 import MemberLoginBar from "./members/member-login-bar.js";
 import { MemberService } from "./members/member-service.js";
 import GoogleLoginForm from "./members/google-login-form.js";
+import MessageBar from "./message-bar/message-bar.js";
 
 export default {
   alertPosition,
@@ -39,4 +40,5 @@ export default {
   MemberLoginBar,
   MemberService,
   GoogleLoginForm,
+  MessageBar,
 };

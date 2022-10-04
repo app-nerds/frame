@@ -1,0 +1,45 @@
+/*
+ * Copyright © 2022 App Nerds LLC
+ */
+.message-bar {
+  width: 100%;
+  border-radius: 8px;
+  padding: 1rem;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.message-bar p {
+  margin: 0;
+}
+
+.message-bar span {
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: bold;
+  font-size: 2rem;
+  margin: 0;
+  padding: 0;
+}
+
+.message-bar span:hover {
+  color: black;
+}
+
+.message-bar-error {
+  background-color: #F44336;
+}
+
+.message-bar-warn {
+  background-color: #FF9800;
+}
+
+.message-bar-info {
+  background-color: #2196F3;
+}
+
+.message-bar-success {
+  background-color: #04AA6D;
+}

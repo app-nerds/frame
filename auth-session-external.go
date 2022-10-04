@@ -45,7 +45,7 @@ func (fa *FrameApplication) SetupExternalAuth(pathsExcludedFromAuth, htmlPaths [
 		/*
 		 * If this member doesn't exist yet, create them as an unapproved member
 		 */
-		member, err = fa.MemberService.GetMemberByEmail(user.Email)
+		member, err = fa.MemberService.GetMemberByEmail(user.Email, true)
 
 		if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 			member = Member{

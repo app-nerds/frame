@@ -42,7 +42,7 @@ func (fa *FrameApplication) setupMiddleware(pathsExcludedFromAuth, htmlPaths []s
 			 */
 			if session, err = fa.sessionStore.Get(r, fa.sessionName); err != nil {
 				fa.Logger.WithError(err).Error("error getting session information")
-				http.Redirect(w, r, UnexpectedErrorPath, http.StatusTemporaryRedirect)
+				http.Redirect(w, r, UnexpectedErrorPath, http.StatusFound)
 				return
 			}
 
@@ -76,7 +76,7 @@ func (fa *FrameApplication) setupMiddleware(pathsExcludedFromAuth, htmlPaths []s
 					"path": r.URL.Path,
 				}).Error("user has an account but it is not yet approved")
 
-				http.Redirect(w, r, SiteAuthAccountPendingPath, http.StatusTemporaryRedirect)
+				http.Redirect(w, r, SiteAuthAccountPendingPath, http.StatusFound)
 				return
 			}
 
@@ -116,7 +116,7 @@ func (fa *FrameApplication) setupMiddleware(pathsExcludedFromAuth, htmlPaths []s
 func (fa *FrameApplication) sendUnauthorizedResponse(w http.ResponseWriter, r *http.Request, htmlResponsePaths []string) {
 	for _, path := range htmlResponsePaths {
 		if strings.HasPrefix(r.URL.Path, path) {
-			http.Redirect(w, r, fmt.Sprintf("%s?referer=%s", SiteAuthLoginPath, r.URL.Path), http.StatusTemporaryRedirect)
+			http.Redirect(w, r, fmt.Sprintf("%s?referer=%s", SiteAuthLoginPath, r.URL.Path), http.StatusFound)
 			return
 		}
 	}

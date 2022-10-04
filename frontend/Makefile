@@ -23,7 +23,7 @@ build-library: rollup
 	uglifycss --output dist/components.min.css src/dialogs/alert.css \
 		src/dialogs/confirm.css src/menus/popup-menu.css src/shim/shim.css \
 		src/spinner/spinner.css src/members/member-login-bar.css \
-		src/members/google-login-form.css
+		src/members/google-login-form.css src/message-bar/message-bar.css
 
 rollup:
 	rollup src/frame.js --name dist/frame.js --format es -o dist/frame.js --banner "/* Copyright © 2022 App Nerds LLC $(VERSION) */"

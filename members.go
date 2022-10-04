@@ -33,10 +33,16 @@ func (s MemberService) CreateMember(member *Member) error {
 	return dbResult.Error
 }
 
-func (s MemberService) GetMemberByEmail(email string) (Member, error) {
+func (s MemberService) GetMemberByEmail(email string, includeDeleted bool) (Member, error) {
 	result := Member{}
 
-	queryResult := s.frame.DB.Where("email = ?", email).First(&result)
+	query := s.frame.DB
+
+	if includeDeleted {
+		query = query.Unscoped()
+	}
+
+	queryResult := query.Where("email = ?", email).First(&result)
 	return result, queryResult.Error
 }
 

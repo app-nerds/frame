@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/app-nerds/kit/v6/passwords"
 	"github.com/gorilla/sessions"
 	"gorm.io/gorm"
 )
@@ -15,6 +14,7 @@ mechanism. It registers the following endpoints, each with baked in HTML:
 
 - /member/login
 - /member/account-pending
+- /member/create-account
 - /api/member/current
 - /api/member/logout
 
@@ -32,12 +32,13 @@ func (fa *FrameApplication) SetupSiteAuth(layoutName, contentTemplateName string
 	/*
 	 * Make sure specific paths are excluded from auth
 	 */
-	pathsExcludedFromAuth = append(pathsExcludedFromAuth, "/static", SiteAuthAccountPendingPath, SiteAuthLoginPath, SiteAuthLogoutPath, UnexpectedErrorPath)
+	pathsExcludedFromAuth = append(pathsExcludedFromAuth, "/static", SiteAuthAccountPendingPath, SiteAuthLoginPath, SiteAuthLogoutPath, SiteAuthMemberSignUpPath, UnexpectedErrorPath)
 
 	fa.router.HandleFunc(SiteAuthAccountPendingPath, fa.handleAuthAccountPending).Methods(http.MethodGet)
 	fa.router.HandleFunc(SiteAuthLoginPath, fa.handleSessionBasicLogin(baseData)).Methods(http.MethodGet, http.MethodPost)
+	fa.router.HandleFunc(SiteAuthMemberSignUpPath, fa.handleMemberSignup).Methods(http.MethodGet, http.MethodPost)
 	fa.router.HandleFunc(MemberApiCurrentMember, fa.handleMemberCurrent).Methods(http.MethodGet)
-	fa.router.HandleFunc(MemberApiLogOut, fa.handleMemberLogout).Methods(http.MethodPost)
+	fa.router.HandleFunc(MemberApiLogOut, fa.handleMemberLogout).Methods(http.MethodGet)
 
 	fa.setupMiddleware(pathsExcludedFromAuth, htmlPaths)
 	return fa
@@ -73,31 +74,18 @@ func (fa *FrameApplication) handleSessionBasicLogin(baseData map[string]interfac
 			password := r.Form.Get("password")
 
 			/*
-			 * If this member doesn't exist yet, create them as an unapproved member
+			 * If this member doesn't exist yet, send them to the sign-up page
 			 */
-			member, err = fa.MemberService.GetMemberByEmail(email)
+			member, err = fa.MemberService.GetMemberByEmail(email, true)
 
 			if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-				member = Member{
-					Approved:  false,
-					AvatarURL: "",
-					Email:     email,
-					Password:  passwords.HashedPasswordString(password),
-				}
-
-				if err = fa.MemberService.CreateMember(&member); err != nil {
-					fa.Logger.WithError(err).Error("error creating new member")
-					http.Redirect(w, r, UnexpectedErrorPath, http.StatusTemporaryRedirect)
-					return
-				}
-
-				http.Redirect(w, r, SiteAuthAccountPendingPath, http.StatusTemporaryRedirect)
+				http.Redirect(w, r, SiteAuthMemberSignUpPath, http.StatusFound)
 				return
 			}
 
 			if err != nil {
 				fa.Logger.WithError(err).Error("error getting member information in site auth")
-				http.Redirect(w, r, UnexpectedErrorPath, http.StatusTemporaryRedirect)
+				http.Redirect(w, r, UnexpectedErrorPath, http.StatusFound)
 				return
 			}
 
@@ -106,7 +94,15 @@ func (fa *FrameApplication) handleSessionBasicLogin(baseData map[string]interfac
 			 * redirect them.
 			 */
 			if !member.Approved {
-				http.Redirect(w, r, SiteAuthAccountPendingPath, http.StatusTemporaryRedirect)
+				http.Redirect(w, r, SiteAuthAccountPendingPath, http.StatusFound)
+				return
+			}
+
+			/*
+			 * If they are approved, but deleted, redirect
+			 */
+			if member.DeletedAt.Valid {
+				http.Redirect(w, r, SiteAuthAccountPendingPath, http.StatusFound)
 				return
 			}
 
@@ -114,7 +110,7 @@ func (fa *FrameApplication) handleSessionBasicLogin(baseData map[string]interfac
 			 * If we have an approved member, but the password is invalid, let them know
 			 */
 			if !member.Password.IsSameAsPlaintextPassword(password) {
-				data["ErrorMessage"] = "Invalid user name or password. Please try again."
+				data["errorMessage"] = "Invalid user name or password. Please try again."
 
 				fa.RenderTemplate(w, "login.tmpl", data)
 				return
@@ -125,7 +121,7 @@ func (fa *FrameApplication) handleSessionBasicLogin(baseData map[string]interfac
 			 */
 			if session, err = fa.sessionStore.Get(r, fa.sessionName); err != nil {
 				fa.Logger.WithError(err).Error("error geting session")
-				http.Redirect(w, r, UnexpectedErrorPath, http.StatusTemporaryRedirect)
+				http.Redirect(w, r, UnexpectedErrorPath, http.StatusFound)
 				return
 			}
 
@@ -138,7 +134,7 @@ func (fa *FrameApplication) handleSessionBasicLogin(baseData map[string]interfac
 
 			if err = fa.sessionStore.Save(r, w, session); err != nil {
 				fa.Logger.WithError(err).Error("error saving session")
-				http.Redirect(w, r, UnexpectedErrorPath, http.StatusTemporaryRedirect)
+				http.Redirect(w, r, UnexpectedErrorPath, http.StatusFound)
 				return
 			}
 

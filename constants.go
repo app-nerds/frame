@@ -8,6 +8,7 @@ const (
 	SiteAuthLoginPath          string = "/member/login"
 	SiteAuthLogoutPath         string = "/member/logout"
 	SiteAuthAccountPendingPath string = "/member/account-pending"
+	SiteAuthMemberSignUpPath   string = "/member/create-account"
 
 	// Member API endpoints
 	MemberApiCurrentMember string = "/api/member/current"

@@ -1,7 +1,6 @@
 package frame
 
 import (
-	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
@@ -40,7 +39,6 @@ func (fa *FrameApplication) Templates(templateFS fs.FS, manifest TemplateCollect
 		tmplDefinition Template
 	)
 
-	// fa.templateFS = templateFS
 	fa.templateFS = mergefs.Merge(templateFS, internalTemplatesFS)
 	fa.templates = make(map[string]*template.Template)
 
@@ -72,34 +70,7 @@ func (fa *FrameApplication) registerInternalTemplates(manifest TemplateCollectio
 	manifest = append(manifest, Template{Name: "account-pending.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
 	manifest = append(manifest, Template{Name: "login.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
 	manifest = append(manifest, Template{Name: "unexpected-error.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
+	manifest = append(manifest, Template{Name: "sign-up.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
 
 	return manifest
-}
-
-func (fa *FrameApplication) setupInternalTemplate(templateString, layoutName, newTemplateName string) {
-	var (
-		err error
-	)
-
-	fa.Lock()
-	defer fa.Unlock()
-
-	// Validate the layout template exists first
-	layoutFileName := fmt.Sprintf("%s.tmpl", layoutName)
-
-	if _, ok := fa.templates[layoutFileName]; !ok {
-		fa.Logger.Fatalf("The layout template name '%s' does not exist", layoutName)
-	}
-
-	// Render the login template and add it to the template cache
-	// newTemplate, err := template.New(newTemplateName).Parse(templateString)
-	// newTemplate, err := fa.templates[layoutFileName].Parse(templateString)
-	newTemplate, err := fa.templates[layoutFileName].New(newTemplateName).Parse(templateString)
-
-	if err != nil {
-		fa.Logger.WithError(err).Fatalf("error parsing %s template", newTemplateName)
-	}
-
-	fa.templates[newTemplateName] = newTemplate
-	fmt.Printf("\n%+v\n", fa.templates)
 }

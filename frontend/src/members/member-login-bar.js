@@ -36,11 +36,11 @@ export default class MemberLoginBar extends HTMLElement {
     return ["login-path"];
   }
 
-  set memberService(service) {
+  set memberService(/** @type {any} */ service) {
     this.memberService = service;
   }
 
-  attributedChangedCallback(name, oldValue, newValue) {
+  attributedChangedCallback(name, _, newValue) {
     if (name === "login-path") {
       this.loginPath = newValue;
     }
@@ -76,7 +76,6 @@ export default class MemberLoginBar extends HTMLElement {
   createAvatarEl(container, member) {
     let el;
 
-    console.log(member && member.avatarURL);
     if (member && member.avatarURL) {
       el = document.createElement("img");
       el.classList.add("avatar");
