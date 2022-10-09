@@ -51,10 +51,6 @@ func (a Endpoints) Less(i, j int) bool {
 		return len(a[i].Path) > len(a[j].Path)
 	}
 
-	// if a[i].Method != a[j].Method {
-	// 	return a[i].Method != "GET"
-	// }
-
 	if a[i].Path == a[j].Path {
 		panic("Two endpoints can't be same")
 	}
@@ -68,8 +64,10 @@ func isDynamic(url string) bool {
 
 func (fa *FrameApplication) SetupEndpoints(webAppFS fs.FS, endpoints Endpoints) *FrameApplication {
 	fa.webAppFS = webAppFS
-	fs := http.FileServer(fa.getStaticFileSystem())
 	fa.router.Use(accessControlMiddleware(AllowAllOrigins, AllowAllMethods, AllowAllHeaders))
+
+	fs := http.FileServer(fa.getStaticFileSystem())
+	adminFs := http.FileServer(fa.getAdminStaticFileSystem())
 
 	sort.Sort(endpoints)
 
@@ -92,7 +90,10 @@ func (fa *FrameApplication) SetupEndpoints(webAppFS fs.FS, endpoints Endpoints) 
 		fa.Logger.Info("registering /static endpoint")
 	}
 
+	fa.router.HandleFunc("/errors/unexpected", fa.handleUnexpectedError)
 	fa.router.PathPrefix("/static/").Handler(fs).Methods(http.MethodGet)
+	fa.router.PathPrefix("/admin-static/").Handler(adminFs).Methods(http.MethodGet)
+
 	return fa
 }
 
@@ -116,4 +117,8 @@ func (fa *FrameApplication) getStaticFileSystem() http.FileSystem {
 	}
 
 	return http.FS(fsys)
+}
+
+func (fa *FrameApplication) getAdminStaticFileSystem() http.FileSystem {
+	return http.FS(adminStaticFS)
 }

@@ -63,6 +63,7 @@ func (fa *FrameApplication) Templates(templateFS fs.FS, manifest TemplateCollect
 		fa.templates[tmplDefinition.Name] = parsedTemplate
 	}
 
+	fa.setupAdminTemplates()
 	return fa
 }
 

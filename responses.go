@@ -8,10 +8,15 @@ import (
 )
 
 type GenericErrorResponse struct {
-	Code    string
-	Detail  string
-	Message string
-	Success bool
+	Code    string `json:"code"`
+	Detail  string `json:"detail"`
+	Message string `json:"message"`
+	Success bool   `json:"success"`
+}
+
+type GenericSuccessResponse struct {
+	Message string `json:"message"`
+	Success bool   `json:"success"`
 }
 
 func (fa *FrameApplication) CreateGenericErrorResponse(message, detail, code string) GenericErrorResponse {
@@ -20,6 +25,13 @@ func (fa *FrameApplication) CreateGenericErrorResponse(message, detail, code str
 		Detail:  detail,
 		Message: message,
 		Success: false,
+	}
+}
+
+func (fa *FrameApplication) CreateGenericSuccessResponse(message string) GenericSuccessResponse {
+	return GenericSuccessResponse{
+		Message: message,
+		Success: true,
 	}
 }
 

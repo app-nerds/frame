@@ -1,14 +1,44 @@
 package frame
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/app-nerds/kit/v6/passwords"
 	"github.com/gorilla/sessions"
 )
 
 /*
-/api/member/current
+PUT /admin/api/member/activate
+*/
+func (fa *FrameApplication) handleMemberActivate(w http.ResponseWriter, r *http.Request) {
+	var (
+		err      error
+		idString string
+		id       int
+	)
+
+	r.ParseForm()
+
+	idString = r.FormValue("id")
+
+	if id, err = strconv.Atoi(idString); err != nil {
+		fa.WriteJSON(w, http.StatusBadRequest, fa.CreateGenericErrorResponse("Invalid member ID", fmt.Sprintf("%s could not be converted to an integer", idString), ""))
+		return
+	}
+
+	if err = fa.MemberService.ActivateMember(uint(id)); err != nil {
+		fa.Logger.WithError(err).Error("error activating member")
+		fa.WriteJSON(w, http.StatusInternalServerError, fa.CreateGenericErrorResponse("Error activating member", err.Error(), ""))
+		return
+	}
+
+	fa.WriteJSON(w, http.StatusOK, fa.CreateGenericSuccessResponse("Member activated!"))
+}
+
+/*
+GET /api/member/current
 */
 func (fa *FrameApplication) handleMemberCurrent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -19,6 +49,7 @@ func (fa *FrameApplication) handleMemberCurrent(w http.ResponseWriter, r *http.R
 		"firstName": ctx.Value("firstName"),
 		"lastName":  ctx.Value("lastName"),
 		"avatarURL": ctx.Value("avatarURL"),
+		"status":    ctx.Value("status"),
 	}
 
 	fa.WriteJSON(w, http.StatusOK, member)
@@ -51,7 +82,7 @@ func (fa *FrameApplication) handleMemberLogout(w http.ResponseWriter, r *http.Re
 }
 
 /*
-/member/create-account
+POST /member/create-account
 */
 func (fa *FrameApplication) handleMemberSignup(w http.ResponseWriter, r *http.Request) {
 	var (
@@ -122,12 +153,15 @@ func (fa *FrameApplication) handleMemberSignup(w http.ResponseWriter, r *http.Re
 
 	// Create the member
 	member = Member{
-		Approved:  false,
 		AvatarURL: "",
 		Email:     email,
 		FirstName: firstName,
 		LastName:  lastName,
 		Password:  passwords.HashedPasswordString(password),
+		Status: MembersStatus{
+			ID:     MemberPendingApprovalID,
+			Status: MemberPendingApproval,
+		},
 	}
 
 	if err = fa.MemberService.CreateMember(&member); err != nil {

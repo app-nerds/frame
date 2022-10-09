@@ -19,14 +19,21 @@ import (
 	"gorm.io/gorm"
 )
 
-//go:embed templates/*
+//go:embed templates
 var internalTemplatesFS embed.FS
+
+//go:embed admin-templates
+var adminTemplatesFS embed.FS
+
+//go:embed admin-static
+var adminStaticFS embed.FS
 
 type FrameApplication struct {
 	*sync.Mutex
 
 	appName       string
 	externalAuths []goth.Provider
+	pageSize      int
 	router        *mux.Router
 	sessionName   string
 	sessionStore  sessions.Store
@@ -61,8 +68,9 @@ func NewFrameApplication(appName, version string) *FrameApplication {
 			"who":     appName,
 			"version": version,
 		}),
-		router:  mux.NewRouter(),
-		version: version,
+		pageSize: 25,
+		router:   mux.NewRouter(),
+		version:  version,
 	}
 
 	config := result.setupConfig()
@@ -76,6 +84,8 @@ func NewFrameApplication(appName, version string) *FrameApplication {
 }
 
 func (fa *FrameApplication) Start() chan os.Signal {
+	fa.setupAdminRoutes()
+
 	fa.Logger.WithFields(logrus.Fields{
 		"host":    fa.Config.ServerHost,
 		"debug":   fa.Config.Debug,

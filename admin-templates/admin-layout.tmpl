@@ -1,0 +1,52 @@
+{{- define "admin-layout"}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{template "title" .}} | {{.appName}} Admin</title>
+  <link rel="stylesheet" href="/admin-static/css/base.min.css" />
+  <link rel="stylesheet" href="/admin-static/css/admin-left-side-nav.min.css" />
+  <link rel="stylesheet" href="/admin-static/css/components.min.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+</head>
+
+<body>
+  <header>
+    <h1>{{.appName}} Admin</h1>
+  </header>
+
+  <nav class="sidenav">
+    <ul>
+      <li class="menu-header">Members &amp; Users</li>
+      <li>
+        <i data-feather="user"></i> <a href="/admin/users/manage">Manage Users</a>
+      </li>
+      <li>
+        <i data-feather="users"></i> <a href="/admin/members/manage">Manage Members</a>
+      </li>
+    </ul>
+  </nav>
+
+  <main>
+    {{template "content" .}}
+  </main>
+
+  <footer>
+    <p>&copy; 2022 App Nerds LLC.</p>
+  </footer>
+
+  {{if .scripts}} 
+    {{range .scripts}}
+      <script type="{{.Type}}" src="/admin-static/js{{.Src}}"></script>
+    {{end}}
+  {{end}}
+
+  <script type="module" src="/admin-static/js/pages/admin-layout.js"></script>
+</body>
+</html>
+{{end}}
+

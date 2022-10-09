@@ -32,7 +32,10 @@ func (fa *FrameApplication) SetupSiteAuth(layoutName, contentTemplateName string
 	/*
 	 * Make sure specific paths are excluded from auth
 	 */
-	pathsExcludedFromAuth = append(pathsExcludedFromAuth, "/static", SiteAuthAccountPendingPath, SiteAuthLoginPath, SiteAuthLogoutPath, SiteAuthMemberSignUpPath, UnexpectedErrorPath)
+
+	// TODO: figure out admin auth
+	pathsExcludedFromAuth = append(pathsExcludedFromAuth, "/static", "/admin-static", SiteAuthAccountPendingPath, SiteAuthLoginPath,
+		SiteAuthLogoutPath, SiteAuthMemberSignUpPath, UnexpectedErrorPath, "/admin")
 
 	fa.router.HandleFunc(SiteAuthAccountPendingPath, fa.handleAuthAccountPending).Methods(http.MethodGet)
 	fa.router.HandleFunc(SiteAuthLoginPath, fa.handleSessionBasicLogin(baseData)).Methods(http.MethodGet, http.MethodPost)
@@ -93,7 +96,7 @@ func (fa *FrameApplication) handleSessionBasicLogin(baseData map[string]interfac
 			 * If we have an existing member, but they aren't approved yet,
 			 * redirect them.
 			 */
-			if !member.Approved {
+			if member.Status.ID != MemberActiveID {
 				http.Redirect(w, r, SiteAuthAccountPendingPath, http.StatusFound)
 				return
 			}
@@ -130,7 +133,7 @@ func (fa *FrameApplication) handleSessionBasicLogin(baseData map[string]interfac
 			session.Values["firstName"] = member.FirstName
 			session.Values["lastName"] = member.LastName
 			session.Values["avatarURL"] = member.AvatarURL
-			session.Values["approved"] = member.Approved
+			session.Values["status"] = string(member.Status.Status)
 
 			if err = fa.sessionStore.Save(r, w, session); err != nil {
 				fa.Logger.WithError(err).Error("error saving session")

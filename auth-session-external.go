@@ -49,12 +49,15 @@ func (fa *FrameApplication) SetupExternalAuth(pathsExcludedFromAuth, htmlPaths [
 
 		if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 			member = Member{
-				Approved:   false,
 				AvatarURL:  user.AvatarURL,
 				Email:      user.Email,
 				ExternalID: user.UserID,
 				FirstName:  user.FirstName,
 				LastName:   user.LastName,
+				Status: MembersStatus{
+					ID:     MemberPendingApprovalID,
+					Status: MemberPendingApproval,
+				},
 			}
 
 			if err = fa.MemberService.CreateMember(&member); err != nil {
@@ -77,7 +80,7 @@ func (fa *FrameApplication) SetupExternalAuth(pathsExcludedFromAuth, htmlPaths [
 		 * If we have an existing member, but they aren't approved yet,
 		 * redirect them.
 		 */
-		if !member.Approved {
+		if member.Status.Status != MemberActive {
 			http.Redirect(w, r, SiteAuthAccountPendingPath, http.StatusTemporaryRedirect)
 			return
 		}
@@ -95,7 +98,7 @@ func (fa *FrameApplication) SetupExternalAuth(pathsExcludedFromAuth, htmlPaths [
 		session.Values["firstName"] = user.FirstName
 		session.Values["lastName"] = user.LastName
 		session.Values["avatarURL"] = user.AvatarURL
-		session.Values["approved"] = member.Approved
+		// session.Values["status"] =
 
 		if err = fa.sessionStore.Save(r, w, session); err != nil {
 			fa.Logger.WithError(err).Error("error saving session")

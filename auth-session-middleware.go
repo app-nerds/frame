@@ -68,9 +68,12 @@ func (fa *FrameApplication) setupMiddleware(pathsExcludedFromAuth, htmlPaths []s
 				return
 			}
 
-			approved, _ := session.Values["approved"].(bool)
+			status, ok := session.Values["status"].(string)
+			if !ok {
+				status = ""
+			}
 
-			if !approved {
+			if status != string(MemberActive) {
 				fa.Logger.WithFields(logrus.Fields{
 					"ip":   realIP(r),
 					"path": r.URL.Path,
@@ -105,6 +108,7 @@ func (fa *FrameApplication) setupMiddleware(pathsExcludedFromAuth, htmlPaths []s
 			ctx = context.WithValue(ctx, "email", email)
 			ctx = context.WithValue(ctx, "avatarURL", avatarURL)
 			ctx = context.WithValue(ctx, "memberID", memberID)
+			ctx = context.WithValue(ctx, "status", status)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

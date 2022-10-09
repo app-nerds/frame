@@ -10,7 +10,7 @@
   --link-color: #1BBAE1;
   --background-color: white;
   --light-text-color: rgb(255, 255, 255, 0.8);
-  --shadow-color: rgba(0, 0, 0, 0.16);
+  --shadow-color: rgba(100, 100, 111, 0.2);
   --border-color: #ccc;
 
   /*
@@ -187,6 +187,18 @@ table {
   margin: 1rem 0 0.5rem 0;
 }
 
+table caption {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border-width: 0;
+}
+
 thead {
 	background-color: var(--table-header-background-color);
 	color: var(--table-header-color);
@@ -229,7 +241,7 @@ div.card div.content {
   background-color: #f0f0f0;
   width: 100%;
   padding: 0.5rem;
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  box-shadow: var(--shadow-color) 0px 7px 29px 0px;
   min-height: 225px;
   position: relative;
 }
