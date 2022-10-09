@@ -77,6 +77,9 @@ func NewFrameApplication(appName, version string) *FrameApplication {
 	result.Logger.Logger.SetLevel(config.GetLogLevel())
 	result.Config = config
 
+	// Attach Fireplace if configured
+	result.withFireplace()
+
 	// Attach services
 	result.MemberService = newMemberService(result)
 

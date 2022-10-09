@@ -13,6 +13,8 @@ type Config struct {
 	AutoSSLWhitelist   string `flag:"autosslwhitelist" env:"AUTO_SSL_WHITELIST" default:"" description:"Comma-seperated list of domains for SSL"`
 	Debug              bool   `flag:"debug" evn:"DEBUG" default:"true" description:"True to turn on debug mode."`
 	DSN                string `flag:"dsn" env:"DSN" default:"host=localhost user=postgres password=password dbname=frame port=5432" description:"DSN string to connect to a database"`
+	FireplaceURL       string `flag:"fireplaceurl" env:"FIREPLACE_URL" default:"" description:"URL to a Fireplace logging server"`
+	FireplacePassword  string `flag:"fireplacepassword" env:"FIREPLACE_PASSWORD" default:"" description:"Password to the Fireplace logging server"`
 	GoogleClientID     string `flag:"googleclientid" env:"GOOGLE_CLIENT_ID" default:"" description:"Google OAuth2 client ID"`
 	GoogleClientSecret string `flag:"googleclientsecret" env:"GOOGLE_CLIENT_SECRET" default:"" description:"Google OAuth2 client secret"`
 	GoogleRedirectURI  string `flag:"googleredirecturi" env:"GOOGLE_REDIRECT_URI" default:"http://localhost:8080/auth/google/callback" description:"Google OAuth2 redirect URI"`
