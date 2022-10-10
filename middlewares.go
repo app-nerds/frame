@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/app-nerds/frame/pkg/httputils"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
@@ -21,17 +22,6 @@ const (
 	AllowHeaderCSRF           string = "X-CSRF-Token"
 	AllowHeaderAuthorization  string = "Authorization"
 )
-
-func realIP(r *http.Request) string {
-	result := r.RemoteAddr
-	xForwardedFor := r.Header.Get("X-Forwarded-For")
-
-	if xForwardedFor != "" {
-		result = xForwardedFor
-	}
-
-	return result
-}
 
 type statusRecorder struct {
 	http.ResponseWriter
@@ -121,7 +111,7 @@ func (m *requestLogger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	startTime := time.Now()
-	ip := realIP(r)
+	ip := httputils.RealIP(r)
 
 	m.handler.ServeHTTP(recorder, r)
 	diff := time.Since(startTime)

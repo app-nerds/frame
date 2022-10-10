@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/app-nerds/configinator v1.0.1
+	github.com/app-nerds/fireplace/v2 v2.0.4
 	github.com/app-nerds/kit/v6 v6.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/sessions v1.2.1
@@ -15,8 +16,6 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.93.3 // indirect
-	github.com/app-nerds/fireplace/v2 v2.0.4 // indirect
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect

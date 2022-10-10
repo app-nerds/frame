@@ -1,4 +1,4 @@
-package frame
+package webapp
 
 type JavascriptInclude struct {
 	Type string

@@ -1,4 +1,4 @@
-package frame
+package config
 
 import (
 	"github.com/app-nerds/configinator"
@@ -18,20 +18,23 @@ type Config struct {
 	GoogleClientID     string `flag:"googleclientid" env:"GOOGLE_CLIENT_ID" default:"" description:"Google OAuth2 client ID"`
 	GoogleClientSecret string `flag:"googleclientsecret" env:"GOOGLE_CLIENT_SECRET" default:"" description:"Google OAuth2 client secret"`
 	GoogleRedirectURI  string `flag:"googleredirecturi" env:"GOOGLE_REDIRECT_URI" default:"http://localhost:8080/auth/google/callback" description:"Google OAuth2 redirect URI"`
-	LogLevel           string `flag:"loglevel" env:"LOG_LEVEL" default:"info" description:"Minimum log level to report"`
+	LogLevel           string `flag:"loglevel" env:"LOG_LEVEL" default:"debug" description:"Minimum log level to report"`
+	PageSize           int    `flag:"pagesize" env:"PAGE_SIZE" default:"25" description:"Size of pages for results"`
 	ServerHost         string `flag:"serverhost" env:"SERVER_HOST" default:"localhost:8080" description:"Host and port to bind to"`
 	SessionKey         string `flag:"sessionkey" env:"SESSION_KEY" default:"my-secret-key" description:"Key used to encrypt sessions"`
+	SessionMaxAge      int    `flag:"sessionmaxage" env:"SESSION_MAX_AGE" default:"86400" description:"Number of seconds a session is valid for"`
+	SessionName        string `flag:"sessionname" env:"SESSION_NAME" default:"" description:"Name of cookie sessions"`
 	ServerIdleTimeout  int    `flag:"serveridletimeout" env:"SERVER_IDLE_TIMEOUT" default:"30" description:"Timeout for HTTP idle"`
 	ServerReadTimeout  int    `flag:"serverreadtimeout" env:"SERVER_READ_TIMEOUT" default:"60" description:"Timeout for HTTP reads"`
 	ServerWriteTimeout int    `flag:"serverwritetimeout" env:"SERVER_WRITE_TIMEOUT" default:"30" description:"Timeout for HTTP writes"`
 }
 
-func (fa *FrameApplication) setupConfig() *Config {
+func NewConfig(appName, version string) *Config {
 	result := Config{}
 	configinator.Behold(&result)
 
-	result.AppName = fa.appName
-	result.Version = fa.version
+	result.AppName = appName
+	result.Version = version
 
 	return &result
 }

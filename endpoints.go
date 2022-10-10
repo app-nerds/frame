@@ -62,11 +62,17 @@ func isDynamic(url string) bool {
 	return strings.Contains(url, "{") && strings.Contains(url, "}")
 }
 
-func (fa *FrameApplication) SetupEndpoints(webAppFS fs.FS, endpoints Endpoints) *FrameApplication {
-	fa.webAppFS = webAppFS
+func (fa *FrameApplication) SetupEndpoints(endpoints Endpoints) *FrameApplication {
+	var (
+		staticFS http.Handler
+	)
+
 	fa.router.Use(accessControlMiddleware(AllowAllOrigins, AllowAllMethods, AllowAllHeaders))
 
-	fs := http.FileServer(fa.getStaticFileSystem())
+	if fa.webApp != nil {
+		staticFS = http.FileServer(fa.getStaticFileSystem())
+	}
+
 	adminFs := http.FileServer(fa.getAdminStaticFileSystem())
 
 	sort.Sort(endpoints)
@@ -90,8 +96,7 @@ func (fa *FrameApplication) SetupEndpoints(webAppFS fs.FS, endpoints Endpoints) 
 		fa.Logger.Info("registering /static endpoint")
 	}
 
-	fa.router.HandleFunc("/errors/unexpected", fa.handleUnexpectedError)
-	fa.router.PathPrefix("/static/").Handler(fs).Methods(http.MethodGet)
+	fa.router.PathPrefix("/static/").Handler(staticFS).Methods(http.MethodGet)
 	fa.router.PathPrefix("/admin-static/").Handler(adminFs).Methods(http.MethodGet)
 
 	return fa
@@ -100,17 +105,17 @@ func (fa *FrameApplication) SetupEndpoints(webAppFS fs.FS, endpoints Endpoints) 
 func (fa *FrameApplication) getStaticFileSystem() http.FileSystem {
 	if fa.Config.Version == "development" {
 		if fa.Config.Debug {
-			fa.Logger.Infof("serving static assets from filesystem out of '%s'", fa.webAppFolder)
+			fa.Logger.Infof("serving static assets from filesystem out of '%s'", fa.webApp.GetAppFolder())
 		}
 
-		return http.FS(os.DirFS(fa.webAppFolder))
+		return http.FS(os.DirFS(fa.webApp.GetAppFolder()))
 	}
 
 	if fa.Config.Debug {
-		fa.Logger.Infof("serving static assets from embedded content at '%s'", fa.webAppFolder)
+		fa.Logger.Infof("serving static assets from embedded content at '%s'", fa.webApp.GetAppFolder())
 	}
 
-	fsys, err := fs.Sub(fa.webAppFS, fa.webAppFolder)
+	fsys, err := fs.Sub(fa.webApp.GetStaticFS(), fa.webApp.GetAppFolder())
 
 	if err != nil {
 		fa.Logger.WithError(err).Fatal("error loading static asset filesystem")

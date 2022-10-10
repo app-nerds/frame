@@ -1,4 +1,4 @@
-package frame
+package framemember
 
 import (
 	"github.com/app-nerds/kit/v6/passwords"

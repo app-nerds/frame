@@ -1,24 +1,30 @@
-package frame
+package framemember
 
 import (
-	"net/http"
-
+	"github.com/app-nerds/frame/pkg/database"
 	"gorm.io/gorm"
 )
 
-type MemberService struct {
-	frame *FrameApplication
+type MemberServiceConfig struct {
+	DB       *gorm.DB
+	PageSize int
 }
 
-func newMemberService(frame *FrameApplication) MemberService {
+type MemberService struct {
+	db       *gorm.DB
+	pageSize int
+}
+
+func NewMemberService(config MemberServiceConfig) MemberService {
 	return MemberService{
-		frame: frame,
+		db:       config.DB,
+		pageSize: config.PageSize,
 	}
 }
 
 func (s MemberService) ActivateMember(id uint) error {
 	member := Member{}
-	queryResult := s.frame.DB.First(&member, id)
+	queryResult := s.db.First(&member, id)
 
 	if queryResult.Error != nil {
 		return queryResult.Error
@@ -29,20 +35,20 @@ func (s MemberService) ActivateMember(id uint) error {
 		Status: MemberActive,
 	}
 
-	queryResult = s.frame.DB.Save(&member)
+	queryResult = s.db.Save(&member)
 	return queryResult.Error
 }
 
 func (s MemberService) CreateMember(member *Member) error {
 	member.Password = member.Password.Hash()
-	dbResult := s.frame.DB.Create(&member)
+	dbResult := s.db.Create(&member)
 	return dbResult.Error
 }
 
 func (s MemberService) GetMemberByEmail(email string, includeDeleted bool) (Member, error) {
 	result := Member{}
 
-	query := s.frame.DB
+	query := s.db
 
 	if includeDeleted {
 		query = query.Unscoped()
@@ -55,7 +61,7 @@ func (s MemberService) GetMemberByEmail(email string, includeDeleted bool) (Memb
 func (s MemberService) GetMemberByEmailAndExternalID(email, id string) (Member, error) {
 	result := Member{}
 
-	queryResult := s.frame.DB.Where("email = ? AND external_id = ?", email, id).First(&result)
+	queryResult := s.db.Where("email = ? AND external_id = ?", email, id).First(&result)
 	return result, queryResult.Error
 }
 
@@ -66,20 +72,20 @@ func (s MemberService) GetMemberByID(id int) (Member, error) {
 		},
 	}
 
-	queryResult := s.frame.DB.Joins("Status").First(&result)
+	queryResult := s.db.Joins("Status").First(&result)
 	return result, queryResult.Error
 }
 
-func (s MemberService) GetMembers(r *http.Request, page int) ([]Member, error) {
+func (s MemberService) GetMembers(page int) ([]Member, error) {
 	result := []Member{}
 
-	queryResult := s.frame.DB.Unscoped().Scopes(s.frame.paginate(r)).Joins("Status").Find(&result)
+	queryResult := s.db.Unscoped().Scopes(database.Paginate(page, s.pageSize)).Joins("Status").Find(&result)
 	return result, queryResult.Error
 }
 
 func (s MemberService) InactivateMember(id uint) error {
 	member := Member{}
-	queryResult := s.frame.DB.First(&member, id)
+	queryResult := s.db.First(&member, id)
 
 	if queryResult.Error != nil {
 		return queryResult.Error
@@ -90,6 +96,6 @@ func (s MemberService) InactivateMember(id uint) error {
 		Status: MemberInactive,
 	}
 
-	queryResult = s.frame.DB.Save(&member)
+	queryResult = s.db.Save(&member)
 	return queryResult.Error
 }
