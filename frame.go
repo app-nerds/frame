@@ -148,7 +148,7 @@ func (fa *FrameApplication) Database(dst ...interface{}) *FrameApplication {
 	return fa
 }
 
-func (fa *FrameApplication) RenderTemplate(w http.ResponseWriter, name string, data map[string]interface{}) {
+func (fa *FrameApplication) RenderTemplate(w http.ResponseWriter, name string, data interface{}) {
 	fa.webApp.RenderTemplate(w, name, data)
 }
 

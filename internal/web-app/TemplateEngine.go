@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (wa *WebApp) RenderTemplate(w http.ResponseWriter, name string, data map[string]interface{}) {
+func (wa *WebApp) RenderTemplate(w http.ResponseWriter, name string, data interface{}) {
 	var (
 		err  error
 		tmpl *template.Template
@@ -58,15 +58,6 @@ func (wa *WebApp) setupTemplateEngine() {
 	 * Log out some debug information in development mode
 	 */
 	if wa.debug {
-		// fs.WalkDir(wa.templateFS, ".", func(path string, d fs.DirEntry, err error) error {
-		// 	if d.IsDir() {
-		// 		return nil
-		// 	}
-
-		// 	wa.logger.WithField("fileName", d.Name()).Debug("template file")
-		// 	return nil
-		// })
-
 		for k, v := range wa.templates {
 			wa.logger.WithFields(logrus.Fields{
 				"templateName": k,
