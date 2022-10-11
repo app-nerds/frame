@@ -101,6 +101,7 @@ func (fa *FrameApplication) AddSiteAuth(config pkgsiteauth.SiteAuthConfig) *Fram
 	}, config)
 
 	fa.memberManagement = membermanagement.NewMemberManagement(membermanagement.InternalMemberManagementConfig{
+		AppName:       fa.appName,
 		Logger:        fa.Logger,
 		MemberService: &fa.MemberService,
 		WebApp:        fa.webApp,
