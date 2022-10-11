@@ -3,6 +3,7 @@ package frame
 import (
 	"net/http"
 
+	"github.com/app-nerds/frame/internal/routepaths"
 	"github.com/app-nerds/frame/pkg/httputils"
 )
 
@@ -42,4 +43,12 @@ WriteString writes string content to the response writer.
 */
 func (fa *FrameApplication) WriteString(w http.ResponseWriter, status int, value string) {
 	httputils.WriteString(w, status, value)
+}
+
+/*
+UnexpectedError redirects the user to a page for unexpected errors. This is configured
+when calling AddWebApp
+*/
+func (fa *FrameApplication) UnexpectedError(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, routepaths.UnexpectedErrorPath, http.StatusFound)
 }
