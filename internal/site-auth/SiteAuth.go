@@ -72,7 +72,8 @@ func NewSiteAuth(internalConfig InternalSiteAuthConfig, siteAuthConfig pkgsiteau
 	result.pathsExcludedFromAuth = append(result.pathsExcludedFromAuth, "/static", "/admin-static", "/frame-static", routepaths.SiteAuthAccountPendingPath, routepaths.SiteAuthLoginPath,
 		routepaths.SiteAuthLogoutPath, routepaths.MemberSignUpPath, routepaths.UnexpectedErrorPath, "/admin")
 
-	result.htmlPaths = append(result.htmlPaths, "/member/profile")
+	// These paths need to redirect to an HTML error or login page when the user is not authorized
+	result.htmlPaths = append(result.htmlPaths, "/member/profile", "/member/profile/avatar")
 
 	return result
 }

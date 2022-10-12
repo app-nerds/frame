@@ -86,6 +86,7 @@ func (wa *WebApp) registerInternalTemplates() pkgwebapp.TemplateCollection {
 	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "unexpected-error.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
 	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "sign-up.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
 	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "member-profile.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
+	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "member-edit-avatar.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
 
 	return wa.templateManifest
 }

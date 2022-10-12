@@ -1,0 +1,24 @@
+{{template "layout" .}}
+{{define "title"}}Edit Avatar{{end}}
+
+{{define "content"}}
+<div class="member-edit-avatar-page">
+  <h2>Edit Avatar</h2>
+
+  {{if .Message}}
+    <message-bar message-type="{{if .Success}}success{{else}}error{{end}}" message="{{.Message}}"></message-bar>
+  {{end}}
+
+  <message-bar message-type="info" message="Choose an image to use for your avatar. Images must be JPEG or PNG files no larger than 250KB."></message-bar>
+
+  <form method="POST" enctype="multipart/form-data" id="uploadForm">
+    <label for="imageUpload">Select an image:</label>
+    <input type="file" name="imageFile" id="imageFile" accept="image/png, image/jpeg" />
+
+    <footer>
+      <button type="button" id="cancel">Cancel</button>
+      <button class="action-button">Upload</button>
+    </footer>
+  </form>
+</div>
+{{end}}

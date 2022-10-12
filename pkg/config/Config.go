@@ -15,6 +15,9 @@ type Config struct {
 	DSN                string `flag:"dsn" env:"DSN" default:"host=localhost user=postgres password=password dbname=frame port=5432" description:"DSN string to connect to a database"`
 	FireplaceURL       string `flag:"fireplaceurl" env:"FIREPLACE_URL" default:"" description:"URL to a Fireplace logging server"`
 	FireplacePassword  string `flag:"fireplacepassword" env:"FIREPLACE_PASSWORD" default:"" description:"Password to the Fireplace logging server"`
+	GobucketURL        string `flag:"gobucketurl" env:"GOBUCKET_URL" default:"" description:"URL to a Gobucket Server"`
+	GobucketClientCode string `flag:"gobucketclientcode" env:"GOBUCKET_CLIENT_CODE" default:"" description:"Client Code to a Gobucket Server"`
+	GobucketAppKey     string `flag:"gobucketappkey" env:"GOBUCKET_APP_KEY" default:"" description:"App Key token to connect to a Gobucket Server"`
 	GoogleClientID     string `flag:"googleclientid" env:"GOOGLE_CLIENT_ID" default:"" description:"Google OAuth2 client ID"`
 	GoogleClientSecret string `flag:"googleclientsecret" env:"GOOGLE_CLIENT_SECRET" default:"" description:"Google OAuth2 client secret"`
 	GoogleRedirectURI  string `flag:"googleredirecturi" env:"GOOGLE_REDIRECT_URI" default:"http://localhost:8080/auth/google/callback" description:"Google OAuth2 redirect URI"`

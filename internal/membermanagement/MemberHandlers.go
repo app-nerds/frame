@@ -2,8 +2,10 @@ package membermanagement
 
 import (
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/app-nerds/frame/internal/baseviewmodel"
 	"github.com/app-nerds/frame/internal/routepaths"
@@ -11,6 +13,8 @@ import (
 	"github.com/app-nerds/frame/pkg/httputils"
 	"github.com/app-nerds/frame/pkg/paging"
 	webapp "github.com/app-nerds/frame/pkg/web-app"
+	"github.com/app-nerds/gobucket/v2/pkg/requestcontracts"
+	"github.com/app-nerds/gobucket/v2/pkg/responsecontracts"
 	"github.com/app-nerds/kit/v6/passwords"
 	"github.com/gorilla/sessions"
 	"github.com/sirupsen/logrus"
@@ -45,9 +49,10 @@ func (mm *MemberManagement) handleMemberProfile(w http.ResponseWriter, r *http.R
 				"/frame-static/css/frame-page-styles.css",
 			},
 		},
-		Member:  framemember.Member{},
-		Message: "",
-		Success: true,
+		EditAvatarPath: routepaths.MemberProfileAvatarPath,
+		Member:         framemember.Member{},
+		Message:        "",
+		Success:        true,
 	}
 
 	if data.Member, err = mm.memberService.GetMemberByEmail(memberEmail, false); err != nil {
@@ -96,6 +101,117 @@ func (mm *MemberManagement) handleMemberProfile(w http.ResponseWriter, r *http.R
 	}
 
 	mm.webApp.RenderTemplate(w, "member-profile.tmpl", data)
+}
+
+func (mm *MemberManagement) handleEditAvatar(w http.ResponseWriter, r *http.Request) {
+	var (
+		err      error
+		file     multipart.File
+		header   *multipart.FileHeader
+		imageURL string
+	)
+
+	ctx := r.Context()
+	memberEmail, _ := ctx.Value("email").(string)
+	memberFirstName, _ := ctx.Value("firstName").(string)
+	memberLastName, _ := ctx.Value("lastName").(string)
+
+	data := EditAvatarData{
+		BaseViewModel: baseviewmodel.BaseViewModel{
+			JavascriptIncludes: webapp.JavascriptIncludes{
+				{Type: "module", Src: "/frame-static/js/member-edit-avatar.js"},
+			},
+			AppName: mm.appName,
+			Stylesheets: []string{
+				"/frame-static/css/frame-page-styles.css",
+			},
+		},
+		Member:  framemember.Member{},
+		Message: "",
+		Success: true,
+	}
+
+	if data.Member, err = mm.memberService.GetMemberByEmail(memberEmail, false); err != nil {
+		mm.logger.WithError(err).Error("error getting member information in handleMemberProfile()")
+		mm.webApp.UnexpectedError(w, r)
+		return
+	}
+
+	if data.Member.AvatarURL == "" {
+		data.Member.AvatarURL = "/frame-static/images/blank-profile-picture.png"
+	}
+
+	/*
+	 * Handle form post
+	 */
+	if r.Method == http.MethodPost {
+		// Allow a 1MB post
+		if err = r.ParseMultipartForm(1 << 20); err != nil {
+			data.Success = false
+			data.Message = "Please choose an image no larger that 250KB"
+			goto rendereditavatar
+		}
+
+		// If we have no error, keep going
+		if file, header, err = r.FormFile("imageFile"); err != nil {
+			data.Success = false
+			data.Message = "There was an error getting the file information."
+			goto rendereditavatar
+		}
+
+		defer file.Close()
+
+		/*
+		 * I am supporting two types of uploads: file system, and GoBucket. If GoBucket is
+		 * configured use it.
+		 */
+		if mm.gobucketClient != nil {
+			var createImageResponse *responsecontracts.CreateImageResponse
+
+			createImageRequest := &requestcontracts.CreateImageRequest{
+				Author:       fmt.Sprintf("%s %s", memberFirstName, memberLastName),
+				Bucket:       "avatars",
+				Caption:      fmt.Sprintf("Avatar for %s %s", memberFirstName, memberLastName),
+				DateTime:     time.Now().Format("2006-01-02T15:03:04"),
+				FileContents: file,
+				FileName:     header.Filename,
+				Metadata:     map[string]string{},
+				Name:         fmt.Sprintf("avatar-%s-%s", memberFirstName, memberLastName),
+				ScaleImage:   false,
+				SortIndex:    0,
+				Tags:         []string{},
+			}
+
+			if createImageResponse, err = mm.gobucketClient.CreateImage(createImageRequest); err != nil {
+				mm.logger.WithError(err).Error("error uploading image to Gobucket")
+
+				data.Success = false
+				data.Message = "There was an error uploading your image. Please try again."
+				goto rendereditavatar
+			}
+
+			imageURL = createImageResponse.UploadedImages[0].URL
+		}
+
+		// TODO: Add local file upload support
+
+		// Update member record
+		data.Member.AvatarURL = imageURL
+
+		if err = mm.memberService.UpdateMember(data.Member); err != nil {
+			mm.logger.WithError(err).Error("error updating member after image upload")
+
+			data.Success = false
+			data.Message = "There was a problem updating your member record. Please try again."
+			goto rendereditavatar
+		}
+
+		data.Success = true
+		data.Message = "Avatar uploaded successfully!"
+	}
+
+rendereditavatar:
+	mm.webApp.RenderTemplate(w, "member-edit-avatar.tmpl", data)
 }
 
 func (mm *MemberManagement) handleAdminApiGetMembers(w http.ResponseWriter, r *http.Request) {
@@ -147,15 +263,18 @@ func (mm *MemberManagement) handleMemberActivate(w http.ResponseWriter, r *http.
 GET /api/member/current
 */
 func (mm *MemberManagement) handleMemberCurrent(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+	var (
+		err    error
+		member framemember.Member
+	)
 
-	member := map[string]interface{}{
-		"id":        ctx.Value("memberID"),
-		"email":     ctx.Value("email"),
-		"firstName": ctx.Value("firstName"),
-		"lastName":  ctx.Value("lastName"),
-		"avatarURL": ctx.Value("avatarURL"),
-		"status":    ctx.Value("status"),
+	ctx := r.Context()
+	email := ctx.Value("email").(string)
+
+	if member, err = mm.memberService.GetMemberByEmail(email, false); err != nil {
+		mm.logger.WithError(err).Error("error getting member in handleMemberCurrent()")
+		httputils.WriteJSON(w, http.StatusInternalServerError, httputils.CreateGenericErrorResponse("Error retrieving member information", err.Error(), ""))
+		return
 	}
 
 	httputils.WriteJSON(w, http.StatusOK, member)

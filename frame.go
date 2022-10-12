@@ -19,6 +19,7 @@ import (
 	"github.com/app-nerds/frame/pkg/framemember"
 	pkgsiteauth "github.com/app-nerds/frame/pkg/site-auth"
 	pkgwebapp "github.com/app-nerds/frame/pkg/web-app"
+	"github.com/app-nerds/gobucket/v2/cmd/gobucketgo"
 	"github.com/gorilla/mux"
 	"github.com/markbates/goth"
 	"github.com/sirupsen/logrus"
@@ -53,6 +54,7 @@ type FrameApplication struct {
 	primaryLayoutName string
 
 	// Internal services
+	gobucketClient   *gobucketgo.GoBucket
 	memberManagement *membermanagement.MemberManagement
 	siteAuth         *siteauth.SiteAuth
 	webApp           *webapp.WebApp
@@ -88,6 +90,7 @@ func NewFrameApplication(appName, version string) *FrameApplication {
 
 	// Attach Fireplace if configured
 	result.withFireplace()
+	result.withGobucket()
 
 	return result
 }
@@ -105,10 +108,11 @@ func (fa *FrameApplication) AddSiteAuth(config pkgsiteauth.SiteAuthConfig) *Fram
 	}, config)
 
 	fa.memberManagement = membermanagement.NewMemberManagement(membermanagement.InternalMemberManagementConfig{
-		AppName:       fa.appName,
-		Logger:        fa.Logger,
-		MemberService: &fa.MemberService,
-		WebApp:        fa.webApp,
+		AppName:        fa.appName,
+		GobucketClient: fa.gobucketClient,
+		Logger:         fa.Logger,
+		MemberService:  &fa.MemberService,
+		WebApp:         fa.webApp,
 	})
 
 	return fa

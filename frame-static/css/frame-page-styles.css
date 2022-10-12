@@ -1,10 +1,7 @@
 .login-page, 
 .sign-up-page, 
-.member-profile-page-container {
-  padding: 1rem 1.5rem;
-}
-
-.sign-up-page {
+.member-profile-page-container,
+.member-edit-avatar-page {
   padding: 1rem 1.5rem;
 }
 
