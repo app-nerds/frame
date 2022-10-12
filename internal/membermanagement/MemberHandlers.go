@@ -55,6 +55,10 @@ func (mm *MemberManagement) handleMemberProfile(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	if data.Member.AvatarURL == "" {
+		data.Member.AvatarURL = "/frame-static/images/blank-profile-picture.png"
+	}
+
 	mm.webApp.RenderTemplate(w, "member-profile.tmpl", data)
 }
 
