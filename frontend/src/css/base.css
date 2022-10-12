@@ -170,6 +170,19 @@ input:focus, textarea:focus, select:focus {
 	box-shadow: 0 0 0 .20rem var(--primary-color);
 }
 
+form small {
+  position: relative;
+  top: -10px;
+  opacity: 0.8;
+}
+
+form footer {
+  width: 100%;
+  background-color: transparent;
+  padding: 0;
+  margin-top: 1rem;
+}
+
 /*
  * Main
  */
