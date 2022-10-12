@@ -19,30 +19,37 @@ func (sa *SiteAuth) handleSiteAuthLogin(webApp *webapp.WebApp, memberService *fr
 			member  framemember.Member
 		)
 
-		data := map[string]interface{}{}
-
-		for k, v := range sa.baseData {
-			data[k] = v
+		data := struct {
+			Email        string
+			ErrorMessage string
+			Referer      string
+			Stylesheets  []string
+		}{
+			Stylesheets: []string{
+				"/frame-static/css/frame-page-styles.css",
+			},
 		}
 
 		if r.Method == http.MethodGet {
-			data["Referer"] = r.URL.Query().Get("referer")
+			data.Referer = r.URL.Query().Get("referer")
 		}
 
 		if r.Method == http.MethodPost {
 			r.ParseForm()
 
-			data["Referer"] = r.Form.Get("referer")
+			data.Email = r.FormValue("email")
+			data.Referer = r.Form.Get("referer")
 			email := r.Form.Get("email")
 			password := r.Form.Get("password")
 
 			/*
-			 * If this member doesn't exist yet, send them to the sign-up page
+			 * If this member doesn't exist yet, tell them they can make one.
 			 */
 			member, err = memberService.GetMemberByEmail(email, true)
 
 			if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-				http.Redirect(w, r, routepaths.MemberSignUpPath, http.StatusFound)
+				data.ErrorMessage = "Invalid user name or password. Please try again."
+				webApp.RenderTemplate(w, "login.tmpl", data)
 				return
 			}
 
@@ -73,8 +80,7 @@ func (sa *SiteAuth) handleSiteAuthLogin(webApp *webapp.WebApp, memberService *fr
 			 * If we have an approved member, but the password is invalid, let them know
 			 */
 			if !member.Password.IsSameAsPlaintextPassword(password) {
-				data["errorMessage"] = "Invalid user name or password. Please try again."
-
+				data.ErrorMessage = "Invalid user name or password. Please try again."
 				webApp.RenderTemplate(w, "login.tmpl", data)
 				return
 			}
@@ -112,5 +118,19 @@ func (sa *SiteAuth) handleSiteAuthLogin(webApp *webapp.WebApp, memberService *fr
 		}
 
 		webApp.RenderTemplate(w, "login.tmpl", data)
+	}
+}
+
+func (sa *SiteAuth) handleAccountPending(webApp *webapp.WebApp) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data := struct {
+			Stylesheets []string
+		}{
+			Stylesheets: []string{
+				"/frame-static/css/frame-page-styles.css",
+			},
+		}
+
+		webApp.RenderTemplate(w, "account-pending.tmpl", data)
 	}
 }

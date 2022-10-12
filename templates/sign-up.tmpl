@@ -3,29 +3,22 @@
 
 {{define "content"}}
 <div class="sign-up-page">
-  {{if .errorMessage}}
     <message-bar 
-      message-type="error"
-      message="{{.errorMessage}}"
+       message-type="{{if .ErrorMessage}}error{{else}}info{{end}}"
+       message="{{if .ErrorMessage}}{{.ErrorMessage}}{{else}}To create a new member account fill out the form below. After you submit the form 
+          your account will be created in a <em>Pending Approval</em> status. You will not 
+          be able to log in or access member-only pages until your account is approved.{{end}}"
     ></message-bar>
-  {{else}}
-    <message-bar 
-      message-type="info" 
-      message="To create a new member account fill out the form below. After you submit the form 
-        your account will be created in a <em>Pending Approval</em> status. You will not 
-        be able to log in or access member-only pages until your account is approved."
-      ></message-bar>
-  {{end}}
 
   <form method="post">
     <label for="firstName">First Name</label>
-    <input type="text" id="firstName" name="firstName" value="{{.user.firstName}}" required autofocus />
+    <input type="text" id="firstName" name="firstName" value="{{.User.FirstName}}" required autofocus />
 
     <label for="lastName">Last Name</label>
-    <input type="text" id="lastName" name="lastName" value="{{.user.lastName}}" required />
+    <input type="text" id="lastName" name="lastName" value="{{.User.LastName}}" required />
 
     <label for="email">Email</label>
-    <input type="email" id="email" name="email" value="{{.user.email}}" required />
+    <input type="email" id="email" name="email" value="{{.User.Email}}" required />
 
     <label for="password">Password</label>
     <input type="password" id="password" name="password" required />

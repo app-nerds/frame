@@ -5,11 +5,36 @@
 <div class="member-profile-page">
   <nav>
     <div class="avatar-block">
-      <img src="/frame-static/images/blank-profile-picture.png" alt="Blank profile picture" />
+      <img src="{{.Member.AvatarURL}}" alt="{{.Member.FirstName}} {{.Member.LastName}} avatar picture" />
       <a href="/member/profile/avatar">Edit Avatar</a>
     </div>
 
-    <h2></h2>
+    <h2>{{.Member.FirstName}} {{.Member.LastName}}</h2>
   </nav>
+
+  {{if .Message}}
+    <message-bar message-type="{{if .Success}}success{{else}}error{{end}}" message="{{.Message}}"></message-bar>
+  {{end}}
+
+  <div class="member-profile-page-container">
+    <form method="POST">
+      <fieldset>
+        <label for="firstName">First Name <sup>*</sup></label>
+        <input type="text" name="firstName" value="{{.Member.FirstName}}" required autofocus />
+
+        <label for="lastName">Last Name <sup>*</sup></label>
+        <input type="text" name="lastName" value="{{.Member.LastName}}" required />
+
+        <label for="password">Password</label>
+        <input type="password" name="password" />
+        <small>Only enter a password if you wish to change it.</small>
+      </fieldset>
+
+      <footer>
+        <button class="action-button">Update</button>
+      </footer>
+    </form>
+  </div>
+
 </div>
 {{end}}

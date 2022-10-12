@@ -13,6 +13,7 @@ import (
 	webapp "github.com/app-nerds/frame/pkg/web-app"
 	"github.com/app-nerds/kit/v6/passwords"
 	"github.com/gorilla/sessions"
+	"github.com/sirupsen/logrus"
 )
 
 func (mm *MemberManagement) handleAdminMembersManage(w http.ResponseWriter, r *http.Request) {
@@ -57,6 +58,41 @@ func (mm *MemberManagement) handleMemberProfile(w http.ResponseWriter, r *http.R
 
 	if data.Member.AvatarURL == "" {
 		data.Member.AvatarURL = "/frame-static/images/blank-profile-picture.png"
+	}
+
+	if r.Method == http.MethodPost {
+		r.ParseForm()
+
+		if r.FormValue("lastName") == "" {
+			data.Success = false
+			data.Message = "Please provide a last name."
+		}
+
+		if r.FormValue("firstName") == "" {
+			data.Success = false
+			data.Message = "Please provide a first name."
+		}
+
+		if data.Success {
+			data.Member.FirstName = r.FormValue("firstName")
+			data.Member.LastName = r.FormValue("lastName")
+
+			if r.FormValue("password") != "" {
+				data.Member.Password = passwords.HashedPasswordString(r.FormValue("password"))
+			}
+
+			if err = mm.memberService.UpdateMember(data.Member); err != nil {
+				mm.logger.WithError(err).WithFields(logrus.Fields{
+					"memberID": data.Member.ID,
+				}).Error("error updating member")
+
+				mm.webApp.UnexpectedError(w, r)
+				return
+			}
+
+			data.Success = true
+			data.Message = "Member updated successfully!"
+		}
 	}
 
 	mm.webApp.RenderTemplate(w, "member-profile.tmpl", data)
@@ -160,14 +196,23 @@ func (mm *MemberManagement) handleMemberSignup(w http.ResponseWriter, r *http.Re
 		member framemember.Member
 	)
 
-	data := map[string]interface{}{
-		"errorMessage": "",
-		"user": map[string]interface{}{
-			"firstName": "",
-			"lastName":  "",
-			"email":     "",
+	data := struct {
+		ErrorMessage string
+		Stylesheets  []string
+		User         struct {
+			FirstName string
+			LastName  string
+			Email     string
+		}
+	}{
+		Stylesheets: []string{
+			"/frame-static/css/frame-page-styles.css",
 		},
 	}
+
+	data.User.FirstName = ""
+	data.User.LastName = ""
+	data.User.Email = ""
 
 	render := func() {
 		mm.webApp.RenderTemplate(w, "sign-up.tmpl", data)
@@ -197,26 +242,20 @@ func (mm *MemberManagement) handleMemberSignup(w http.ResponseWriter, r *http.Re
 
 	// We already have a member with this email address
 	if err == nil {
-		data["user"] = map[string]interface{}{
-			"firstName": firstName,
-			"lastName":  lastName,
-			"email":     email,
-		}
-
-		data["errorMessage"] = "A member with this email address already exists."
+		data.User.FirstName = firstName
+		data.User.LastName = lastName
+		data.User.Email = email
+		data.ErrorMessage = "A member with this email address already exists."
 		render()
 		return
 	}
 
 	// The passwords don't match
 	if password != reenterPassword {
-		data["user"] = map[string]interface{}{
-			"firstName": firstName,
-			"lastName":  lastName,
-			"email":     email,
-		}
-
-		data["errorMessage"] = "The passwords you provided don't match. Please re-type them and try submitting again."
+		data.User.FirstName = firstName
+		data.User.LastName = lastName
+		data.User.Email = email
+		data.ErrorMessage = "The passwords you provided don't match. Please re-type them and try submitting again."
 		render()
 		return
 	}

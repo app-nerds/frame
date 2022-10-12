@@ -26,7 +26,6 @@ type InternalSiteAuthConfig struct {
 }
 
 type SiteAuth struct {
-	baseData              map[string]interface{}
 	contentTemplateName   string
 	frameStaticFS         fs.FS
 	htmlPaths             []string
@@ -55,7 +54,6 @@ All pages in SiteAuth have a few expectations.
 */
 func NewSiteAuth(internalConfig InternalSiteAuthConfig, siteAuthConfig pkgsiteauth.SiteAuthConfig) *SiteAuth {
 	result := &SiteAuth{
-		baseData:              siteAuthConfig.BaseData,
 		contentTemplateName:   siteAuthConfig.ContentTemplateName,
 		frameStaticFS:         internalConfig.FrameStaticFS,
 		htmlPaths:             siteAuthConfig.HtmlPaths,
@@ -79,18 +77,13 @@ func NewSiteAuth(internalConfig InternalSiteAuthConfig, siteAuthConfig pkgsiteau
 
 func (sa *SiteAuth) RegisterStaticFrameAssetsRoute(router *mux.Router) {
 	sa.logger.Info("registering static frame assets...")
-	// fsys, err := fs.Sub(sa.frameStaticFS, "frame-static")
-
-	// if err != nil {
-	// 	sa.logger.WithError(err).Fatal("error loading static Frame assets")
-	// }
-
 	frameStaticFS := http.FileServer(http.FS(sa.frameStaticFS))
 	router.PathPrefix("/frame-static/").Handler(frameStaticFS).Methods(http.MethodGet)
 }
 
 func (sa *SiteAuth) RegisterSiteAuthRoutes(router *mux.Router, webApp *webapp.WebApp, memberService *framemember.MemberService) {
 	router.HandleFunc(routepaths.SiteAuthLoginPath, sa.handleSiteAuthLogin(webApp, memberService)).Methods(http.MethodGet, http.MethodPost)
+	router.HandleFunc(routepaths.SiteAuthAccountPendingPath, sa.handleAccountPending(webApp)).Methods(http.MethodGet)
 
 	sa.setupMiddleware(router)
 }

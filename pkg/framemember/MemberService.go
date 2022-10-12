@@ -1,6 +1,8 @@
 package framemember
 
 import (
+	"fmt"
+
 	"github.com/app-nerds/frame/pkg/database"
 	"gorm.io/gorm"
 )
@@ -94,6 +96,31 @@ func (s MemberService) InactivateMember(id uint) error {
 	member.Status = MembersStatus{
 		ID:     MemberInactiveID,
 		Status: MemberInactive,
+	}
+
+	queryResult = s.db.Save(&member)
+	return queryResult.Error
+}
+
+func (s MemberService) UpdateMember(member Member) error {
+	var (
+		queryResult *gorm.DB
+	)
+
+	existingMember := Member{}
+	existingMember.ID = member.ID
+
+	queryResult = s.db.First(&existingMember)
+
+	if queryResult.Error != nil {
+		return fmt.Errorf("error querying for existing member in UpdateMember: %w", queryResult.Error)
+	}
+
+	/*
+	 * If we've got a password in the new member struct, we are changing it
+	 */
+	if existingMember.Password != member.Password {
+		member.Password = member.Password.Hash()
 	}
 
 	queryResult = s.db.Save(&member)
