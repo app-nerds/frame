@@ -5,24 +5,57 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/app-nerds/frame/internal/baseviewmodel"
 	"github.com/app-nerds/frame/internal/routepaths"
 	"github.com/app-nerds/frame/pkg/framemember"
 	"github.com/app-nerds/frame/pkg/httputils"
 	"github.com/app-nerds/frame/pkg/paging"
-	pkgwebapp "github.com/app-nerds/frame/pkg/web-app"
+	webapp "github.com/app-nerds/frame/pkg/web-app"
 	"github.com/app-nerds/kit/v6/passwords"
 	"github.com/gorilla/sessions"
 )
 
 func (mm *MemberManagement) handleAdminMembersManage(w http.ResponseWriter, r *http.Request) {
-	data := map[string]interface{}{
-		"appName": mm.appName,
-		"scripts": pkgwebapp.JavascriptIncludes{
-			{Type: "module", Src: "/pages/admin-members-manage.js"},
+	data := MembersManageData{
+		BaseViewModel: baseviewmodel.BaseViewModel{
+			JavascriptIncludes: webapp.JavascriptIncludes{
+				{Type: "module", Src: "/pages/admin-members-manage.js"},
+			},
+			AppName: mm.appName,
 		},
 	}
 
 	mm.webApp.RenderTemplate(w, "admin-members-manage.tmpl", data)
+}
+
+func (mm *MemberManagement) handleMemberProfile(w http.ResponseWriter, r *http.Request) {
+	var (
+		err error
+	)
+
+	ctx := r.Context()
+	memberEmail, _ := ctx.Value("email").(string)
+
+	data := MemberProfileData{
+		BaseViewModel: baseviewmodel.BaseViewModel{
+			JavascriptIncludes: webapp.JavascriptIncludes{},
+			AppName:            mm.appName,
+			Stylesheets: []string{
+				"/frame-static/css/frame-page-styles.css",
+			},
+		},
+		Member:  framemember.Member{},
+		Message: "",
+		Success: true,
+	}
+
+	if data.Member, err = mm.memberService.GetMemberByEmail(memberEmail, false); err != nil {
+		mm.logger.WithError(err).Error("error getting member information in handleMemberProfile()")
+		mm.webApp.UnexpectedError(w, r)
+		return
+	}
+
+	mm.webApp.RenderTemplate(w, "member-profile.tmpl", data)
 }
 
 func (mm *MemberManagement) handleAdminApiGetMembers(w http.ResponseWriter, r *http.Request) {

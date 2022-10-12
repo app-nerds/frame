@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"strings"
 
@@ -18,14 +19,16 @@ import (
 )
 
 type InternalSiteAuthConfig struct {
-	Logger       *logrus.Entry
-	SessionName  string
-	SessionStore sessions.Store
+	FrameStaticFS fs.FS
+	Logger        *logrus.Entry
+	SessionName   string
+	SessionStore  sessions.Store
 }
 
 type SiteAuth struct {
 	baseData              map[string]interface{}
 	contentTemplateName   string
+	frameStaticFS         fs.FS
 	htmlPaths             []string
 	layoutName            string
 	logger                *logrus.Entry
@@ -54,6 +57,7 @@ func NewSiteAuth(internalConfig InternalSiteAuthConfig, siteAuthConfig pkgsiteau
 	result := &SiteAuth{
 		baseData:              siteAuthConfig.BaseData,
 		contentTemplateName:   siteAuthConfig.ContentTemplateName,
+		frameStaticFS:         internalConfig.FrameStaticFS,
 		htmlPaths:             siteAuthConfig.HtmlPaths,
 		layoutName:            siteAuthConfig.LayoutName,
 		logger:                internalConfig.Logger,
@@ -67,10 +71,22 @@ func NewSiteAuth(internalConfig InternalSiteAuthConfig, siteAuthConfig pkgsiteau
 	 */
 
 	// TODO: figure out admin auth
-	result.pathsExcludedFromAuth = append(result.pathsExcludedFromAuth, "/static", "/admin-static", routepaths.SiteAuthAccountPendingPath, routepaths.SiteAuthLoginPath,
+	result.pathsExcludedFromAuth = append(result.pathsExcludedFromAuth, "/static", "/admin-static", "/frame-static", routepaths.SiteAuthAccountPendingPath, routepaths.SiteAuthLoginPath,
 		routepaths.SiteAuthLogoutPath, routepaths.MemberSignUpPath, routepaths.UnexpectedErrorPath, "/admin")
 
 	return result
+}
+
+func (sa *SiteAuth) RegisterStaticFrameAssetsRoute(router *mux.Router) {
+	sa.logger.Info("registering static frame assets...")
+	// fsys, err := fs.Sub(sa.frameStaticFS, "frame-static")
+
+	// if err != nil {
+	// 	sa.logger.WithError(err).Fatal("error loading static Frame assets")
+	// }
+
+	frameStaticFS := http.FileServer(http.FS(sa.frameStaticFS))
+	router.PathPrefix("/frame-static/").Handler(frameStaticFS).Methods(http.MethodGet)
 }
 
 func (sa *SiteAuth) RegisterSiteAuthRoutes(router *mux.Router, webApp *webapp.WebApp, memberService *framemember.MemberService) {

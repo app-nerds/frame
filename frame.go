@@ -35,6 +35,9 @@ var adminTemplatesFS embed.FS
 //go:embed admin-static
 var adminStaticFS embed.FS
 
+//go:embed frame-static
+var frameStaticFS embed.FS
+
 type FrameApplication struct {
 	*sync.Mutex
 
@@ -95,9 +98,10 @@ func (fa *FrameApplication) AddSiteAuth(config pkgsiteauth.SiteAuthConfig) *Fram
 	}
 
 	fa.siteAuth = siteauth.NewSiteAuth(siteauth.InternalSiteAuthConfig{
-		Logger:       fa.Logger,
-		SessionName:  fa.webApp.GetSessionName(),
-		SessionStore: fa.webApp.GetSessionStore(),
+		FrameStaticFS: frameStaticFS,
+		Logger:        fa.Logger,
+		SessionName:   fa.webApp.GetSessionName(),
+		SessionStore:  fa.webApp.GetSessionStore(),
 	}, config)
 
 	fa.memberManagement = membermanagement.NewMemberManagement(membermanagement.InternalMemberManagementConfig{
@@ -160,6 +164,7 @@ func (fa *FrameApplication) Start() chan os.Signal {
 
 	if fa.siteAuth != nil && fa.webApp != nil {
 		fa.siteAuth.RegisterSiteAuthRoutes(fa.router, fa.webApp, &fa.MemberService)
+		fa.siteAuth.RegisterStaticFrameAssetsRoute(fa.router)
 		fa.memberManagement.RegisterRoutes(fa.router)
 
 	}

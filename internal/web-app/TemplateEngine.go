@@ -35,6 +35,10 @@ func (wa *WebApp) setupTemplateEngine() {
 	wa.templateFS = mergefs.Merge(wa.templateFS, wa.internalTemplateFS)
 	wa.templateManifest = wa.registerInternalTemplates()
 
+	templateFuncs := template.FuncMap{
+		"IsSet": wa.templateFuncIsSet,
+	}
+
 	for _, tmplDefinition = range wa.templateManifest {
 		var parsedTemplate *template.Template
 
@@ -42,11 +46,11 @@ func (wa *WebApp) setupTemplateEngine() {
 		layoutPath := filepath.Join("templates", tmplDefinition.UseLayout)
 
 		if tmplDefinition.IsLayout {
-			if parsedTemplate, err = template.ParseFS(wa.templateFS, tmplPath); err != nil {
+			if parsedTemplate, err = template.New(tmplDefinition.Name).Funcs(templateFuncs).ParseFS(wa.templateFS, tmplPath); err != nil {
 				wa.logger.WithError(err).Fatalf("error parsing layout '%s'. shutting down", tmplDefinition.Name)
 			}
 		} else {
-			if parsedTemplate, err = template.ParseFS(wa.templateFS, tmplPath, layoutPath); err != nil {
+			if parsedTemplate, err = template.New(tmplDefinition.Name).Funcs(templateFuncs).ParseFS(wa.templateFS, tmplPath, layoutPath); err != nil {
 				wa.logger.WithError(err).Fatalf("error parsing template '%s' with layout '%s'. shutting down", tmplDefinition.Name, tmplDefinition.UseLayout)
 			}
 		}
@@ -81,6 +85,7 @@ func (wa *WebApp) registerInternalTemplates() pkgwebapp.TemplateCollection {
 	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "login.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
 	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "unexpected-error.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
 	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "sign-up.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
+	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "member-profile.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
 
 	return wa.templateManifest
 }

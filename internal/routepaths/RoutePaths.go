@@ -4,6 +4,7 @@ const (
 	MemberApiCurrentMember     string = "/api/member/current"
 	MemberApiLogOut            string = "/api/member/logout"
 	MemberSignUpPath           string = "/member/create-account"
+	MemberProfilePath          string = "/member/profile"
 	UnexpectedErrorPath        string = "/errors/unexpected"
 	SiteAuthLoginPath          string = "/member/login"
 	SiteAuthLogoutPath         string = "/member/logout"

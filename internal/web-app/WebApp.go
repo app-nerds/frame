@@ -3,7 +3,9 @@ package webapp
 import (
 	"html/template"
 	"io/fs"
+	"net/http"
 
+	"github.com/app-nerds/frame/internal/routepaths"
 	"github.com/app-nerds/frame/pkg/config"
 	"github.com/app-nerds/frame/pkg/framemember"
 	"github.com/app-nerds/frame/pkg/framesessions"
@@ -94,6 +96,14 @@ func (wa *WebApp) GetStaticFS() fs.FS {
 func (wa *WebApp) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/admin", wa.handleAdminDashboard)
 	router.HandleFunc("/errors/unexpected", wa.handleUnexpectedError)
+}
+
+/*
+UnexpectedError redirects the user to a page for unexpected errors. This is configured
+when calling AddWebApp
+*/
+func (wa *WebApp) UnexpectedError(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, routepaths.UnexpectedErrorPath, http.StatusFound)
 }
 
 func (wa *WebApp) setupSessions() {
