@@ -2,13 +2,13 @@
  * Copyright © 2022 App Nerds LLC
  */
 
-export async function fetcher(url, options, spinner) {
+export async function fetcher(url, options, spinner, msBeforeShowSpinner = 1000) {
   let timerID;
 
   if (spinner) {
     timerID = setTimeout(() => {
       spinner.show();
-    }, 1000);
+    }, msBeforeShowSpinner);
   }
 
   const response = await fetch(url, options);
