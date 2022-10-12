@@ -9,6 +9,7 @@
   display: inline-flex;
   align-items: center;
   gap: 1rem;
+  margin: 0.8rem 0;
 }
 
 .message-bar p {
