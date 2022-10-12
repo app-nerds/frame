@@ -72,6 +72,8 @@ func NewSiteAuth(internalConfig InternalSiteAuthConfig, siteAuthConfig pkgsiteau
 	result.pathsExcludedFromAuth = append(result.pathsExcludedFromAuth, "/static", "/admin-static", "/frame-static", routepaths.SiteAuthAccountPendingPath, routepaths.SiteAuthLoginPath,
 		routepaths.SiteAuthLogoutPath, routepaths.MemberSignUpPath, routepaths.UnexpectedErrorPath, "/admin")
 
+	result.htmlPaths = append(result.htmlPaths, "/member/profile")
+
 	return result
 }
 
