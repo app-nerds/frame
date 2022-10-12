@@ -177,6 +177,8 @@ form small {
 }
 
 form footer {
+  display: flex;
+  gap: 0.5rem;
   width: 100%;
   background-color: transparent;
   padding: 0;
