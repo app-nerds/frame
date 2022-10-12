@@ -151,7 +151,7 @@ export default class MemberLoginBar extends HTMLElement {
    ******************************************************************************/
 
   onMyAccountClick() {
-    console.log("My Account");
+    window.location = "/member/profile";
   }
 
   onLogOutClick() {
