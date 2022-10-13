@@ -1,6 +1,7 @@
 package routepaths
 
 const (
+	AdminLoginPath             string = "/admin/login"
 	MemberApiCurrentMember     string = "/api/member/current"
 	MemberApiLogOut            string = "/api/member/logout"
 	MemberSignUpPath           string = "/member/create-account"

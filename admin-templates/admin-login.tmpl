@@ -1,0 +1,22 @@
+{{template "admin-layout" .}}
+{{define "title"}}Manage Members{{end}}
+
+{{define "content"}}
+<h2>Admin Login</h2>
+
+{{if .Message}}
+  <message-bar message-type="error" message="{{.Message}}"></message-bar>
+{{end}}
+
+<form method="POST">
+  <label for="userName">User Name</label>
+  <input type="text" name="userName" required autofocus />
+
+  <label for="password">Password</label>
+  <input type="password" name="password" required />
+
+  <footer>
+    <button class="action-button">Log In</button>
+  </footer>
+</form>
+{{end}}

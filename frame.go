@@ -17,6 +17,7 @@ import (
 	webapp "github.com/app-nerds/frame/internal/web-app"
 	"github.com/app-nerds/frame/pkg/config"
 	"github.com/app-nerds/frame/pkg/framemember"
+	"github.com/app-nerds/frame/pkg/middlewares"
 	pkgsiteauth "github.com/app-nerds/frame/pkg/site-auth"
 	pkgwebapp "github.com/app-nerds/frame/pkg/web-app"
 	"github.com/app-nerds/gobucket/v2/cmd/gobucketgo"
@@ -162,15 +163,19 @@ func (fa *FrameApplication) RenderTemplate(w http.ResponseWriter, name string, d
 }
 
 func (fa *FrameApplication) Start() chan os.Signal {
+	var adminRouter *mux.Router
+
 	if fa.webApp != nil {
-		fa.webApp.RegisterRoutes(fa.router)
+		adminRouter = fa.router.PathPrefix("/admin").Subrouter()
+		adminRouter.Use(middlewares.AdminAuthMiddleware(fa.Logger, fa.Config, fa.webApp.GetAdminSessionStore()))
+
+		fa.webApp.RegisterRoutes(fa.router, adminRouter)
 	}
 
 	if fa.siteAuth != nil && fa.webApp != nil {
 		fa.siteAuth.RegisterSiteAuthRoutes(fa.router, fa.webApp, &fa.MemberService)
 		fa.siteAuth.RegisterStaticFrameAssetsRoute(fa.router)
-		fa.memberManagement.RegisterRoutes(fa.router)
-
+		fa.memberManagement.RegisterRoutes(fa.router, adminRouter)
 	}
 
 	fa.Logger.WithFields(logrus.Fields{

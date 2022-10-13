@@ -30,6 +30,8 @@ type InternalWebAppConfig struct {
 type WebApp struct {
 	adminStaticFS      fs.FS
 	adminTemplateFS    fs.FS
+	adminSessionName   string
+	adminSessionStore  sessions.Store
 	appName            string
 	appFS              fs.FS
 	appFolder          string
@@ -77,6 +79,14 @@ func NewWebApp(internalConfig InternalWebAppConfig, webAppConfig *pkgwebapp.WebA
 	return result
 }
 
+func (wa *WebApp) GetAdminSessionName() string {
+	return wa.adminSessionName
+}
+
+func (wa *WebApp) GetAdminSessionStore() sessions.Store {
+	return wa.adminSessionStore
+}
+
 func (wa *WebApp) GetAppFolder() string {
 	return wa.appFolder
 }
@@ -93,9 +103,11 @@ func (wa *WebApp) GetStaticFS() fs.FS {
 	return wa.appFS
 }
 
-func (wa *WebApp) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/admin", wa.handleAdminDashboard)
+func (wa *WebApp) RegisterRoutes(router *mux.Router, adminRouter *mux.Router) {
 	router.HandleFunc("/errors/unexpected", wa.handleUnexpectedError)
+
+	adminRouter.HandleFunc("", wa.handleAdminDashboard)
+	adminRouter.HandleFunc("/login", wa.handleAdminLogin)
 }
 
 /*
@@ -109,5 +121,27 @@ func (wa *WebApp) UnexpectedError(w http.ResponseWriter, r *http.Request) {
 func (wa *WebApp) setupSessions() {
 	if wa.sessionType == framesessions.CookieSessionType {
 		wa.sessionName, wa.sessionStore = framesessions.CookieSessions(wa.frameConfig)
+		wa.adminSessionName, wa.adminSessionStore = framesessions.AdminCookieSessions(wa.frameConfig)
 	}
+}
+
+func (wa *WebApp) registerAdminTemplates() pkgwebapp.TemplateCollection {
+	manifest := pkgwebapp.TemplateCollection{}
+	manifest = append(manifest, pkgwebapp.Template{Name: "admin-layout.tmpl", IsLayout: true})
+	manifest = append(manifest, pkgwebapp.Template{Name: "admin-login.tmpl", IsLayout: false, UseLayout: "admin-layout.tmpl"})
+	manifest = append(manifest, pkgwebapp.Template{Name: "admin-dashboard.tmpl", IsLayout: false, UseLayout: "admin-layout.tmpl"})
+	manifest = append(manifest, pkgwebapp.Template{Name: "admin-members-manage.tmpl", IsLayout: false, UseLayout: "admin-layout.tmpl"})
+
+	return manifest
+}
+
+func (wa *WebApp) registerInternalTemplates() pkgwebapp.TemplateCollection {
+	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "account-pending.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
+	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "login.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
+	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "unexpected-error.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
+	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "sign-up.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
+	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "member-profile.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
+	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "member-edit-avatar.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
+
+	return wa.templateManifest
 }

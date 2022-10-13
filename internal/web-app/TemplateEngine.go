@@ -50,6 +50,10 @@ func (wa *WebApp) setupTemplateEngine() {
 				wa.logger.WithError(err).Fatalf("error parsing layout '%s'. shutting down", tmplDefinition.Name)
 			}
 		} else {
+			if tmplDefinition.UseLayout == "" {
+				wa.logger.Fatalf("The template '%s' must have a layout specified.", tmplDefinition.Name)
+			}
+
 			if parsedTemplate, err = template.New(tmplDefinition.Name).Funcs(templateFuncs).ParseFS(wa.templateFS, tmplPath, layoutPath); err != nil {
 				wa.logger.WithError(err).Fatalf("error parsing template '%s' with layout '%s'. shutting down", tmplDefinition.Name, tmplDefinition.UseLayout)
 			}
@@ -69,26 +73,6 @@ func (wa *WebApp) setupTemplateEngine() {
 			}).Info("template captured")
 		}
 	}
-}
-
-func (wa *WebApp) registerAdminTemplates() pkgwebapp.TemplateCollection {
-	manifest := pkgwebapp.TemplateCollection{}
-	manifest = append(manifest, pkgwebapp.Template{Name: "admin-layout.tmpl", IsLayout: true})
-	manifest = append(manifest, pkgwebapp.Template{Name: "admin-dashboard.tmpl", IsLayout: false, UseLayout: "admin-layout.tmpl"})
-	manifest = append(manifest, pkgwebapp.Template{Name: "admin-members-manage.tmpl", IsLayout: false, UseLayout: "admin-layout.tmpl"})
-
-	return manifest
-}
-
-func (wa *WebApp) registerInternalTemplates() pkgwebapp.TemplateCollection {
-	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "account-pending.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
-	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "login.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
-	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "unexpected-error.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
-	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "sign-up.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
-	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "member-profile.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
-	wa.templateManifest = append(wa.templateManifest, pkgwebapp.Template{Name: "member-edit-avatar.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
-
-	return wa.templateManifest
 }
 
 func (wa *WebApp) setupAdminTemplates() {

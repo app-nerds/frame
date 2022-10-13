@@ -39,13 +39,13 @@ func NewMemberManagement(internalConfig InternalMemberManagementConfig) *MemberM
 	return result
 }
 
-func (mm *MemberManagement) RegisterRoutes(router *mux.Router) {
+func (mm *MemberManagement) RegisterRoutes(router *mux.Router, adminRouter *mux.Router) {
 	router.HandleFunc(routepaths.MemberSignUpPath, mm.handleMemberSignup).Methods(http.MethodGet, http.MethodPost)
 	router.HandleFunc(routepaths.MemberApiCurrentMember, mm.handleMemberCurrent).Methods(http.MethodGet)
 	router.HandleFunc(routepaths.MemberApiLogOut, mm.handleMemberLogout).Methods(http.MethodGet)
 	router.HandleFunc(routepaths.MemberProfilePath, mm.handleMemberProfile).Methods(http.MethodGet, http.MethodPost)
 	router.HandleFunc(routepaths.MemberProfileAvatarPath, mm.handleEditAvatar).Methods(http.MethodGet, http.MethodPost)
-	router.HandleFunc("/admin/members/manage", mm.handleAdminMembersManage).Methods(http.MethodGet)
-	router.HandleFunc("/admin/api/members", mm.handleAdminApiGetMembers).Methods(http.MethodGet)
-	router.HandleFunc("/admin/api/member/activate", mm.handleMemberActivate).Methods(http.MethodPut)
+	adminRouter.HandleFunc("/members/manage", mm.handleAdminMembersManage).Methods(http.MethodGet)
+	adminRouter.HandleFunc("/api/members", mm.handleAdminApiGetMembers).Methods(http.MethodGet)
+	adminRouter.HandleFunc("/api/member/activate", mm.handleMemberActivate).Methods(http.MethodPut)
 }

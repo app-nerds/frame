@@ -9,6 +9,9 @@ type Config struct {
 	AppName string
 	Version string
 
+	AdminSessionKey    string `flag:"adminsessionkey" env:"ADMIN_SESSION_KEY" default:"my-secret-key" description:"Key used to encrypt admin sessions"`
+	AdminSessionMaxAge int    `flag:"adminsessionmaxage" env:"ADMIN_SESSION_MAX_AGE" default:"86400" description:"Number of seconds a session is valid for"`
+	AdminSessionName   string `flag:"adminsessionname" env:"ADMIN_SESSION_NAME" default:"" description:"Name of cookie sessions"`
 	AutoSSLEmail       string `flag:"autosslemail" env:"AUTO_SSL_EMAIL" default:"" description:"Email address to use for Lets Encrypt"`
 	AutoSSLWhitelist   string `flag:"autosslwhitelist" env:"AUTO_SSL_WHITELIST" default:"" description:"Comma-seperated list of domains for SSL"`
 	Debug              bool   `flag:"debug" evn:"DEBUG" default:"true" description:"True to turn on debug mode."`
@@ -23,6 +26,8 @@ type Config struct {
 	GoogleRedirectURI  string `flag:"googleredirecturi" env:"GOOGLE_REDIRECT_URI" default:"http://localhost:8080/auth/google/callback" description:"Google OAuth2 redirect URI"`
 	LogLevel           string `flag:"loglevel" env:"LOG_LEVEL" default:"debug" description:"Minimum log level to report"`
 	PageSize           int    `flag:"pagesize" env:"PAGE_SIZE" default:"25" description:"Size of pages for results"`
+	RootUserName       string `flag:"rootusername" env:"ROOT_USER_NAME" default:"root" description:"root user name for admin"`
+	RootUserPassword   string `flag:"rootUserPassword" env:"ROOT_USER_PASSWORD" default:"password" description:"Password to the root admin user"`
 	ServerHost         string `flag:"serverhost" env:"SERVER_HOST" default:"localhost:8080" description:"Host and port to bind to"`
 	SessionKey         string `flag:"sessionkey" env:"SESSION_KEY" default:"my-secret-key" description:"Key used to encrypt sessions"`
 	SessionMaxAge      int    `flag:"sessionmaxage" env:"SESSION_MAX_AGE" default:"86400" description:"Number of seconds a session is valid for"`
