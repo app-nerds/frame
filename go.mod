@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/app-nerds/configinator v1.0.1
 	github.com/app-nerds/fireplace/v2 v2.0.4
+	github.com/app-nerds/gobucket/v2 v2.6.1
 	github.com/app-nerds/kit/v6 v6.4.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/sessions v1.2.1
@@ -16,8 +17,6 @@ require (
 )
 
 require (
-	github.com/app-nerds/gobucket/v2 v2.6.1 // indirect
-	github.com/app-nerds/gobucketlib/v2 v2.4.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8 // indirect
