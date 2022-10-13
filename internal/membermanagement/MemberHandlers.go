@@ -16,6 +16,7 @@ import (
 	"github.com/app-nerds/gobucket/v2/pkg/requestcontracts"
 	"github.com/app-nerds/gobucket/v2/pkg/responsecontracts"
 	"github.com/app-nerds/kit/v6/passwords"
+	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/sirupsen/logrus"
 )
@@ -222,7 +223,7 @@ func (mm *MemberManagement) handleAdminApiGetMembers(w http.ResponseWriter, r *h
 
 	page := paging.GetPageFromRequest(r)
 
-	if members, err = mm.memberService.GetMembers(page); err != nil {
+	if members, err = mm.memberService.GetMembers(page, false); err != nil {
 		mm.logger.WithError(err).Error("error getting members")
 		httputils.WriteJSON(w, http.StatusInternalServerError, httputils.CreateGenericErrorResponse("There was a problem retrieving members", err.Error(), ""))
 		return
@@ -399,4 +400,35 @@ func (mm *MemberManagement) handleMemberSignup(w http.ResponseWriter, r *http.Re
 	}
 
 	http.Redirect(w, r, routepaths.SiteAuthAccountPendingPath, http.StatusFound)
+}
+
+func (mm *MemberManagement) handleMemberDelete(w http.ResponseWriter, r *http.Request) {
+	var (
+		err    error
+		id     int
+		member framemember.Member
+	)
+
+	vars := mux.Vars(r)
+	idString := vars["id"]
+
+	if id, err = strconv.Atoi(idString); err != nil {
+		mm.logger.WithError(err).Error("invalid member ID")
+		httputils.WriteJSON(w, http.StatusBadRequest, httputils.CreateGenericErrorResponse("Invalid member ID", "", ""))
+		return
+	}
+
+	if member, err = mm.memberService.GetMemberByID(id); err != nil {
+		mm.logger.WithError(err).Error("error getting member in handleMemberDelete()")
+		httputils.WriteJSON(w, http.StatusInternalServerError, httputils.CreateGenericErrorResponse("Error retrieving member information", err.Error(), ""))
+		return
+	}
+
+	if err = mm.memberService.DeleteMember(member); err != nil {
+		mm.logger.WithError(err).WithField("memberID", id).Error("error deleting member")
+		httputils.WriteJSON(w, http.StatusInternalServerError, httputils.CreateGenericErrorResponse("Error deleting member", err.Error(), ""))
+		return
+	}
+
+	httputils.WriteJSON(w, http.StatusOK, httputils.CreateGenericSuccessResponse("Member deleted successfully"))
 }

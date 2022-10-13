@@ -124,6 +124,7 @@ export default class MembersTable extends HTMLElement {
 
   createActionButtons(member) {
     const button1 = document.createElement("button");
+    const button2 = document.createElement("button");
 
     if (member.memberStatus.id === PendingApproval) {
       button1.classList.add("action-button");
@@ -153,7 +154,18 @@ export default class MembersTable extends HTMLElement {
       this.onActionButtonClick(member);
     });
 
-    return [button1];
+    button2.classList.add("delete-button");
+    button2.setAttribute("alt", `Delete ${member.firstName} ${member.lastName}`);
+    button2.setAttribute("title", `Delete ${member.firstName} ${member.lastName}`);
+    button2.innerHTML = `<i data-feather="x"></i>`;
+
+    button2.addEventListener("click", e => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.onDeleteButtonClick(member);
+    });
+
+    return [button1, button2];
   }
 
   async getMembers() {
@@ -187,6 +199,7 @@ export default class MembersTable extends HTMLElement {
         break;
 
       case Active:
+        // TODO: Add inactivate
         break;
 
       case Inactive:
@@ -205,8 +218,30 @@ export default class MembersTable extends HTMLElement {
     this.rerenderBody();
   }
 
-  async inactivateMember(member) {
+  async onDeleteButtonClick(member) {
+    const confirmation = await window.confirm.yesNo("Are you sure you wish to delete this member?");
 
+    if (!confirmation) {
+      return;
+    }
+
+    const options = {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    const response = await frame.fetcher(`/admin/api/member/delete/${member.ID}`, options, window.spinner);
+    const result = await response.json();
+
+    if (!response.ok) {
+      window.alert.error(result.message);
+      return;
+    }
+
+    window.alert.success("Member deleted.");
+    this.rerenderBody();
   }
 
   async activateMember(member) {

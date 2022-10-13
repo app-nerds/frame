@@ -47,6 +47,11 @@ func (s MemberService) CreateMember(member *Member) error {
 	return dbResult.Error
 }
 
+func (s MemberService) DeleteMember(member Member) error {
+	queryResult := s.db.Delete(&member)
+	return queryResult.Error
+}
+
 func (s MemberService) GetMemberByEmail(email string, includeDeleted bool) (Member, error) {
 	result := Member{}
 
@@ -78,10 +83,16 @@ func (s MemberService) GetMemberByID(id int) (Member, error) {
 	return result, queryResult.Error
 }
 
-func (s MemberService) GetMembers(page int) ([]Member, error) {
+func (s MemberService) GetMembers(page int, includeDeleted bool) ([]Member, error) {
 	result := []Member{}
 
-	queryResult := s.db.Unscoped().Scopes(database.Paginate(page, s.pageSize)).Joins("Status").Find(&result)
+	queryResult := s.db
+
+	if includeDeleted {
+		queryResult = queryResult.Unscoped()
+	}
+
+	queryResult = queryResult.Scopes(database.Paginate(page, s.pageSize)).Joins("Status").Find(&result)
 	return result, queryResult.Error
 }
 
