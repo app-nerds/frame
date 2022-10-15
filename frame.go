@@ -2,12 +2,15 @@ package frame
 
 import (
 	"context"
+	"crypto/tls"
 	"embed"
+	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -24,6 +27,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/markbates/goth"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/crypto/acme/autocert"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -200,7 +204,50 @@ func (fa *FrameApplication) Start() chan os.Signal {
 	}
 
 	go func() {
-		err := fa.Server.ListenAndServe()
+		var (
+			err error
+		)
+
+		if fa.Config.AutoSSLEmail != "" && fa.Config.AutoSSLWhitelist != "" {
+			autocertManager := &autocert.Manager{
+				Prompt: autocert.AcceptTOS,
+				Cache:  autocert.DirCache("./certs"),
+				Email:  fa.Config.AutoSSLEmail,
+				HostPolicy: func(ctx context.Context, host string) error {
+					domains := strings.Split(fa.Config.AutoSSLWhitelist, ",")
+
+					for _, domain := range domains {
+						if host == domain {
+							return nil
+						}
+					}
+
+					return fmt.Errorf("acme/autocert: %s host not allowed", host)
+				},
+			}
+
+			fa.Server.TLSConfig = &tls.Config{
+				GetCertificate: autocertManager.GetCertificate,
+			}
+
+			go func() {
+				autocertMux := &http.ServeMux{}
+				autocertServer := &http.Server{
+					ReadTimeout:  5 * time.Second,
+					WriteTimeout: 5 * time.Second,
+					IdleTimeout:  120 * time.Second,
+					Handler:      autocertMux,
+					Addr:         ":80",
+				}
+
+				autocertServer.Handler = autocertManager.HTTPHandler(autocertServer.Handler)
+				_ = autocertServer.ListenAndServe()
+			}()
+
+			err = fa.Server.ListenAndServeTLS("", "")
+		} else {
+			err = fa.Server.ListenAndServe()
+		}
 
 		if err != nil && err != http.ErrServerClosed {
 			fa.Logger.WithError(err).Fatal("error starting server")
