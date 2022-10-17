@@ -92,8 +92,43 @@ func (s MemberService) GetMembers(page int, includeDeleted bool) ([]Member, erro
 		queryResult = queryResult.Unscoped()
 	}
 
-	queryResult = queryResult.Scopes(database.Paginate(page, s.pageSize)).Joins("Status").Find(&result)
+	queryResult = queryResult.Scopes(database.Paginate(page, s.pageSize)).Joins("Status").Joins("Role").Find(&result)
 	return result, queryResult.Error
+}
+
+func (s MemberService) GetMemberRole(name string) (MemberRole, error) {
+	var (
+		err error
+	)
+
+	result := MemberRole{}
+	result.RoleName = name
+
+	err = s.db.Find(&result).Error
+	return result, err
+}
+
+func (s MemberService) GetMemberRoleByID(id int) (MemberRole, error) {
+	var (
+		err error
+	)
+
+	result := MemberRole{}
+	result.ID = uint(id)
+
+	err = s.db.Find(&result).Error
+	return result, err
+}
+
+func (s MemberService) GetMemberRoles() ([]MemberRole, error) {
+	var (
+		err error
+	)
+
+	result := []MemberRole{}
+	err = s.db.Find(&result).Error
+
+	return result, err
 }
 
 func (s MemberService) InactivateMember(id uint) error {

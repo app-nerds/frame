@@ -9,6 +9,12 @@ type MembersManageData struct {
 	baseviewmodel.BaseViewModel
 }
 
+type MembersEditData struct {
+	baseviewmodel.BaseViewModel
+	Member  framemember.Member
+	Message string
+	Success bool
+}
 type MemberProfileData struct {
 	baseviewmodel.BaseViewModel
 	EditAvatarPath string

@@ -34,6 +34,99 @@ func (mm *MemberManagement) handleAdminMembersManage(w http.ResponseWriter, r *h
 	mm.webApp.RenderTemplate(w, "admin-members-manage.tmpl", data)
 }
 
+func (mm *MemberManagement) handleAdminMembersEdit(w http.ResponseWriter, r *http.Request) {
+	var (
+		err      error
+		idString string
+		id       int
+	)
+
+	vars := mux.Vars(r)
+	idString = vars["id"]
+
+	data := MembersEditData{
+		BaseViewModel: baseviewmodel.BaseViewModel{
+			JavascriptIncludes: webapp.JavascriptIncludes{
+				{Type: "module", Src: "/pages/admin-members-edit.js"},
+			},
+			AppName: mm.appName,
+		},
+	}
+
+	if id, err = strconv.Atoi(idString); err != nil {
+		data.Success = false
+		data.Message = "Invalid member ID"
+		goto rendermembersedit
+	}
+
+	if data.Member, err = mm.memberService.GetMemberByID(id); err != nil {
+		mm.logger.WithError(err).Error("error retrieving member in handleAdminMembersEdit")
+
+		data.Success = false
+		data.Message = "There was a problem retrieving this member's information. Please try again."
+		goto rendermembersedit
+	}
+
+	/*
+	 * POST
+	 */
+	if r.Method == http.MethodPost {
+		_ = r.ParseForm()
+
+		if data.Member.AvatarURL == "" {
+			data.Member.AvatarURL = "/frame-static/images/blank-profile-picture.png"
+		}
+
+		if r.FormValue("lastName") == "" {
+			data.Success = false
+			data.Message = "Please provide a last name."
+			goto rendermembersedit
+		}
+
+		if r.FormValue("firstName") == "" {
+			data.Success = false
+			data.Message = "Please provide a first name."
+			goto rendermembersedit
+		}
+
+		roleID, err := strconv.Atoi(r.FormValue("role"))
+
+		if err != nil {
+			data.Success = false
+			data.Message = "Invalid Role selected"
+			goto rendermembersedit
+		}
+
+		role, err := mm.memberService.GetMemberRoleByID(roleID)
+
+		if err != nil {
+			data.Success = false
+			data.Message = "There was a problem getting role information"
+			goto rendermembersedit
+		}
+
+		data.Member.FirstName = r.FormValue("firstName")
+		data.Member.LastName = r.FormValue("lastName")
+		data.Member.RoleID = int(role.ID)
+		data.Member.Role = role
+
+		if err = mm.memberService.UpdateMember(data.Member); err != nil {
+			mm.logger.WithError(err).WithFields(logrus.Fields{
+				"memberID": data.Member.ID,
+			}).Error("error updating member")
+
+			mm.webApp.UnexpectedError(w, r)
+			return
+		}
+
+		data.Success = true
+		data.Message = "Member updated successfully!"
+	}
+
+rendermembersedit:
+	mm.webApp.RenderTemplate(w, "admin-members-edit.tmpl", data)
+}
+
 func (mm *MemberManagement) handleMemberProfile(w http.ResponseWriter, r *http.Request) {
 	var (
 		err error
@@ -314,6 +407,7 @@ func (mm *MemberManagement) handleMemberSignup(w http.ResponseWriter, r *http.Re
 	var (
 		err    error
 		member framemember.Member
+		role   framemember.MemberRole
 	)
 
 	data := struct {
@@ -380,6 +474,18 @@ func (mm *MemberManagement) handleMemberSignup(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	// Get the base member role
+	if role, err = mm.memberService.GetMemberRole(framemember.BaseMemberRole); err != nil {
+		mm.logger.WithError(err).Error("error retrieving member role in handleMemberSignup()")
+
+		data.User.FirstName = firstName
+		data.User.LastName = lastName
+		data.User.Email = email
+		data.ErrorMessage = "There was a problem getting some information before creating your member. Please try again."
+		render()
+		return
+	}
+
 	// Create the member
 	member = framemember.Member{
 		AvatarURL: "",
@@ -387,10 +493,13 @@ func (mm *MemberManagement) handleMemberSignup(w http.ResponseWriter, r *http.Re
 		FirstName: firstName,
 		LastName:  lastName,
 		Password:  passwords.HashedPasswordString(password),
+		StatusID:  framemember.MemberPendingApprovalID,
 		Status: framemember.MembersStatus{
 			ID:     framemember.MemberPendingApprovalID,
 			Status: framemember.MemberPendingApproval,
 		},
+		RoleID: int(role.ID),
+		Role:   role,
 	}
 
 	if err = mm.memberService.CreateMember(&member); err != nil {
@@ -431,4 +540,19 @@ func (mm *MemberManagement) handleMemberDelete(w http.ResponseWriter, r *http.Re
 	}
 
 	httputils.WriteJSON(w, http.StatusOK, httputils.CreateGenericSuccessResponse("Member deleted successfully"))
+}
+
+func (mm *MemberManagement) handleGetMemberRoles(w http.ResponseWriter, r *http.Request) {
+	var (
+		err   error
+		roles []framemember.MemberRole
+	)
+
+	if roles, err = mm.memberService.GetMemberRoles(); err != nil {
+		mm.logger.WithError(err).Error("error retrieving member roles")
+		httputils.WriteJSON(w, http.StatusInternalServerError, httputils.CreateGenericErrorResponse("Error retrieving roles", "", ""))
+		return
+	}
+
+	httputils.WriteJSON(w, http.StatusOK, roles)
 }

@@ -1,0 +1,28 @@
+{{template "admin-layout" .}}
+{{define "title"}}Edit Member{{end}}
+
+{{define "content"}}
+<div class="admin-members-edit-page">
+  <h2>Edit Member</h2>
+
+  {{- if .Message}}
+    <message-bar message-type="{{if .Success}}success{{else}}error{{end}}" message="{{.Message}}"></message-bar>
+  {{end}}
+
+  <form method="POST">
+    <label for="firstName">First Name</label>
+    <input type="text" name="firstName" value="{{.Member.FirstName}}" autofocus />
+
+    <label for="lastName">Last Name</label>
+    <input type="text" name="lastName" value="{{.Member.LastName}}" />
+
+    <label for="role">Role</label>
+    <role-selector selected="{{.Member.Role.ID}}" name="role"></role-selector>
+
+    <footer>
+      <button type="button" id="cancel">Close</button>
+      <button class="action-button">Update</button>
+    </footer>
+  </form>
+</div>
+{{end}}

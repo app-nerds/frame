@@ -34,11 +34,15 @@ export default class MembersTable extends HTMLElement {
   createTableHead() {
     const head = document.createElement("thead");
     const tr = document.createElement("tr");
+    const th0 = document.createElement("th");
     const th1 = document.createElement("th");
     const th2 = document.createElement("th");
     const th3 = document.createElement("th");
     const th4 = document.createElement("th");
     const th5 = document.createElement("th");
+
+    th0.setAttribute("scope", "col");
+    th0.innerText = "Role";
 
     th1.setAttribute("scope", "col");
     th1.innerText = "Name";
@@ -55,6 +59,7 @@ export default class MembersTable extends HTMLElement {
     th5.setAttribute("scope", "col");
     th5.innerHTML = `<span class="sr-only">Actions</span>`;
 
+    tr.insertAdjacentElement("beforeend", th0);
     tr.insertAdjacentElement("beforeend", th1);
     tr.insertAdjacentElement("beforeend", th2);
     tr.insertAdjacentElement("beforeend", th3);
@@ -84,6 +89,7 @@ export default class MembersTable extends HTMLElement {
       const td = document.createElement("td");
 
       td.setAttribute("scope", "row");
+      td.setAttribute("colspan", "6");
       td.innerText = `No member records`;
 
       tr.insertAdjacentElement("beforeend", td);
@@ -92,6 +98,7 @@ export default class MembersTable extends HTMLElement {
 
     members.forEach(member => {
       const tr = document.createElement("tr");
+      const td0 = document.createElement("td");
       const th1 = document.createElement("th");
       const td2 = document.createElement("td");
       const td3 = document.createElement("td");
@@ -99,9 +106,9 @@ export default class MembersTable extends HTMLElement {
       const td5 = document.createElement("td");
       const buttons = this.createActionButtons(member);
 
+      td0.innerHTML = `<span class="member-table-role-block" style="background-color: ${member.role.color};" title="Role: ${member.role.roleName}"><span class="sr-only">Role: ${member.role.roleName}</span></span>`
       th1.setAttribute("scope", "row");
       th1.innerText = `${member.firstName} ${member.lastName}`;
-
       td2.innerText = member.email;
       td3.innerText = dayjs(member.CreatedAt).format("MMM D, YYYY");
       td4.innerText = member.memberStatus.status;
@@ -110,6 +117,7 @@ export default class MembersTable extends HTMLElement {
         td5.insertAdjacentElement("beforeend", button);
       });
 
+      tr.insertAdjacentElement("beforeend", td0);
       tr.insertAdjacentElement("beforeend", th1);
       tr.insertAdjacentElement("beforeend", td2);
       tr.insertAdjacentElement("beforeend", td3);
@@ -123,49 +131,47 @@ export default class MembersTable extends HTMLElement {
   }
 
   createActionButtons(member) {
-    const button1 = document.createElement("button");
-    const button2 = document.createElement("button");
+    const buttonID = `member-action-${member.ID}`;
+
+    const button = document.createElement("button");
+    button.id = buttonID;
+    button.classList.add("action-button");
+    button.setAttribute("alt", "Action Menu");
+    button.setAttribute("title", "Action Menu");
+    button.innerHTML = `<i data-feather="menu"></i>`;
+
+    const popup = document.createElement("popup-menu");
+    popup.setAttribute("trigger", `#${buttonID}`);
+
+    let menuItems = [
+      { id: `member-edit-button-${member.ID}`, text: `Edit`, icon: "edit-3", handler: () => { this.onEditMemberClick(member.ID); } },
+    ];
 
     if (member.memberStatus.id === PendingApproval) {
-      button1.classList.add("action-button");
-      button1.setAttribute("alt", `Approve ${member.firstName} ${member.lastName}`);
-      button1.setAttribute("title", `Approve ${member.firstName} ${member.lastName}`);
-      button1.innerHTML = `<i data-feather="user-check"></i>`;
-    }
-
-    if (member.memberStatus.id === Active) {
-      button1.classList.add("delete-button");
-      button1.setAttribute("alt", `Inactivate ${member.firstName} ${member.lastName}`);
-      button1.setAttribute("title", `Inactivate ${member.firstName} ${member.lastName}`);
-      button1.innerHTML = `<i data-feather="user-minus"></i>`;
+      menuItems.push({ id: `member-status-button-${member.ID}`, text: `Approve`, icon: "user-check", handler: () => { this.onActionButtonClick(member); } });
     }
 
     if (member.memberStatus.id === Inactive) {
-      button1.classList.add("action-button");
-      button1.setAttribute("alt", `Activate ${member.firstName} ${member.lastName}`);
-      button1.setAttribute("title", `Activate ${member.firstName} ${member.lastName}`);
-      button1.innerHTML = `<i data-feather="user-check"></i>`;
+      menuItems.push({ id: `member-status-button-${member.ID}`, text: `Inactivate`, icon: "user-minus", handler: () => { this.onActionButtonClick(member); } });
     }
 
-    button1.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+    if (member.memberStatus.id === Inactive) {
+      menuItems.push({ id: `member-status-button-${member.ID}`, text: `Activate`, icon: "user-check", handler: () => { this.onActionButtonClick(member); } });
+    }
 
-      this.onActionButtonClick(member);
+    menuItems.push({ id: `member-delete-button-${member.ID}`, text: `Delete`, icon: "x", handler: () => { this.onDeleteButtonClick(member); } });
+
+    menuItems.forEach(data => {
+      const menuItem = document.createElement("popup-menu-item");
+      menuItem.setAttribute("id", data.id);
+      menuItem.setAttribute("text", data.text);
+      menuItem.setAttribute("icon", data.icon);
+      menuItem.addEventListener("click", data.handler);
+
+      popup.insertAdjacentElement("beforeend", menuItem);
     });
 
-    button2.classList.add("delete-button");
-    button2.setAttribute("alt", `Delete ${member.firstName} ${member.lastName}`);
-    button2.setAttribute("title", `Delete ${member.firstName} ${member.lastName}`);
-    button2.innerHTML = `<i data-feather="x"></i>`;
-
-    button2.addEventListener("click", e => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.onDeleteButtonClick(member);
-    });
-
-    return [button1, button2];
+    return [button, popup];
   }
 
   async getMembers() {
@@ -179,6 +185,10 @@ export default class MembersTable extends HTMLElement {
     const response = await frame.fetcher(`/admin/api/members?page=${this._page}`, options);
     const result = await response.json();
     return result;
+  }
+
+  onEditMemberClick(memberID) {
+    window.location = `/admin/members/edit/${memberID}`;
   }
 
   async onActionButtonClick(member) {

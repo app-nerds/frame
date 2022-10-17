@@ -58,6 +58,9 @@ type FrameApplication struct {
 	// Template setup
 	primaryLayoutName string
 
+	// Internal models
+	customMemberSignupConfig *framemember.CustomMemberSignupConfig
+
 	// Internal services
 	gobucketClient   *gobucketgo.GoBucket
 	memberManagement *membermanagement.MemberManagement
@@ -98,6 +101,11 @@ func NewFrameApplication(appName, version string) *FrameApplication {
 	result.withGobucket()
 
 	return result
+}
+
+func (fa *FrameApplication) WithCustomSignUpForm(config *framemember.CustomMemberSignupConfig) *FrameApplication {
+	fa.customMemberSignupConfig = config
+	return fa
 }
 
 func (fa *FrameApplication) AddSiteAuth(config pkgsiteauth.SiteAuthConfig) *FrameApplication {
@@ -151,11 +159,15 @@ func (fa *FrameApplication) Database(dst ...interface{}) *FrameApplication {
 		fa.Logger.WithError(err).Fatal("unable to connect to the database")
 	}
 
-	dst = append(dst, &framemember.MembersStatus{}, &framemember.Member{})
+	dst = append(dst, &framemember.MemberRole{}, &framemember.MembersStatus{}, &framemember.Member{})
 	_ = fa.DB.AutoMigrate(dst...)
 
 	if err = fa.seedDataMemberStatuses(); err != nil {
 		fa.Logger.WithError(err).Fatal("error seeding database...")
+	}
+
+	if err = fa.seedDataMemberRoles(); err != nil {
+		fa.Logger.WithError(err).Fatal("error seeding dtabase...")
 	}
 
 	fa.setupServicesThatRequireDB()

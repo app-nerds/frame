@@ -8,6 +8,7 @@ import (
 type MemberStatus string
 
 const (
+	BaseMemberRole          string       = "Member"
 	MemberPendingApprovalID int          = 1
 	MemberPendingApproval   MemberStatus = "Pending Approval"
 	MemberActiveID          int          = 2
@@ -25,8 +26,17 @@ type Member struct {
 	FirstName  string                         `json:"firstName"`
 	LastName   string                         `json:"lastName"`
 	Password   passwords.HashedPasswordString `json:"-"`
+	RoleID     int                            `json:"-"`
+	Role       MemberRole                     `json:"role"`
 	StatusID   int                            `json:"-"`
 	Status     MembersStatus                  `json:"memberStatus"`
+}
+
+type MemberRole struct {
+	gorm.Model
+
+	Color    string `json:"color"`
+	RoleName string `json:"roleName"`
 }
 
 type MembersStatus struct {
