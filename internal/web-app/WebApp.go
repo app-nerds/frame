@@ -132,6 +132,7 @@ func (wa *WebApp) registerAdminTemplates() pkgwebapp.TemplateCollection {
 	manifest = append(manifest, pkgwebapp.Template{Name: "admin-dashboard.tmpl", IsLayout: false, UseLayout: "admin-layout.tmpl"})
 	manifest = append(manifest, pkgwebapp.Template{Name: "admin-members-manage.tmpl", IsLayout: false, UseLayout: "admin-layout.tmpl"})
 	manifest = append(manifest, pkgwebapp.Template{Name: "admin-members-edit.tmpl", IsLayout: false, UseLayout: "admin-layout.tmpl"})
+	manifest = append(manifest, pkgwebapp.Template{Name: "admin-roles-manage.tmpl", IsLayout: false, UseLayout: "admin-layout.tmpl"})
 
 	return manifest
 }

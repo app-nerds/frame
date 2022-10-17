@@ -556,3 +556,26 @@ func (mm *MemberManagement) handleGetMemberRoles(w http.ResponseWriter, r *http.
 
 	httputils.WriteJSON(w, http.StatusOK, roles)
 }
+
+func (mm *MemberManagement) handleAdminRolesManage(w http.ResponseWriter, r *http.Request) {
+	var (
+		err error
+	)
+
+	data := RolesManageData{
+		BaseViewModel: baseviewmodel.BaseViewModel{
+			JavascriptIncludes: webapp.JavascriptIncludes{},
+			AppName:            mm.appName,
+			Stylesheets:        []string{},
+		},
+		Roles: []framemember.MemberRole{},
+	}
+
+	if data.Roles, err = mm.memberService.GetMemberRoles(); err != nil {
+		mm.logger.WithError(err).Error("error retrieving member roles in handleAdminRolesManage()")
+		http.Redirect(w, r, routepaths.UnexpectedErrorPath, http.StatusFound)
+		return
+	}
+
+	mm.webApp.RenderTemplate(w, "admin-roles-manage.tmpl", data)
+}

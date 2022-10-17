@@ -29,3 +29,8 @@ type EditAvatarData struct {
 	Message string
 	Success bool
 }
+
+type RolesManageData struct {
+	baseviewmodel.BaseViewModel
+	Roles []framemember.MemberRole
+}

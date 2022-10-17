@@ -13,3 +13,10 @@ members-table popup-menu {
   border: 1px solid black;
 }
 
+.admin-manage-roles-page table > tbody > tr > td:nth-child(2) {
+  text-align: center;
+}
+
+.admin-manage-roles-page table > tbody > tr > td:nth-child(3) {
+  text-align: right;
+}

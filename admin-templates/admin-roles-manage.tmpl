@@ -1,0 +1,35 @@
+{{template "admin-layout" .}}
+{{define "title"}}Manage Roles{{end}}
+
+{{define "content"}}
+<div class="admin-manage-roles-page">
+  <h2>Manage Roles</h2>
+
+  <table>
+    <caption>Manage Roles</caption>
+    <thead>
+      <tr>
+        <th scope="col">Role Name</th>
+        <th scope="col">Color</th>
+        <th scope="col"><span class="sr-only">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{- range .Roles}}
+      <tr>
+        <td scope="row">{{.RoleName}}</td>
+        <td>
+          <span class="member-table-role-block" style="background-color: {{.Color}};"></span>
+        </td>
+        <td>
+          <button class="action-button" alt="Action menu" title="Action menu" id="action-menu-{{.ID}}"><i data-feather="menu"></i></button>
+          <popup-menu trigger="#action-menu-{{.ID}}">
+            <popup-menu-item id="edit-role-{{.ID}}" text="Edit" icon="edit-3"></popup-menu-item>
+          </popup-menu>
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{end}}
