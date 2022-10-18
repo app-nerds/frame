@@ -564,9 +564,11 @@ func (mm *MemberManagement) handleAdminRolesManage(w http.ResponseWriter, r *htt
 
 	data := RolesManageData{
 		BaseViewModel: baseviewmodel.BaseViewModel{
-			JavascriptIncludes: webapp.JavascriptIncludes{},
-			AppName:            mm.appName,
-			Stylesheets:        []string{},
+			JavascriptIncludes: webapp.JavascriptIncludes{
+				{Type: "module", Src: "/pages/admin-roles-manage.js"},
+			},
+			AppName:     mm.appName,
+			Stylesheets: []string{},
 		},
 		Roles: []framemember.MemberRole{},
 	}

@@ -106,7 +106,7 @@ export default class MembersTable extends HTMLElement {
       const td5 = document.createElement("td");
       const buttons = this.createActionButtons(member);
 
-      td0.innerHTML = `<span class="member-table-role-block" style="background-color: ${member.role.color};" title="Role: ${member.role.roleName}"><span class="sr-only">Role: ${member.role.roleName}</span></span>`
+      td0.innerHTML = `<span class="member-table-role-block" style="background-color: ${member.role.color};" title="Role: ${member.role.roleName}"><span class="sr-only">Role: ${member.role.roleName}</span></span>`;
       th1.setAttribute("scope", "row");
       th1.innerText = `${member.firstName} ${member.lastName}`;
       td2.innerText = member.email;

@@ -20,3 +20,7 @@ members-table popup-menu {
 .admin-manage-roles-page table > tbody > tr > td:nth-child(3) {
   text-align: right;
 }
+
+.admin-manage-roles-page popup-menu {
+  width: 6rem;
+}
