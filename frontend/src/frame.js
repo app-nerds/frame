@@ -18,6 +18,7 @@ import MemberLoginBar from "./members/member-login-bar.js";
 import { MemberService } from "./members/member-service.js";
 import GoogleLoginForm from "./members/google-login-form.js";
 import MessageBar from "./message-bar/message-bar.js";
+import ColorPicker from "./color-picker/color-picker.js";
 
 export default {
   alertPosition,
@@ -41,4 +42,5 @@ export default {
   MemberService,
   GoogleLoginForm,
   MessageBar,
+  ColorPicker,
 };

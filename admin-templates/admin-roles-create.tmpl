@@ -1,0 +1,25 @@
+{{template "admin-layout" .}}
+{{define "title"}}Create Role{{end}}
+
+{{define "content"}}
+<div class="admin-roles-create-page">
+  <h2>Create a Role</h2>
+
+  {{- if .Message}}
+    <message-bar message-type="{{if .Success}}success{{else}}error{{end}}" message="{{.Message}}"></message-bar>
+  {{end}}
+
+  <form method="POST">
+    <label for="roleName">Role Name</label>
+    <input type="text" name="roleName" required autofocus />
+
+    <label for="color">Color</label>
+    <color-picker id="colorPicker" name="color"></color-picker>
+
+    <footer>
+      <button type="button" id="close">Close</button>
+      <button>Create</button>
+    </footer>
+  </form>
+</div>
+{{end}}

@@ -56,6 +56,8 @@ func (mm *MemberManagement) RegisterRoutes(router *mux.Router, adminRouter *mux.
 	adminRouter.HandleFunc("/members/manage", mm.handleAdminMembersManage).Methods(http.MethodGet)
 	adminRouter.HandleFunc("/members/edit/{id}", mm.handleAdminMembersEdit).Methods(http.MethodGet, http.MethodPost)
 	adminRouter.HandleFunc("/roles/manage", mm.handleAdminRolesManage).Methods(http.MethodGet)
+	adminRouter.HandleFunc("/roles/create", mm.handleAdminRolesCreate).Methods(http.MethodGet, http.MethodPost)
+	adminRouter.HandleFunc("/roles/edit/{id}", mm.handleAdminRolesEdit).Methods(http.MethodGet, http.MethodPost)
 	adminRouter.HandleFunc("/api/members", mm.handleAdminApiGetMembers).Methods(http.MethodGet)
 	adminRouter.HandleFunc("/api/member/activate", mm.handleMemberActivate).Methods(http.MethodPut)
 	adminRouter.HandleFunc("/api/member/delete/{id}", mm.handleMemberDelete).Methods(http.MethodDelete)

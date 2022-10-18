@@ -34,3 +34,17 @@ type RolesManageData struct {
 	baseviewmodel.BaseViewModel
 	Roles []framemember.MemberRole
 }
+
+type RolesCreateData struct {
+	baseviewmodel.BaseViewModel
+	Role    framemember.MemberRole
+	Success bool
+	Message string
+}
+
+type RolesEditData struct {
+	baseviewmodel.BaseViewModel
+	Role    framemember.MemberRole
+	Success bool
+	Message string
+}

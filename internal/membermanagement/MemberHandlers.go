@@ -1,6 +1,7 @@
 package membermanagement
 
 import (
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"net/http"
@@ -19,6 +20,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 func (mm *MemberManagement) handleAdminMembersManage(w http.ResponseWriter, r *http.Request) {
@@ -580,4 +582,134 @@ func (mm *MemberManagement) handleAdminRolesManage(w http.ResponseWriter, r *htt
 	}
 
 	mm.webApp.RenderTemplate(w, "admin-roles-manage.tmpl", data)
+}
+
+func (mm *MemberManagement) handleAdminRolesCreate(w http.ResponseWriter, r *http.Request) {
+	var (
+		err      error
+		existing framemember.MemberRole
+	)
+
+	data := RolesCreateData{
+		BaseViewModel: baseviewmodel.BaseViewModel{
+			JavascriptIncludes: webapp.JavascriptIncludes{
+				{Type: "module", Src: "/pages/admin-roles-create.js"},
+			},
+			AppName:     mm.appName,
+			Stylesheets: []string{},
+		},
+		Role:    framemember.MemberRole{},
+		Success: true,
+		Message: "",
+	}
+
+	/*
+	 * POST
+	 */
+	if r.Method == http.MethodPost {
+		_ = r.ParseForm()
+
+		roleName := r.FormValue("roleName")
+		color := r.FormValue("color")
+
+		if roleName == "" {
+			data.Success = false
+			data.Message = "Please provide a name for your new role."
+			goto renderrolescreate
+		}
+
+		if color == "" {
+			data.Success = false
+			data.Message = "Please select a color to represent this role."
+			goto renderrolescreate
+		}
+
+		// Make sure we don't have a role by this name already
+		if existing, err = mm.memberService.GetMemberRoleByName(roleName); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			mm.logger.WithError(err).Error("error checking for existing role by name in handleAdminRolesCreate")
+
+			data.Success = false
+			data.Message = "There was a problem getting role information. Please try again."
+			goto renderrolescreate
+		}
+
+		if existing.ID > 0 {
+			data.Success = false
+			data.Message = "A role with this name already exists. Please choose another."
+			goto renderrolescreate
+		}
+
+		data.Role.RoleName = roleName
+		data.Role.Color = color
+
+		if data.Role, err = mm.memberService.CreateMemberRole(data.Role); err != nil {
+			mm.logger.WithError(err).Error("error creating new role in handleAdminRolesCreate")
+
+			data.Success = false
+			data.Message = "There was a problem creating your new role. Please try again."
+			goto renderrolescreate
+		}
+
+		http.Redirect(w, r, "/admin/roles/manage", http.StatusFound)
+		return
+	}
+
+renderrolescreate:
+	mm.webApp.RenderTemplate(w, "admin-roles-create.tmpl", data)
+}
+
+func (mm *MemberManagement) handleAdminRolesEdit(w http.ResponseWriter, r *http.Request) {
+	var (
+		err      error
+		idString string
+		id       int
+	)
+
+	vars := mux.Vars(r)
+	idString = vars["id"]
+
+	data := RolesEditData{
+		BaseViewModel: baseviewmodel.BaseViewModel{
+			JavascriptIncludes: webapp.JavascriptIncludes{
+				{Type: "module", Src: "/pages/admin-roles-edit.js"},
+			},
+			AppName:     mm.appName,
+			Stylesheets: []string{},
+		},
+		Role:    framemember.MemberRole{},
+		Success: true,
+		Message: "",
+	}
+
+	if id, err = strconv.Atoi(idString); err != nil {
+		data.Success = false
+		data.Message = "Invalid role ID"
+		goto renderrolesedit
+	}
+
+	/*
+	 * You can't edit the first role, Member. That is system generated
+	 */
+	if id == 1 {
+		data.Success = false
+		data.Message = "You are not allowed to edit this role"
+		goto renderrolesedit
+	}
+
+	if data.Role, err = mm.memberService.GetMemberRoleByID(id); err != nil {
+		mm.logger.WithError(err).Error("error retrieving role in handleAdminRolesEdit")
+
+		data.Success = false
+		data.Message = "There was a problem retrieving role information. Please try again."
+		goto renderrolesedit
+	}
+
+	/*
+	 * POST
+	 */
+	if r.Method == http.MethodPost {
+	}
+
+renderrolesedit:
+	mm.webApp.RenderTemplate(w, "admin-roles-edit.tmpl", data)
 }

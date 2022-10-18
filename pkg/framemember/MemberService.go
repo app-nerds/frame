@@ -79,7 +79,7 @@ func (s MemberService) GetMemberByID(id int) (Member, error) {
 		},
 	}
 
-	queryResult := s.db.Joins("Status").First(&result)
+	queryResult := s.db.Joins("Status").Joins("Role").First(&result)
 	return result, queryResult.Error
 }
 
@@ -129,6 +129,22 @@ func (s MemberService) GetMemberRoles() ([]MemberRole, error) {
 	err = s.db.Find(&result).Error
 
 	return result, err
+}
+
+func (s MemberService) GetMemberRoleByName(name string) (MemberRole, error) {
+	var (
+		err error
+	)
+
+	result := MemberRole{}
+
+	err = s.db.First(&result, "role_name = ?", name).Error
+	return result, err
+}
+
+func (s MemberService) CreateMemberRole(role MemberRole) (MemberRole, error) {
+	err := s.db.Create(&role).Error
+	return role, err
 }
 
 func (s MemberService) InactivateMember(id uint) error {
