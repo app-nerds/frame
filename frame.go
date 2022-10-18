@@ -24,6 +24,7 @@ import (
 	pkgsiteauth "github.com/app-nerds/frame/pkg/site-auth"
 	pkgwebapp "github.com/app-nerds/frame/pkg/web-app"
 	"github.com/app-nerds/gobucket/v2/cmd/gobucketgo"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/markbates/goth"
 	"github.com/sirupsen/logrus"
@@ -212,7 +213,7 @@ func (fa *FrameApplication) Start() chan os.Signal {
 		WriteTimeout: time.Second * time.Duration(fa.Config.ServerWriteTimeout),
 		ReadTimeout:  time.Second * time.Duration(fa.Config.ServerReadTimeout),
 		IdleTimeout:  time.Second * time.Duration(fa.Config.ServerIdleTimeout),
-		Handler:      fa.router,
+		Handler:      handlers.CompressHandler(fa.router),
 	}
 
 	go func() {
