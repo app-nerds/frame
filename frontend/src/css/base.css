@@ -71,26 +71,41 @@ html, body {
   color: var(--text-color);
 }
 
-p {
+p, code {
   margin-top: 0.5rem;
   margin-bottom: 1rem;
+}
+
+code {
+  display: block;
 }
 
 h1 {
   color: var(--primary-color);
   font-weight: bold;
   font-size: 2.2rem;
+  margin: 1rem 0;
 }
 
 h2 {
   color: var(--primary-color);
   font-weight: bold;
   font-size: 2rem;
+  margin: 1rem 0;
 }
 
 h3 {
   color: var(--primary-color);
   font-size: 1.6rem;
+  margin: 1rem 0;
+}
+
+h4 {
+  margin: 1rem 0;
+}
+
+h5 {
+  margin: 1rem 0;
 }
 
 ul {
@@ -176,7 +191,7 @@ form small {
   opacity: 0.8;
 }
 
-form footer {
+form nav {
   display: flex;
   gap: 0.5rem;
   width: 100%;
@@ -232,48 +247,36 @@ tr:nth-child(even) {
 }
 
 /* Cards */
-div.card {
-  display: inline-flex;
-  flex-direction: column;
-  width: 30rem;
-  margin-bottom: 1rem;
-  -webkit-column-break-inside: avoid;
-  margin-right: 2rem;
-}
-
-div.card h3 {
+.cards {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 50px;
-  color: #008;
-  font-size: 18pt;
-  letter-spacing: 1.2px;
-  padding: 0 0.2rem 0.1rem 0.5rem;
-  width: 100%;
-  border-top: 1px solid var(--border-color);
-  border-left: 1px solid var(--border-color);
-  border-right: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  align-items: stretch;
+  max-width: 89.999rem;
+  margin: 0 auto;
+  gap: 1rem;
 }
 
-div.card div.content {
-  background-color: #f0f0f0;
-  width: 100%;
+.cards > section {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 20rem;
+  max-width: 30rem;
   padding: 0.5rem;
   box-shadow: var(--shadow-color) 0px 7px 29px 0px;
-  min-height: 225px;
-  position: relative;
 }
 
-div.card div.content p {
-  margin-bottom: 0.6rem;
-  margin-top: 0.6rem;
+.cards > section > h3 {
+  margin: 0;
 }
 
-div.card div.button-row {
-  position: absolute;
-  bottom: 10px;
-  justify-content: left;
+.cards > section > footer {
+  margin-top: auto;
+}
+
+@media (max-width: 30em) {
+  .cards {
+    display: block;
+  }
 }
 
 /* Utility */

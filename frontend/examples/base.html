@@ -5,8 +5,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Base Example</title>
-  <link rel="stylesheet" href="base.min.css" />
-  <link rel="stylesheet" href="components.min.css" />
+  <link rel="stylesheet" href="../src/css/base.css" />
+  <link rel="stylesheet" href="../src/color-picker/color-picker.css" />
+  <link rel="stylesheet" href="../src/dialogs/alert.css" />
+  <link rel="stylesheet" href="../src/dialogs/confirm.css" />
+  <link rel="stylesheet" href="../src/menus/popup-menu.css" />
+  <link rel="stylesheet" href="../src/message-bar/message-bar.css" />
+  <link rel="stylesheet" href="../src/shim/shim.css" />
+  <link rel="stylesheet" href="../src/spinner/spinner.css" />
 
   <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
 </head>
@@ -16,14 +22,191 @@
     <h1>Base Example</h1>
 
     <p>
-      Welcome to the Base Example for the Nerd JS Library. This showcases the base CSS settings.
+      This page showcases the Base CSS and Components CSS.
     </p>
+
+    <h2>Styles</h2>
+
+    <p>
+      A number of styles are built-in.
+    </p>
+
+    <h3>Headers</h3>
+
+    <p>
+      Here's what all the headers look like.
+    </p>
+
+    <div style="background-color: var(--border-color)">
+      <h1>Heading 1</h1>
+      <h2>Heading 2</h2>
+      <h3>Heading 3</h3>
+      <h4>Heading 4</h4>
+      <h5>Heading 5</h5>
+    </div>
+
+    <h3>Tables</h3>
+
+    <table>
+      <caption>Table Example</caption>
+      <thead>
+        <tr>
+          <th scope="col">Col 1</th>
+          <th scope="col">Col 2</th>
+          <th scope="col">Col 3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Value 1</th>
+          <td>Value 2</td>
+          <td>Value 3</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Forms</h3>
+
+    <form>
+      <label for="first">First</label>
+      <input type="text" id="first" />
+      <small>
+        This is additional information for this form field
+      </small>
+
+      <label for="second">Second</label>
+      <select id="second">
+        <option value="value1">Value 1</option>
+        <option value="value2">Value 2</option>
+        <option value="value3">Value 3</option>
+      </select>
+
+      <label for="third">Third</label>
+      <textarea id="third">Text goes here</textarea>
+
+      <nav>
+        <button type="button">Cancel</button>
+        <button type="button" class="action-button">Action!</button>
+      </nav>
+    </form>
+
+    <h3>Cards</h3>
+
+    <div class="cards">
+      <section>
+        <h3>Card Demonstration</h3>
+        <p>
+          This is the first card. It contains content.
+          The markup is simple.
+        </p>
+
+        <footer>
+          <button>Secondary</button>
+          <button class="action-button">Primary</button>
+        </footer>
+      </section>
+
+      <section>
+        <h3>First: Container</h3>
+        <p>
+          Start with a DIV that has a class of <strong>.cards</strong>.
+        </p>
+
+        <code>
+          &lt;div class="cards"&gt;<br />
+          <br />
+          &lt;/div&gt;
+        </code>
+
+        <footer>
+          <button>Secondary</button>
+          <button class="action-button">Primary</button>
+        </footer>
+      </section>
+
+      <section>
+        <h3>Second: Sections</h3>
+        <p>
+          Then add sections that look like this:
+        </p>
+
+        <code>
+          &lt;section&gt;<br />
+          &nbsp;&nbsp;&lt;h3&gt;Title Goes Here&lt;/h3&gt;<br />
+          <br />
+          &nbsp;&nbsp;&lt;p&gt;<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;Content goes in here. Put what you want!<br />
+          &nbsp;&nbsp;&lt;/p&gt;<br />
+          <br />
+          &nbsp;&nbsp;&lt;footer&gt;<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;button&gt;Button&lt;/button&gt;<br />
+          &nbsp;&nbsp;&lt;/footer&gt;<br />
+          &lt;/section&gt;
+        </code>
+
+        <footer>
+          <button>Secondary</button>
+          <button class="action-button">Primary</button>
+        </footer>
+      </section>
+
+      <section>
+        <h3>All Together!</h3>
+
+        <p>
+          That's it! Here's a full sample!
+        </p>
+
+        <code>
+          &lt;div class="cards"&gt;<br />
+          &nbsp;&nbsp;&lt;section&gt;<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;h3&gt;Title Goes Here&lt;/h3&gt;<br />
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Content goes in here. Put what you want!<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;/p&gt;<br />
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;footer&gt;<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;button&gt;Button&lt;/button&gt;<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;/footer&gt;<br />
+          &nbsp;&nbsp;&lt;/section&gt;<br />
+          &lt;/div&gt;
+        </code>
+      </section>
+    </div>
 
     <h2>Components</h2>
 
     <p>
       Here are the components provided by this library.
     </p>
+
+    <h3>Color Picker</h3>
+
+    <p>
+      Color picker is a control that allows a user to pick a color from a predefined list.
+    </p>
+
+    <color-picker></color-picker>
+
+    <h3>Message Bar</h3>
+
+    <p>
+      A basic component which displays a message. The background color
+      depends upon the type of message being displayed.
+    </p>
+
+    <message-bar message-type="info" message="This is an informational message. Use 'message-type' of 'info'.">
+    </message-bar>
+
+    <message-bar message-type="success" message="This is a success message. Use 'message-type' of 'success'.">
+    </message-bar>
+
+    <message-bar message-type="warn" message="This is a warning message. Use 'message-type' of 'warn'.">
+    </message-bar>
+
+    <message-bar message-type="error" message="This is an error message. Use 'message-type' of 'error'.">
+    </message-bar>
 
     <h3>Dialogs</h3>
 
@@ -37,7 +220,10 @@
     </ul>
 
     <div style="margin-bottom: 1rem;">
-      <button id="showAlert">Show Alert</button>
+      <button id="showInfoAlert">Show Info Alert</button>
+      <button id="showSuccessAlert">Show Success Alert</button>
+      <button id="showWarnAlert">Show Warn Alert</button>
+      <button id="showErrorAlert">Show Error Alert</button>
       <button id="showConfirm">Show Confirm</button>
     </div>
 
@@ -67,50 +253,6 @@
       <button id="showSpinner">Show Spinner</button>
     </div>
 
-    <h2>Styles</h2>
-
-    <p>
-      A number of styles are built-in.
-    </p>
-
-    <h3>Tables</h3>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Col 1</th>
-          <th>Col 2</th>
-          <th>Col 3</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Value 1</td>
-          <td>Value 2</td>
-          <td>Value 3</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h3>Forms</h3>
-
-    <form>
-      <label for="first">First</label>
-      <input type="text" id="first" />
-
-      <label for="second">Second</label>
-      <select id="second">
-        <option value="value1">Value 1</option>
-        <option value="value2">Value 2</option>
-        <option value="value3">Value 3</option>
-      </select>
-
-      <label for="third">Third</label>
-      <textarea id="third">Text goes here</textarea>
-
-      <button type="button">Cancel</button>
-      <button type="button" class="action-button">Action!</button>
-    </form>
   </main>
 
   <script src="base.js" type="module"></script>

@@ -25,6 +25,10 @@
   cursor: pointer;
 }
 
+.grid-item-selected {
+  border: 3px outset #888 !important;
+}
+
 .color-picker .color-input {
   margin-top: 0.4rem;
 }

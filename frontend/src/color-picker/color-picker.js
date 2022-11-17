@@ -17,7 +17,7 @@ export default class ColorPicker extends HTMLElement {
     const colorOptions = this._colors.split(",");
 
     const outerContainer = this.createOuterContainer();
-    const colorGrid = this.createColorGrid(colorOptions);
+    const colorGrid = this.createColorGrid(colorOptions, this._color);
     this.input = this.createInput(this._name, this._color);
 
     outerContainer.insertAdjacentElement("beforeend", colorGrid);
@@ -31,23 +31,27 @@ export default class ColorPicker extends HTMLElement {
     return el;
   }
 
-  createColorGrid(colors) {
+  createColorGrid(colors, selectedColor) {
     const grid = document.createElement("div");
     grid.classList.add("grid");
 
     colors.forEach(color => {
-      const el = this.createColorItem(color);
+      const el = this.createColorItem(color, selectedColor);
       grid.insertAdjacentElement("beforeend", el);
     });
 
     return grid;
   }
 
-  createColorItem(color) {
+  createColorItem(color, selectedColor) {
     const el = document.createElement("div");
     el.classList.add("grid-item");
     el.style.backgroundColor = color;
     el.setAttribute("data-color", color);
+
+    if (selectedColor === color) {
+      el.classList.add("grid-item-selected");
+    }
 
     el.addEventListener("click", this.onColorItemClicked.bind(this));
     return el;
@@ -64,9 +68,21 @@ export default class ColorPicker extends HTMLElement {
   }
 
   onColorItemClicked(e) {
+    this.clearGridSelectedClasses();
+
     const color = e.target.getAttribute("data-color");
+    e.target.classList.add("grid-item-selected");
+
     this.input.value = color;
     this.dispatchEvent(new CustomEvent("color-selected", { detail: color }));
+  }
+
+  clearGridSelectedClasses() {
+    const gridItems = document.querySelectorAll(".grid-item");
+
+    for (let i = 0; i < gridItems.length; i++) {
+      gridItems[i].classList.remove("grid-item-selected");
+    }
   }
 }
 
