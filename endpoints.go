@@ -92,11 +92,14 @@ func (fa *FrameApplication) SetupEndpoints(endpoints Endpoints) *FrameApplicatio
 		}
 	}
 
-	if fa.Config.Debug {
-		fa.Logger.Info("registering /static endpoint")
+	if fa.webApp != nil {
+		if fa.Config.Debug {
+			fa.Logger.Info("registering /static endpoint")
+		}
+
+		fa.router.PathPrefix("/static/").Handler(staticFS).Methods(http.MethodGet)
 	}
 
-	fa.router.PathPrefix("/static/").Handler(staticFS).Methods(http.MethodGet)
 	fa.router.PathPrefix("/admin-static/").Handler(adminFs).Methods(http.MethodGet)
 
 	return fa
