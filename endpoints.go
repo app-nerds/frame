@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
@@ -15,10 +16,11 @@ Endpoint defines a single HTTP endpoint. Each endpoint is used
 to configure a Gorilla Mux route.
 */
 type Endpoint struct {
-	Path        string
-	Methods     []string
-	HandlerFunc http.HandlerFunc
-	Handler     http.Handler
+	Path           string
+	Methods        []string
+	HandlerFunc    http.HandlerFunc
+	Handler        http.Handler
+	MiddlewareFunc mux.MiddlewareFunc
 }
 
 /*
@@ -86,7 +88,12 @@ func (fa *FrameApplication) SetupEndpoints(endpoints Endpoints) *FrameApplicatio
 		}
 
 		if e.HandlerFunc != nil {
-			fa.router.HandleFunc(e.Path, e.HandlerFunc).Methods(e.Methods...)
+			if e.MiddlewareFunc != nil {
+				h := e.MiddlewareFunc(http.HandlerFunc(e.HandlerFunc))
+				fa.router.HandleFunc(e.Path, h.ServeHTTP).Methods(e.Methods...)
+			} else {
+				fa.router.HandleFunc(e.Path, e.HandlerFunc).Methods(e.Methods...)
+			}
 		} else {
 			fa.router.Handle(e.Path, e.Handler).Methods(e.Methods...)
 		}
