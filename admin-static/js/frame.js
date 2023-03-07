@@ -1204,10 +1204,12 @@ class MemberLoginBar extends HTMLElement {
     if (member && member.avatarURL) {
       el = document.createElement("img");
       el.classList.add("avatar");
+      el.setAttribute("role", "img");
       el.src = member.avatarURL;
     } else {
       el = document.createElement("div");
       el.classList.add("avatar");
+      el.setAttribute("role", "img");
       el.innerHTML = `<i data-feather="user"></i>`;
     }
 
