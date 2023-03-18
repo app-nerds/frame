@@ -5,14 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Base Example</title>
-  <link rel="stylesheet" href="../src/css/base.css" />
-  <link rel="stylesheet" href="../src/color-picker/color-picker.css" />
-  <link rel="stylesheet" href="../src/dialogs/alert.css" />
-  <link rel="stylesheet" href="../src/dialogs/confirm.css" />
-  <link rel="stylesheet" href="../src/menus/popup-menu.css" />
-  <link rel="stylesheet" href="../src/message-bar/message-bar.css" />
-  <link rel="stylesheet" href="../src/shim/shim.css" />
-  <link rel="stylesheet" href="../src/spinner/spinner.css" />
+  <link rel="stylesheet" href="base.min.css" />
+  <link rel="stylesheet" href="components.min.css" />
 
   <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
 </head>
@@ -253,6 +247,38 @@
       <button id="showSpinner">Show Spinner</button>
     </div>
 
+    <h3>Tabs</h3>
+
+    <div class="tabset">
+      <input type="radio" name="tabset1" id="tabset-description" hidden aria-hidden="true" checked>
+      <input type="radio" name="tabset1" id="tabset-about" hidden aria-hidden="true">
+
+      <ul hidden aria-hidden="true">
+        <li>
+          <label for="tabset-description">Description</label>
+        </li>
+        <li>
+          <label for="tabset-about">About</label>
+        </li>
+      </ul>
+
+      <div>
+        <section>
+          <h4>Description</h4>
+          <p>
+            This is a tabbed interface that doesn't use any JavaScript. All CSS baby!
+          </p>
+        </section>
+
+        <section>
+          <h4>About</h4>
+          <p>
+            This is pulled from <a href="https://cutcodedown.com/for_others/medium_articles/tabsWithoutJS/">Jason
+              Knight</a>, who is brilliant at CSS and accessibility.
+          </p>
+        </section>
+      </div>
+    </div>
   </main>
 
   <script src="base.js" type="module"></script>

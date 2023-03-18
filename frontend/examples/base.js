@@ -1,14 +1,15 @@
-import { alert } from "../src/dialogs/alert.js";
-import { confirm } from "../src/dialogs/confirm.js";
-import { spinner } from "../src/spinner/spinner.js";
-import { PopupMenu, PopupMenuItem } from "../src/menus/popup-menu.js";
-import ColorPicker from "../src/color-picker/color-picker.js";
-import MessageBar from "../src/message-bar/message-bar.js";
+import frame from "./frame.min.js";
+// import { alert } from "./frame.min.js";
+// import { confirm } from "../src/dialogs/confirm.js";
+// import { spinner } from "../src/spinner/spinner.js";
+// import { PopupMenu, PopupMenuItem } from "../src/menus/popup-menu.js";
+// import ColorPicker from "../src/color-picker/color-picker.js";
+// import MessageBar from "../src/message-bar/message-bar.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const alerter = alert();
-  const confirmer = confirm();
-  const spinnerer = spinner();
+  const alerter = frame.alert();
+  const confirmer = frame.confirm();
+  const spinnerer = frame.spinner();
 
   feather.replace();
 
