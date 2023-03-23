@@ -69,6 +69,7 @@ func (fa *FrameApplication) SetupEndpoints(endpoints Endpoints) *FrameApplicatio
 		staticFS http.Handler
 	)
 
+	fa.hasEndpoints = true
 	fa.router.Use(accessControlMiddleware(AllowAllOrigins, AllowAllMethods, AllowAllHeaders))
 
 	if fa.webApp != nil {

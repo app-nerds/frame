@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/app-nerds/frame/pkg/httputils"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
@@ -111,7 +110,7 @@ func (m *requestLogger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	startTime := time.Now()
-	ip := httputils.RealIP(r)
+	ip := RealIP(r)
 
 	m.handler.ServeHTTP(recorder, r)
 	diff := time.Since(startTime)
