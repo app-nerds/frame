@@ -182,6 +182,7 @@ func (fa *FrameApplication) AddNsqConsumer(topic, channel string, handler nsq.Ha
 		fa.Logger.WithError(err).WithField("address", fa.Config.NsqLookupd).Fatal("error connecting to nsqlookupd")
 	}
 
+	consumer.SetLoggerLevel(nsq.LogLevelError)
 	fa.NsqConsumers = append(fa.NsqConsumers, consumer)
 	return fa
 }
@@ -201,6 +202,7 @@ func (fa *FrameApplication) AddNsqPublisher() *FrameApplication {
 		fa.Logger.WithError(err).WithField("address", fa.Config.Nsqd).Fatal("error connecting to nsqd")
 	}
 
+	producer.SetLoggerLevel(nsq.LogLevelError)
 	fa.NsqPublisher = producer
 	return fa
 }
