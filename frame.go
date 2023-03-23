@@ -24,6 +24,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/markbates/goth"
+	"github.com/nsqio/go-nsq"
 	"github.com/robfig/cron/v3"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/acme/autocert"
@@ -71,6 +72,8 @@ type FrameApplication struct {
 	DB            *sql.DB
 	Logger        *logrus.Entry
 	MemberService MemberService
+	NsqPublisher  *nsq.Producer
+	NsqConsumers  []*nsq.Consumer
 	Server        *http.Server
 
 	// Hooks
@@ -161,6 +164,47 @@ func (fa *FrameApplication) AddCron(schedule string, cronFunc func(app *FrameApp
 	return fa
 }
 
+func (fa *FrameApplication) AddNsqConsumer(topic, channel string, handler nsq.Handler) *FrameApplication {
+	var (
+		err      error
+		consumer *nsq.Consumer
+	)
+
+	nsqConfig := nsq.NewConfig()
+
+	if consumer, err = nsq.NewConsumer(topic, channel, nsqConfig); err != nil {
+		fa.Logger.WithError(err).Fatal("unable to create NSQ consumer")
+	}
+
+	consumer.AddHandler(handler)
+
+	if err = consumer.ConnectToNSQLookupd(fa.Config.NsqLookupd); err != nil {
+		fa.Logger.WithError(err).WithField("address", fa.Config.NsqLookupd).Fatal("error connecting to nsqlookupd")
+	}
+
+	fa.NsqConsumers = append(fa.NsqConsumers, consumer)
+	return fa
+}
+
+func (fa *FrameApplication) AddNsqPublisher() *FrameApplication {
+	var (
+		err      error
+		producer *nsq.Producer
+	)
+
+	fa.Logger.Info("connecting to NSQ...")
+	nsqConfig := nsq.NewConfig()
+
+	producer, err = nsq.NewProducer(fa.Config.Nsqd, nsqConfig)
+
+	if err != nil {
+		fa.Logger.WithError(err).WithField("address", fa.Config.Nsqd).Fatal("error connecting to nsqd")
+	}
+
+	fa.NsqPublisher = producer
+	return fa
+}
+
 func (fa *FrameApplication) Database(migrationDirectory string) *FrameApplication {
 	var (
 		err error
@@ -173,26 +217,28 @@ func (fa *FrameApplication) Database(migrationDirectory string) *FrameApplicatio
 		fa.Logger.WithError(err).Fatal("error connecting to database")
 	}
 
-	d, _ := os.Getwd()
-	finalPath := filepath.Join(d, migrationDirectory)
-	fa.Logger.Infof("auto-migrating database using directory '%s'...", finalPath)
+	if migrationDirectory != "" {
+		d, _ := os.Getwd()
+		finalPath := filepath.Join(d, migrationDirectory)
+		fa.Logger.Infof("auto-migrating database using directory '%s'...", finalPath)
 
-	driver, err := postgres.WithInstance(fa.DB, &postgres.Config{})
+		driver, err := postgres.WithInstance(fa.DB, &postgres.Config{})
 
-	if err != nil {
-		fa.Logger.WithError(err).Fatal("error creating database driver")
-	}
+		if err != nil {
+			fa.Logger.WithError(err).Fatal("error creating database driver")
+		}
 
-	m, err := migrate.NewWithDatabaseInstance("file://"+finalPath, "postgres", driver)
+		m, err := migrate.NewWithDatabaseInstance("file://"+finalPath, "postgres", driver)
 
-	if err != nil {
-		fa.Logger.WithError(err).Fatal("error creating migration instance")
-	}
+		if err != nil {
+			fa.Logger.WithError(err).Fatal("error creating migration instance")
+		}
 
-	err = m.Up()
+		err = m.Up()
 
-	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		fa.Logger.WithError(err).Fatal("error running migrations")
+		if err != nil && !errors.Is(err, migrate.ErrNoChange) {
+			fa.Logger.WithError(err).Fatal("error running migrations")
+		}
 	}
 
 	if fa.webApp != nil {
@@ -223,11 +269,17 @@ func (fa *FrameApplication) SetLogLevelString(level string) {
 func (fa *FrameApplication) Start() chan os.Signal {
 	var adminRouter *mux.Router
 
+	/*
+	 * Start CRON jobs
+	 */
 	if len(fa.cron.Entries()) > 0 {
 		fa.Logger.Infof("starting %d cron jobs...", len(fa.cron.Entries()))
 		fa.cron.Start()
 	}
 
+	/*
+	 * If we have a web app register the admin routes
+	 */
 	if fa.webApp != nil {
 		adminRouter = fa.router.PathPrefix("/admin").Subrouter()
 		adminRouter.Use(AdminAuthMiddleware(fa.Logger, fa.Config, fa.webApp.GetAdminSessionStore()))
@@ -241,6 +293,9 @@ func (fa *FrameApplication) Start() chan os.Signal {
 		fa.memberManagement.RegisterRoutes(fa.router, adminRouter)
 	}
 
+	/*
+	 * If we have either endpoints or a web app start the HTTP server
+	 */
 	if fa.hasEndpoints || fa.webApp != nil {
 		fa.Logger.WithFields(logrus.Fields{
 			"host":     fa.Config.ServerHost,
@@ -328,6 +383,9 @@ func (fa *FrameApplication) Stop() {
 		cronContext context.Context
 	)
 
+	/*
+	 * Stop any running CRON jobs
+	 */
 	if len(fa.cron.Entries()) > 0 {
 		fa.Logger.Infof("stopping %d cron jobs...", len(fa.cron.Entries()))
 		cronContext = fa.cron.Stop()
@@ -336,6 +394,23 @@ func (fa *FrameApplication) Stop() {
 		fa.Logger.Info("cron jobs stopped.")
 	}
 
+	/*
+	 * Stop any NSQ consumers
+	 */
+	if len(fa.NsqConsumers) > 0 {
+		fa.Logger.Infof("stopping %d nsq consumers...", len(fa.NsqConsumers))
+
+		for _, consumer := range fa.NsqConsumers {
+			consumer.Stop()
+			<-consumer.StopChan
+		}
+
+		fa.Logger.Info("nsq consumers stopped.")
+	}
+
+	/*
+	 * If we have a web server stop it
+	 */
 	if fa.webApp != nil || fa.hasEndpoints {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()

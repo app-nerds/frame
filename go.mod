@@ -15,6 +15,7 @@ require (
 	github.com/jackskj/carta v0.2.0
 	github.com/laher/mergefs v0.1.1
 	github.com/markbates/goth v1.74.1
+	github.com/nsqio/go-nsq v1.1.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.0
 	golang.org/x/crypto v0.1.0
@@ -27,6 +28,7 @@ require (
 	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
