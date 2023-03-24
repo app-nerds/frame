@@ -219,6 +219,9 @@ func (fa *FrameApplication) Database(migrationDirectory string) *FrameApplicatio
 		fa.Logger.WithError(err).Fatal("error connecting to database")
 	}
 
+	fa.DB.SetConnMaxIdleTime(time.Minute * 5)
+	fa.DB.SetMaxOpenConns(100)
+
 	if migrationDirectory != "" {
 		d, _ := os.Getwd()
 		finalPath := filepath.Join(d, migrationDirectory)
