@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/app-nerds/kit/v6/passwords"
 	"github.com/gorilla/sessions"
 )
 
@@ -78,7 +77,6 @@ func (sa *SiteAuth) handleSiteAuthLogin(webApp *WebApp, memberService *MemberSer
 			 * If we have an approved member, but the password is invalid, let them know
 			 */
 			if !member.Password.IsSameAsPlaintextPassword(password) {
-				newPasswordHash, _ := passwords.HashPassword(password)
 				data.ErrorMessage = "Invalid user name or password. Please try again."
 				webApp.RenderTemplate(w, "login.tmpl", data)
 				return
