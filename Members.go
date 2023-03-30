@@ -1171,7 +1171,7 @@ func (s MemberService) UpdateMember(member Member) error {
 
 	query := `
 		UPDATE members SET
-			update_at = $1,
+			updated_at = $1,
 			avatar_url = $2,
 			email = $3,
 			external_id = $4,
