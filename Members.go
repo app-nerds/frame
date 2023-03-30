@@ -18,7 +18,6 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/jackskj/carta"
 	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
 /*******************************************************************************
@@ -150,6 +149,7 @@ func (mm *MemberManagement) handleAdminMembersEdit(w http.ResponseWriter, r *htt
 	 * POST
 	 */
 	if r.Method == http.MethodPost {
+		data.Member.Password = ""
 		_ = r.ParseForm()
 
 		if data.Member.AvatarURL == "" {
@@ -680,7 +680,7 @@ func (mm *MemberManagement) handleAdminRolesCreate(w http.ResponseWriter, r *htt
 		}
 
 		// Make sure we don't have a role by this name already
-		if existing, err = mm.memberService.GetMemberRole(roleName); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		if existing, err = mm.memberService.GetMemberRole(roleName); err != nil && !errors.Is(err, sql.ErrNoRows) {
 			mm.logger.WithError(err).Error("error checking for existing role by name in handleAdminRolesCreate")
 
 			data.Success = false
@@ -751,7 +751,9 @@ func (mm *MemberManagement) handleAdminRolesEdit(w http.ResponseWriter, r *http.
 		goto renderrolesedit
 	}
 
-	if data.Role, err = mm.memberService.GetMemberRoleByID(id); err != nil {
+	data.Role, err = mm.memberService.GetMemberRoleByID(id)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		mm.logger.WithError(err).Error("error retrieving role in handleAdminRolesEdit")
 
 		data.Success = false
@@ -904,7 +906,7 @@ func (s MemberService) GetMemberByEmail(email string, includeDeleted bool) (Memb
 	}
 
 	if len(members) < 1 {
-		return Member{}, fmt.Errorf("member not found")
+		return Member{}, fmt.Errorf("member not found: %w", sql.ErrNoRows)
 	}
 
 	return members[0], nil
@@ -954,7 +956,7 @@ func (s MemberService) GetMemberByID(id string, includeDeleted bool) (Member, er
 	}
 
 	if len(members) < 1 {
-		return Member{}, fmt.Errorf("member not found")
+		return Member{}, fmt.Errorf("member not found: %w", sql.ErrNoRows)
 	}
 
 	return members[0], nil
@@ -1004,10 +1006,6 @@ func (s MemberService) GetMembers(page int, includeDeleted bool) ([]Member, erro
 		return members, err
 	}
 
-	if len(members) < 1 {
-		return members, fmt.Errorf("member not found")
-	}
-
 	return members, nil
 }
 
@@ -1041,7 +1039,7 @@ func (s MemberService) GetMemberRole(name string) (MemberRole, error) {
 	}
 
 	if len(roles) < 1 {
-		return MemberRole{}, fmt.Errorf("role not found")
+		return MemberRole{}, fmt.Errorf("role not found: %w", sql.ErrNoRows)
 	}
 
 	return roles[0], nil
@@ -1183,9 +1181,10 @@ func (s MemberService) UpdateMember(member Member) error {
 
 	if member.Password != "" {
 		query += ", password = $9"
+		query += " WHERE id = $10"
+	} else {
+		query += " WHERE id = $9"
 	}
-
-	query += " WHERE id = $10"
 
 	/*
 	 * If we've got a password in the new member struct, we are changing it
@@ -1245,10 +1244,8 @@ type Member struct {
 	FirstName  string                         `json:"firstName" db:"member_first_name"`
 	LastName   string                         `json:"lastName" db:"member_last_name"`
 	Password   passwords.HashedPasswordString `json:"-" db:"member_password"`
-	// RoleID     uint                           `json:"-" db:"role_id"`
-	Role MemberRole `json:"role"`
-	// StatusID   uint                           `json:"-" db:"status_id"`
-	Status MembersStatus `json:"memberStatus"`
+	Role       MemberRole                     `json:"role"`
+	Status     MembersStatus                  `json:"memberStatus"`
 }
 
 type MemberRole struct {

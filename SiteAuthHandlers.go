@@ -1,11 +1,12 @@
 package frame
 
 import (
+	"database/sql"
 	"errors"
 	"net/http"
 
+	"github.com/app-nerds/kit/v6/passwords"
 	"github.com/gorilla/sessions"
-	"gorm.io/gorm"
 )
 
 func (sa *SiteAuth) handleSiteAuthLogin(webApp *WebApp, memberService *MemberService) http.HandlerFunc {
@@ -44,7 +45,7 @@ func (sa *SiteAuth) handleSiteAuthLogin(webApp *WebApp, memberService *MemberSer
 			 */
 			member, err = memberService.GetMemberByEmail(email, false)
 
-			if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+			if err != nil && errors.Is(err, sql.ErrNoRows) {
 				data.ErrorMessage = "Invalid user name or password. Please try again."
 				webApp.RenderTemplate(w, "login.tmpl", data)
 				return
@@ -77,6 +78,7 @@ func (sa *SiteAuth) handleSiteAuthLogin(webApp *WebApp, memberService *MemberSer
 			 * If we have an approved member, but the password is invalid, let them know
 			 */
 			if !member.Password.IsSameAsPlaintextPassword(password) {
+				newPasswordHash, _ := passwords.HashPassword(password)
 				data.ErrorMessage = "Invalid user name or password. Please try again."
 				webApp.RenderTemplate(w, "login.tmpl", data)
 				return
