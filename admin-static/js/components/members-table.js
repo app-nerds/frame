@@ -106,7 +106,7 @@ export default class MembersTable extends HTMLElement {
       const td5 = document.createElement("td");
       const buttons = this.createActionButtons(member);
 
-      td0.innerHTML = `<span class="member-table-role-block" style="background-color: ${member.role.color};" title="Role: ${member.role.roleName}"><span class="sr-only">Role: ${member.role.roleName}</span></span>`;
+      td0.innerHTML = `<span class="member-table-role-block" style="background-color: ${member.role.color};" title="Role: ${member.role.role}"><span class="sr-only">Role: ${member.role.role}</span></span>`;
       th1.setAttribute("scope", "row");
       th1.innerText = `${member.firstName} ${member.lastName}`;
       td2.innerText = member.email;
@@ -131,7 +131,7 @@ export default class MembersTable extends HTMLElement {
   }
 
   createActionButtons(member) {
-    const buttonID = `member-action-${member.ID}`;
+    const buttonID = `member-action-${member.id}`;
 
     const button = document.createElement("button");
     button.id = buttonID;
@@ -144,22 +144,22 @@ export default class MembersTable extends HTMLElement {
     popup.setAttribute("trigger", `#${buttonID}`);
 
     let menuItems = [
-      { id: `member-edit-button-${member.ID}`, text: `Edit`, icon: "edit-3", handler: () => { this.onEditMemberClick(member.ID); } },
+      { id: `member-edit-button-${member.id}`, text: `Edit`, icon: "edit-3", handler: () => { this.onEditMemberClick(member.id); } },
     ];
 
     if (member.memberStatus.id === PendingApproval) {
-      menuItems.push({ id: `member-status-button-${member.ID}`, text: `Approve`, icon: "user-check", handler: () => { this.onActionButtonClick(member); } });
+      menuItems.push({ id: `member-status-button-${member.id}`, text: `Approve`, icon: "user-check", handler: () => { this.onActionButtonClick(member); } });
     }
 
     if (member.memberStatus.id === Inactive) {
-      menuItems.push({ id: `member-status-button-${member.ID}`, text: `Inactivate`, icon: "user-minus", handler: () => { this.onActionButtonClick(member); } });
+      menuItems.push({ id: `member-status-button-${member.id}`, text: `Inactivate`, icon: "user-minus", handler: () => { this.onActionButtonClick(member); } });
     }
 
     if (member.memberStatus.id === Inactive) {
-      menuItems.push({ id: `member-status-button-${member.ID}`, text: `Activate`, icon: "user-check", handler: () => { this.onActionButtonClick(member); } });
+      menuItems.push({ id: `member-status-button-${member.id}`, text: `Activate`, icon: "user-check", handler: () => { this.onActionButtonClick(member); } });
     }
 
-    menuItems.push({ id: `member-delete-button-${member.ID}`, text: `Delete`, icon: "x", handler: () => { this.onDeleteButtonClick(member); } });
+    menuItems.push({ id: `member-delete-button-${member.id}`, text: `Delete`, icon: "x", handler: () => { this.onDeleteButtonClick(member); } });
 
     menuItems.forEach(data => {
       const menuItem = document.createElement("popup-menu-item");
@@ -242,7 +242,7 @@ export default class MembersTable extends HTMLElement {
       },
     };
 
-    const response = await frame.fetcher(`/admin/api/member/delete/${member.ID}`, options, window.spinner);
+    const response = await frame.fetcher(`/admin/api/member/delete/${member.id}`, options, window.spinner);
     const result = await response.json();
 
     if (!response.ok) {
@@ -256,7 +256,7 @@ export default class MembersTable extends HTMLElement {
 
   async activateMember(member) {
     const data = new URLSearchParams();
-    data.set("id", member.ID);
+    data.set("id", member.id);
 
     const options = {
       method: "PUT",

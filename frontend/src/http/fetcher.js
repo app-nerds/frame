@@ -4,6 +4,7 @@
 
 export async function fetcher(url, options, spinner, msBeforeShowSpinner = 1000) {
   let timerID;
+  let response;
 
   if (spinner) {
     timerID = setTimeout(() => {
@@ -11,11 +12,13 @@ export async function fetcher(url, options, spinner, msBeforeShowSpinner = 1000)
     }, msBeforeShowSpinner);
   }
 
-  const response = await fetch(url, options);
-
-  if (spinner) {
-    clearTimeout(timerID);
-    spinner.hide();
+  try {
+    response = await fetch(url, options);
+  } finally {
+    if (spinner) {
+      clearTimeout(timerID);
+      spinner.hide();
+    }
   }
 
   return response;

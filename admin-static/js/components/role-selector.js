@@ -41,8 +41,8 @@ export default class RoleSelector extends HTMLElement {
     this.selectEl.options.length = 0;
 
     roles.forEach(item => {
-      const selected = window.parseInt(this.selected) === item.ID;
-      this.selectEl.options.add(new Option(item.roleName, item.ID, selected, selected));
+      const selected = window.parseInt(this.selected) === item.id;
+      this.selectEl.options.add(new Option(item.role, item.id, selected, selected));
     });
   }
 

@@ -256,7 +256,7 @@ tr:nth-child(even) {
   gap: 1rem;
 }
 
-.cards > section {
+.cards > article {
   display: flex;
   flex-direction: column;
   flex: 1 0 20rem;
@@ -265,12 +265,16 @@ tr:nth-child(even) {
   box-shadow: var(--shadow-color) 0px 7px 29px 0px;
 }
 
-.cards > section > h3 {
+.cards > article > h2,
+.cards > article > h3,
+.cards > article > h4
+{
   margin: 0;
 }
 
-.cards > section > footer {
+.cards > article > footer {
   margin-top: auto;
+  padding: 0.5rem;
 }
 
 @media (max-width: 30em) {

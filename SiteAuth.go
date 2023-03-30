@@ -63,7 +63,6 @@ func NewSiteAuth(internalConfig InternalSiteAuthConfig, siteAuthConfig SiteAuthC
 	 * Make sure specific paths are excluded from auth
 	 */
 
-	// TODO: figure out admin auth
 	result.pathsExcludedFromAuth = append(result.pathsExcludedFromAuth, "/static", "/admin-static", "/frame-static", SiteAuthAccountPendingPath, SiteAuthLoginPath,
 		SiteAuthLogoutPath, MemberSignUpPath, UnexpectedErrorPath, "/admin")
 
@@ -158,9 +157,9 @@ func (sa *SiteAuth) setupMiddleware(router *mux.Router) {
 				return
 			}
 
-			memberID, ok := session.Values["memberID"].(uint)
+			memberID, ok := session.Values["memberID"].(string)
 			if !ok {
-				memberID = 0
+				memberID = ""
 			}
 
 			firstName, ok := session.Values["firstName"].(string)

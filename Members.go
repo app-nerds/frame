@@ -1,6 +1,7 @@
 package frame
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"mime/multipart"
@@ -8,14 +9,103 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/app-nerds/gobucket/v2/cmd/gobucketgo"
 	"github.com/app-nerds/gobucket/v2/pkg/requestcontracts"
 	"github.com/app-nerds/gobucket/v2/pkg/responsecontracts"
 	"github.com/app-nerds/kit/v6/passwords"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+	"github.com/jackskj/carta"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
+
+/*******************************************************************************
+ * Internal Member Management
+ ******************************************************************************/
+
+type InternalMemberManagementConfig struct {
+	AppName                  string
+	CustomMemberSignupConfig *CustomMemberSignupConfig
+	GobucketClient           *gobucketgo.GoBucket
+	Logger                   *logrus.Entry
+	MemberService            *MemberService
+	WebApp                   *WebApp
+}
+
+type MemberManagement struct {
+	appName                  string
+	customMemberSignupConfig *CustomMemberSignupConfig
+	gobucketClient           *gobucketgo.GoBucket
+	logger                   *logrus.Entry
+	memberService            *MemberService
+	webApp                   *WebApp
+}
+
+func NewMemberManagement(internalConfig InternalMemberManagementConfig) *MemberManagement {
+	result := &MemberManagement{
+		appName:                  internalConfig.AppName,
+		customMemberSignupConfig: internalConfig.CustomMemberSignupConfig,
+		gobucketClient:           internalConfig.GobucketClient,
+		logger:                   internalConfig.Logger,
+		memberService:            internalConfig.MemberService,
+		webApp:                   internalConfig.WebApp,
+	}
+
+	return result
+}
+
+/*******************************************************************************
+ * Registration functions
+ ******************************************************************************/
+
+func (mm *MemberManagement) RegisterRoutes(router *mux.Router, adminRouter *mux.Router) {
+	if mm.customMemberSignupConfig != nil {
+		router.HandleFunc(MemberSignUpPath, mm.customMemberSignupConfig.Handler).Methods(http.MethodGet, http.MethodPost)
+	} else {
+		router.HandleFunc(MemberSignUpPath, mm.handleMemberSignup).Methods(http.MethodGet, http.MethodPost)
+	}
+
+	router.HandleFunc(MemberApiCurrentMember, mm.handleMemberCurrent).Methods(http.MethodGet)
+	router.HandleFunc(MemberApiLogOut, mm.handleMemberLogout).Methods(http.MethodGet)
+	router.HandleFunc(MemberProfilePath, mm.handleMemberProfile).Methods(http.MethodGet, http.MethodPost)
+	router.HandleFunc(MemberProfileAvatarPath, mm.handleEditAvatar).Methods(http.MethodGet, http.MethodPost)
+	adminRouter.HandleFunc("/members/manage", mm.handleAdminMembersManage).Methods(http.MethodGet)
+	adminRouter.HandleFunc("/members/edit/{id}", mm.handleAdminMembersEdit).Methods(http.MethodGet, http.MethodPost)
+	adminRouter.HandleFunc("/roles/manage", mm.handleAdminRolesManage).Methods(http.MethodGet)
+	adminRouter.HandleFunc("/roles/create", mm.handleAdminRolesCreate).Methods(http.MethodGet, http.MethodPost)
+	adminRouter.HandleFunc("/roles/edit/{id}", mm.handleAdminRolesEdit).Methods(http.MethodGet, http.MethodPost)
+	adminRouter.HandleFunc("/api/members", mm.handleAdminApiGetMembers).Methods(http.MethodGet)
+	adminRouter.HandleFunc("/api/member/activate", mm.handleMemberActivate).Methods(http.MethodPut)
+	adminRouter.HandleFunc("/api/member/delete/{id}", mm.handleMemberDelete).Methods(http.MethodDelete)
+	adminRouter.HandleFunc("/api/member/role", mm.handleGetMemberRoles).Methods(http.MethodGet)
+}
+
+func (mm *MemberManagement) RegisterAdminTemplate() TemplateCollection {
+	result := TemplateCollection{}
+
+	result = append(result, Template{Name: "admin-members-manage.tmpl", IsLayout: false, UseLayout: "admin-layout.tmpl"})
+	result = append(result, Template{Name: "admin-members-edit.tmpl", IsLayout: false, UseLayout: "admin-layout.tmpl"})
+	result = append(result, Template{Name: "admin-roles-manage.tmpl", IsLayout: false, UseLayout: "admin-layout.tmpl"})
+	result = append(result, Template{Name: "admin-roles-create.tmpl", IsLayout: false, UseLayout: "admin-layout.tmpl"})
+	result = append(result, Template{Name: "admin-roles-edit.tmpl", IsLayout: false, UseLayout: "admin-layout.tmpl"})
+
+	return result
+}
+
+func (mm *MemberManagement) RegisterTemplates() TemplateCollection {
+	result := TemplateCollection{}
+
+	result = append(result, Template{Name: "member-profile.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
+	result = append(result, Template{Name: "member-edit-avatar.tmpl", IsLayout: false, UseLayout: "layout.tmpl"})
+
+	return result
+}
+
+/*******************************************************************************
+ * Handlers
+ ******************************************************************************/
 
 func (mm *MemberManagement) handleAdminMembersManage(w http.ResponseWriter, r *http.Request) {
 	data := MembersManageData{
@@ -32,13 +122,12 @@ func (mm *MemberManagement) handleAdminMembersManage(w http.ResponseWriter, r *h
 
 func (mm *MemberManagement) handleAdminMembersEdit(w http.ResponseWriter, r *http.Request) {
 	var (
-		err      error
-		idString string
-		id       int
+		err error
+		id  string
 	)
 
 	vars := mux.Vars(r)
-	idString = vars["id"]
+	id = vars["id"]
 
 	data := MembersEditData{
 		BaseViewModel: BaseViewModel{
@@ -47,12 +136,6 @@ func (mm *MemberManagement) handleAdminMembersEdit(w http.ResponseWriter, r *htt
 			},
 			AppName: mm.appName,
 		},
-	}
-
-	if id, err = strconv.Atoi(idString); err != nil {
-		data.Success = false
-		data.Message = "Invalid member ID"
-		goto rendermembersedit
 	}
 
 	if data.Member, err = mm.memberService.GetMemberByID(id, false); err != nil {
@@ -103,7 +186,6 @@ func (mm *MemberManagement) handleAdminMembersEdit(w http.ResponseWriter, r *htt
 
 		data.Member.FirstName = r.FormValue("firstName")
 		data.Member.LastName = r.FormValue("lastName")
-		data.Member.RoleID = role.ID
 		data.Member.Role = role
 
 		if err = mm.memberService.UpdateMember(data.Member); err != nil {
@@ -365,7 +447,7 @@ func (mm *MemberManagement) handleMemberCurrent(w http.ResponseWriter, r *http.R
 }
 
 /*
-/api/member/logout
+GET /api/member/logout
 */
 func (mm *MemberManagement) handleMemberLogout(w http.ResponseWriter, r *http.Request) {
 	var (
@@ -483,13 +565,11 @@ func (mm *MemberManagement) handleMemberSignup(w http.ResponseWriter, r *http.Re
 		FirstName: firstName,
 		LastName:  lastName,
 		Password:  passwords.HashedPasswordString(password),
-		StatusID:  MemberPendingApprovalID,
 		Status: MembersStatus{
 			ID:     MemberPendingApprovalID,
 			Status: MemberPendingApproval,
 		},
-		RoleID: role.ID,
-		Role:   role,
+		Role: role,
 	}
 
 	if err = mm.memberService.CreateMember(&member); err != nil {
@@ -687,4 +767,544 @@ func (mm *MemberManagement) handleAdminRolesEdit(w http.ResponseWriter, r *http.
 
 renderrolesedit:
 	mm.webApp.RenderTemplate(w, "admin-roles-edit.tmpl", data)
+}
+
+/*******************************************************************************
+ * Services
+ ******************************************************************************/
+
+type MemberServiceConfig struct {
+	DB       *sql.DB
+	PageSize int
+}
+
+type MemberService struct {
+	db       *sql.DB
+	pageSize int
+}
+
+func NewMemberService(config MemberServiceConfig) MemberService {
+	return MemberService{
+		db:       config.DB,
+		pageSize: config.PageSize,
+	}
+}
+
+func (s MemberService) ActivateMember(id string) error {
+	query := `
+		UPDATE members SET 
+			status_id = $1,
+			updated_at = $2
+		WHERE id = $3
+	`
+
+	_, err := s.db.Exec(query, MemberActiveID, time.Now().UTC(), id)
+	return err
+}
+
+func (s MemberService) CreateMember(member *Member) error {
+	id := uuid.NewString()
+	member.Password = member.Password.Hash()
+
+	query := `
+		INSERT INTO members (
+			id,
+			created_at,
+			avatar_url,
+			email,
+			external_id,
+			first_name,
+			last_name,
+			password,
+			role_id,
+			status_id
+		) VALUES (
+			$1,
+			$2,
+			$3,
+			$4,
+			$5,
+			$6,
+			$7,
+			$8,
+			$9,
+			$10
+		)
+	`
+
+	_, err := s.db.Exec(
+		query,
+		id,
+		time.Now().UTC(),
+		member.AvatarURL,
+		member.Email,
+		member.ExternalID,
+		member.FirstName,
+		member.LastName,
+		member.Password,
+		member.Role.ID,
+		member.Status.ID,
+	)
+
+	return err
+}
+
+func (s MemberService) DeleteMember(id string) error {
+	query := `
+		UPDATE members SET
+			deleted_at = $1
+		WHERE id = $2
+	`
+
+	_, err := s.db.Exec(query, time.Now().UTC(), id)
+	return err
+}
+
+func (s MemberService) GetMemberByEmail(email string, includeDeleted bool) (Member, error) {
+	query := `
+		SELECT
+			members.id AS member_id,
+			members.created_at AS member_created_at,
+			members.updated_at AS member_updated_at,
+			members.deleted_at AS member_deleted_at,
+			members.avatar_url AS member_avatar_url,
+			members.email AS member_email,
+			members.external_id AS member_external_id,
+			members.first_name AS member_first_name,
+			members.last_name AS member_last_name,
+			members.password AS member_password,
+			member_statuses.id AS status_id,
+			member_statuses.status AS status_status, 
+			member_roles.id AS role_id,
+			member_roles.role AS role_role,
+			member_roles.color
+		FROM members 
+			INNER JOIN member_statuses ON members.status_id = member_statuses.id
+			INNER JOIN member_roles ON members.role_id = member_roles.id
+		WHERE 1=1
+			AND members.email = $1
+	`
+
+	if !includeDeleted {
+		query += " AND members.deleted_at IS NULL"
+	}
+
+	rows, err := s.db.Query(query, email)
+
+	if err != nil {
+		return Member{}, err
+	}
+
+	defer rows.Close()
+
+	members := []Member{}
+
+	if err = carta.Map(rows, &members); err != nil {
+		return Member{}, err
+	}
+
+	if len(members) < 1 {
+		return Member{}, fmt.Errorf("member not found")
+	}
+
+	return members[0], nil
+}
+
+func (s MemberService) GetMemberByID(id string, includeDeleted bool) (Member, error) {
+	query := `
+		SELECT
+			members.id AS member_id,
+			members.created_at AS member_created_at,
+			members.updated_at AS member_updated_at,
+			members.deleted_at AS member_deleted_at,
+			members.avatar_url AS member_avatar_url,
+			members.email AS member_email,
+			members.external_id AS member_external_id,
+			members.first_name AS member_first_name,
+			members.last_name AS member_last_name,
+			members.password AS member_password,
+			member_statuses.id AS status_id,
+			member_statuses.status AS status_status, 
+			member_roles.id AS role_id,
+			member_roles.role AS role_role,
+			member_roles.color
+		FROM members 
+			INNER JOIN member_statuses ON members.status_id = member_statuses.id
+			INNER JOIN member_roles ON members.role_id = member_roles.id
+		WHERE 1=1
+			AND members.id = $1
+	`
+
+	if !includeDeleted {
+		query += " AND members.deleted_at IS NULL"
+	}
+
+	rows, err := s.db.Query(query, id)
+
+	if err != nil {
+		return Member{}, err
+	}
+
+	defer rows.Close()
+
+	members := []Member{}
+
+	if err = carta.Map(rows, &members); err != nil {
+		return Member{}, err
+	}
+
+	if len(members) < 1 {
+		return Member{}, fmt.Errorf("member not found")
+	}
+
+	return members[0], nil
+}
+
+func (s MemberService) GetMembers(page int, includeDeleted bool) ([]Member, error) {
+	members := []Member{}
+
+	query := `
+		SELECT
+			members.id AS member_id,
+			members.created_at AS member_created_at,
+			members.updated_at AS member_updated_at,
+			members.deleted_at AS member_deleted_at,
+			members.avatar_url AS member_avatar_url,
+			members.email AS member_email,
+			members.external_id AS member_external_id,
+			members.first_name AS member_first_name,
+			members.last_name AS member_last_name,
+			members.password AS member_password,
+			member_statuses.id AS status_id,
+			member_statuses.status AS status_status, 
+			member_roles.id AS role_id,
+			member_roles.role AS role_role,
+			member_roles.color
+		FROM members 
+			INNER JOIN member_statuses ON members.status_id = member_statuses.id
+			INNER JOIN member_roles ON members.role_id = member_roles.id
+		WHERE 1=1
+	`
+
+	if !includeDeleted {
+		query += " AND members.deleted_at IS NULL"
+	}
+
+	query += GetDBPaging(page, s.pageSize)
+
+	rows, err := s.db.Query(query)
+
+	if err != nil {
+		return members, err
+	}
+
+	defer rows.Close()
+
+	if err = carta.Map(rows, &members); err != nil {
+		return members, err
+	}
+
+	if len(members) < 1 {
+		return members, fmt.Errorf("member not found")
+	}
+
+	return members, nil
+}
+
+func (s MemberService) GetMemberRole(name string) (MemberRole, error) {
+	var (
+		err   error
+		rows  *sql.Rows
+		roles []MemberRole
+	)
+
+	query := `
+		SELECT 
+			id AS role_id,
+			created_at AS member_roles_created_at,
+			updated_at AS member_roles_updated_at,
+			deleted_at AS member_roles_deleted_at,
+			color AS color,
+			role AS role_role
+		FROM member_roles
+		WHERE role = $1
+	`
+
+	if rows, err = s.db.Query(query, name); err != nil {
+		return MemberRole{}, err
+	}
+
+	defer rows.Close()
+
+	if err = carta.Map(rows, &roles); err != nil {
+		return MemberRole{}, err
+	}
+
+	if len(roles) < 1 {
+		return MemberRole{}, fmt.Errorf("role not found")
+	}
+
+	return roles[0], nil
+}
+
+func (s MemberService) GetMemberRoleByID(id int) (MemberRole, error) {
+	var (
+		err   error
+		rows  *sql.Rows
+		roles []MemberRole
+	)
+
+	query := `
+		SELECT 
+			id AS role_id,
+			created_at AS member_roles_created_at,
+			updated_at AS member_roles_updated_at,
+			deleted_at AS member_roles_deleted_at,
+			color AS color,
+			role AS role_role
+		FROM member_roles
+		WHERE id = $1
+	`
+
+	if rows, err = s.db.Query(query, id); err != nil {
+		return MemberRole{}, err
+	}
+
+	defer rows.Close()
+
+	if err = carta.Map(rows, &roles); err != nil {
+		return MemberRole{}, err
+	}
+
+	if len(roles) < 1 {
+		return MemberRole{}, fmt.Errorf("role not found")
+	}
+
+	return roles[0], nil
+}
+
+func (s MemberService) GetMemberRoles() ([]MemberRole, error) {
+	var (
+		err   error
+		rows  *sql.Rows
+		roles []MemberRole
+	)
+
+	query := `
+		SELECT 
+			id AS role_id,
+			created_at AS member_roles_created_at,
+			updated_at AS member_roles_updated_at,
+			deleted_at AS member_roles_deleted_at,
+			color AS color,
+			role AS role_role
+		FROM member_roles
+		WHERE 1=1
+	`
+
+	if rows, err = s.db.Query(query); err != nil {
+		return []MemberRole{}, err
+	}
+
+	defer rows.Close()
+
+	if err = carta.Map(rows, &roles); err != nil {
+		return []MemberRole{}, err
+	}
+
+	return roles, nil
+}
+
+func (s MemberService) CreateMemberRole(role MemberRole) (MemberRole, error) {
+	var (
+		err       error
+		sqlResult sql.Result
+		newID     int64
+	)
+
+	query := `
+		INSERT INTO member_roles (
+			created_at,
+			color,
+			role
+		) VALUES (
+			$1,
+			$2,
+			$3
+		)
+	`
+
+	if sqlResult, err = s.db.Exec(query, time.Now().UTC(), role.Color, role.Role); err != nil {
+		return MemberRole{}, err
+	}
+
+	if newID, err = sqlResult.LastInsertId(); err != nil {
+		return MemberRole{}, err
+	}
+
+	role.ID = uint(newID)
+	return role, nil
+}
+
+func (s MemberService) InactivateMember(id uint) error {
+	var (
+		err error
+	)
+
+	query := `
+		UPDATE members SET 
+			status_id = $1
+		WHERE id = $2
+	`
+
+	if _, err = s.db.Exec(query, MemberInactiveID, id); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s MemberService) UpdateMember(member Member) error {
+	var (
+		err error
+	)
+
+	query := `
+		UPDATE members SET
+			update_at = $1,
+			avatar_url = $2,
+			email = $3,
+			external_id = $4,
+			first_name = $5,
+			last_name = $6,
+			role_id = $7,
+			status_id = $8
+	`
+
+	if member.Password != "" {
+		query += ", password = $9"
+	}
+
+	query += " WHERE id = $10"
+
+	/*
+	 * If we've got a password in the new member struct, we are changing it
+	 */
+	if member.Password != "" {
+		member.Password = member.Password.Hash()
+	}
+
+	params := []interface{}{
+		time.Now().UTC(),
+		member.AvatarURL,
+		member.Email,
+		member.ExternalID,
+		member.FirstName,
+		member.LastName,
+		member.Role.ID,
+		member.Status.ID,
+	}
+
+	if member.Password != "" {
+		params = append(params, member.Password)
+	}
+
+	params = append(params, member.ID)
+
+	if _, err = s.db.Exec(query, params...); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+/*******************************************************************************
+ * Model
+ ******************************************************************************/
+
+type MemberStatus string
+
+const (
+	BaseMemberRole          string       = "Member"
+	MemberPendingApprovalID uint         = 1
+	MemberPendingApproval   MemberStatus = "Pending Approval"
+	MemberActiveID          uint         = 2
+	MemberActive            MemberStatus = "Active"
+	MemberInactiveID        uint         = 3
+	MemberInactive          MemberStatus = "Inactive"
+)
+
+type Member struct {
+	ID         string                         `json:"id" db:"member_id"`
+	CreatedAt  time.Time                      `json:"createdAt" db:"member_created_at"`
+	UpdatedAt  *time.Time                     `json:"updatedAt" db:"member_updated_at"`
+	DeletedAt  *time.Time                     `json:"deletedAt" db:"member_deleted_at"`
+	AvatarURL  string                         `json:"avatarURL" db:"member_avatar_url"`
+	Email      string                         `json:"email" db:"member_email"`
+	ExternalID string                         `json:"-" db:"member_external_id"`
+	FirstName  string                         `json:"firstName" db:"member_first_name"`
+	LastName   string                         `json:"lastName" db:"member_last_name"`
+	Password   passwords.HashedPasswordString `json:"-" db:"member_password"`
+	// RoleID     uint                           `json:"-" db:"role_id"`
+	Role MemberRole `json:"role"`
+	// StatusID   uint                           `json:"-" db:"status_id"`
+	Status MembersStatus `json:"memberStatus"`
+}
+
+type MemberRole struct {
+	ID        uint       `json:"id" db:"role_id"`
+	CreatedAt time.Time  `json:"createdAt" db:"member_roles_created_at"`
+	UpdatedAt *time.Time `json:"updatedAt" db:"member_roles_updated_at"`
+	DeletedAt *time.Time `json:"deletedAt" db:"member_roles_deleted_at"`
+	Color     string     `json:"color" db:"color"`
+	Role      string     `json:"role" db:"role_role"`
+}
+
+type MembersStatus struct {
+	ID     uint         `json:"id" db:"status_id"`
+	Status MemberStatus `json:"status" db:"status_status"`
+}
+
+type MembersManageData struct {
+	BaseViewModel
+}
+
+type MembersEditData struct {
+	BaseViewModel
+	Member  Member
+	Message string
+	Success bool
+}
+type MemberProfileData struct {
+	BaseViewModel
+	EditAvatarPath string
+	Member         Member
+	Message        string
+	Success        bool
+}
+
+type EditAvatarData struct {
+	BaseViewModel
+	Member  Member
+	Message string
+	Success bool
+}
+
+type RolesManageData struct {
+	BaseViewModel
+	Roles []MemberRole
+}
+
+type RolesCreateData struct {
+	BaseViewModel
+	Role    MemberRole
+	Success bool
+	Message string
+}
+
+type RolesEditData struct {
+	BaseViewModel
+	Role    MemberRole
+	Success bool
+	Message string
 }

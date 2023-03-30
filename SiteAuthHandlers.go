@@ -42,7 +42,7 @@ func (sa *SiteAuth) handleSiteAuthLogin(webApp *WebApp, memberService *MemberSer
 			/*
 			 * If this member doesn't exist yet, tell them they can make one.
 			 */
-			member, err = memberService.GetMemberByEmail(email, true)
+			member, err = memberService.GetMemberByEmail(email, false)
 
 			if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 				data.ErrorMessage = "Invalid user name or password. Please try again."

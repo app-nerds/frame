@@ -9,7 +9,7 @@ VERSION := $(shell cat ../VERSION)
 setup: ## Sets up dependencies
 	yarn global add rollup uglify-js uglifycss
 
-run: ## Runs the examp
+run: ## Runs the example
 	@cd examples && python3 -m http.server 8000
 
 build: clean build-library copy ## Builds Nerd JS Library for distribution

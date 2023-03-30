@@ -129,6 +129,8 @@ func (fa *FrameApplication) AddSiteAuth(config SiteAuthConfig) *FrameApplication
 		WebApp:         fa.webApp,
 	})
 
+	fa.webApp.memberManagement = fa.memberManagement
+
 	return fa
 }
 
@@ -253,6 +255,26 @@ func (fa *FrameApplication) Database(migrationDirectory string) *FrameApplicatio
 	return fa
 }
 
+func (fa *FrameApplication) GetMemberSession(r *http.Request) Member {
+	firstName := r.Context().Value("firstName").(string)
+	lastName := r.Context().Value("lastName").(string)
+	email := r.Context().Value("email").(string)
+	avatarURL := r.Context().Value("avatarURL").(string)
+	memberID := r.Context().Value("memberID").(string)
+	status := r.Context().Value("status").(string)
+
+	return Member{
+		ID:        memberID,
+		AvatarURL: avatarURL,
+		Email:     email,
+		FirstName: firstName,
+		LastName:  lastName,
+		Status: MembersStatus{
+			Status: MemberStatus(status),
+		},
+	}
+}
+
 func (fa *FrameApplication) RenderTemplate(w http.ResponseWriter, name string, data interface{}) {
 	fa.webApp.RenderTemplate(w, name, data)
 }
@@ -287,7 +309,7 @@ func (fa *FrameApplication) Start() chan os.Signal {
 	 */
 	if fa.webApp != nil {
 		adminRouter = fa.router.PathPrefix("/admin").Subrouter()
-		adminRouter.Use(AdminAuthMiddleware(fa.Logger, fa.Config, fa.webApp.GetAdminSessionStore()))
+		adminRouter.Use(adminAuthMiddleware(fa.Logger, fa.Config, fa.webApp.GetAdminSessionStore()))
 
 		fa.webApp.RegisterRoutes(fa.router, adminRouter)
 	}
