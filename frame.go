@@ -167,6 +167,15 @@ func (fa *FrameApplication) AddCron(schedule string, cronFunc func(app *FrameApp
 	return fa
 }
 
+func (fa *FrameApplication) AddEmailService() *FrameApplication {
+	fa.Logger.Info("setting up email service...")
+	fa.EmailService = NewEmailService(emailServiceConfig{
+		ApiKey: fa.Config.MailApiKey,
+	})
+
+	return fa
+}
+
 func (fa *FrameApplication) AddNsqConsumer(topic, channel string, handler nsq.Handler) *FrameApplication {
 	var (
 		err      error
@@ -303,16 +312,6 @@ func (fa *FrameApplication) Start() chan os.Signal {
 	if len(fa.cron.Entries()) > 0 {
 		fa.Logger.Infof("starting %d cron jobs...", len(fa.cron.Entries()))
 		fa.cron.Start()
-	}
-
-	/*
-	 * Wire up Sendgrid mail service
-	 */
-	if fa.Config.MailApiKey != "" {
-		fa.Logger.Info("setting up email service...")
-		fa.EmailService = NewEmailService(emailServiceConfig{
-			ApiKey: fa.Config.MailApiKey,
-		})
 	}
 
 	/*
