@@ -71,6 +71,7 @@ type FrameApplication struct {
 	Config        *Config
 	DB            *sql.DB
 	Logger        *logrus.Entry
+	EmailService  EmailServicer
 	MemberService MemberService
 	NsqPublisher  *nsq.Producer
 	NsqConsumers  []*nsq.Consumer
@@ -302,6 +303,15 @@ func (fa *FrameApplication) Start() chan os.Signal {
 	if len(fa.cron.Entries()) > 0 {
 		fa.Logger.Infof("starting %d cron jobs...", len(fa.cron.Entries()))
 		fa.cron.Start()
+	}
+
+	/*
+	 * Wire up Sendgrid mail service
+	 */
+	if fa.Config.MailApiKey != "" {
+		fa.EmailService = NewEmailService(emailServiceConfig{
+			ApiKey: fa.Config.MailApiKey,
+		})
 	}
 
 	/*

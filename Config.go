@@ -25,6 +25,7 @@ type Config struct {
 	GoogleClientSecret string `flag:"googleclientsecret" env:"GOOGLE_CLIENT_SECRET" default:"" description:"Google OAuth2 client secret"`
 	GoogleRedirectURI  string `flag:"googleredirecturi" env:"GOOGLE_REDIRECT_URI" default:"http://localhost:8080/auth/google/callback" description:"Google OAuth2 redirect URI"`
 	LogLevel           string `flag:"loglevel" env:"LOG_LEVEL" default:"debug" description:"Minimum log level to report"`
+	MailApiKey         string `flag:"mailapikey" env:"MAIL_API_KEY" default:"" description:"API Key to a mail service account (sendgrid)"`
 	Nsqd               string `flag:"nsqd" env:"NSQD" default:"nsqd:4150" description:"Address to NSQD server"`
 	NsqLookupd         string `flag:"nsqlookupd" env:"NSQ_LOOKUPD" default:"nsqlookupd:4161" description:"Address to NSQ lookup service"`
 	PageSize           int    `flag:"pagesize" env:"PAGE_SIZE" default:"25" description:"Size of pages for results"`
