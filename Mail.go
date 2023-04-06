@@ -26,7 +26,7 @@ type emailPersonalizations struct {
 }
 
 type EmailServicer interface {
-	Clear()
+	Clear() EmailServicer
 	From(email, name string) EmailServicer
 	Send(templateID string) error
 	TemplateData(to string, data map[string]interface{}) EmailServicer
@@ -37,28 +37,30 @@ type emailServiceConfig struct {
 	ApiKey string
 }
 
-type EmailService struct {
+type emailService struct {
 	apiKey       string
 	from         emailAddress
 	to           []emailAddress
 	templateData map[string]map[string]interface{}
 }
 
-func NewEmailService(config emailServiceConfig) *EmailService {
-	return &EmailService{
+func NewEmailService(config emailServiceConfig) *emailService {
+	return &emailService{
 		apiKey:       config.ApiKey,
 		templateData: map[string]map[string]interface{}{},
 		to:           []emailAddress{},
 	}
 }
 
-func (s *EmailService) Clear() {
+func (s *emailService) Clear() EmailServicer {
 	s.from = emailAddress{}
 	s.to = []emailAddress{}
 	s.templateData = map[string]map[string]interface{}{}
+
+	return s
 }
 
-func (s *EmailService) From(email, name string) EmailServicer {
+func (s *emailService) From(email, name string) EmailServicer {
 	s.from = emailAddress{
 		Email: email,
 		Name:  name,
@@ -67,7 +69,7 @@ func (s *EmailService) From(email, name string) EmailServicer {
 	return s
 }
 
-func (s *EmailService) Send(templateID string) error {
+func (s *emailService) Send(templateID string) error {
 	var (
 		err         error
 		request     rest.Request
@@ -121,12 +123,12 @@ func (s *EmailService) Send(templateID string) error {
 	return nil
 }
 
-func (s *EmailService) TemplateData(to string, data map[string]interface{}) EmailServicer {
+func (s *emailService) TemplateData(to string, data map[string]interface{}) EmailServicer {
 	s.templateData[to] = data
 	return s
 }
 
-func (s *EmailService) To(email, name string) EmailServicer {
+func (s *emailService) To(email, name string) EmailServicer {
 	s.to = append(s.to, emailAddress{
 		Email: email,
 		Name:  name,
