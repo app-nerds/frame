@@ -309,6 +309,7 @@ func (fa *FrameApplication) Start() chan os.Signal {
 	 * Wire up Sendgrid mail service
 	 */
 	if fa.Config.MailApiKey != "" {
+		fa.Logger.Info("setting up email service...")
 		fa.EmailService = NewEmailService(emailServiceConfig{
 			ApiKey: fa.Config.MailApiKey,
 		})
