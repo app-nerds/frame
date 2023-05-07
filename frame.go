@@ -103,6 +103,10 @@ func NewFrameApplication(appName, version string) *FrameApplication {
 	result.Logger.Logger.SetLevel(config.GetLogLevel())
 	result.Config = config
 
+	if !config.Debug {
+		result.Logger.Logger.SetFormatter(&logrus.JSONFormatter{})
+	}
+
 	// Attach Fireplace if configured
 	result.withFireplace()
 	result.withGobucket()
