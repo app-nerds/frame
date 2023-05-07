@@ -104,6 +104,7 @@ func NewFrameApplication(appName, version string) *FrameApplication {
 	result.Config = config
 
 	if !config.Debug {
+		result.Logger.Info("setting log format to JSON")
 		result.Logger.Logger.SetFormatter(&logrus.JSONFormatter{})
 	}
 
