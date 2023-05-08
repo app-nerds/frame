@@ -14,7 +14,7 @@ type Config struct {
 	AdminSessionName   string `flag:"adminsessionname" env:"ADMIN_SESSION_NAME" default:"" description:"Name of cookie sessions"`
 	AutoSSLEmail       string `flag:"autosslemail" env:"AUTO_SSL_EMAIL" default:"" description:"Email address to use for Lets Encrypt"`
 	AutoSSLWhitelist   string `flag:"autosslwhitelist" env:"AUTO_SSL_WHITELIST" default:"" description:"Comma-seperated list of domains for SSL"`
-	Debug              bool   `flag:"debug" evn:"DEBUG" default:"true" description:"True to turn on debug mode."`
+	Debug              bool   `flag:"debug" env:"DEBUG" default:"true" description:"True to turn on debug mode."`
 	DSN                string `flag:"dsn" env:"DSN" default:"host=localhost user=postgres password=password dbname=frame port=5432" description:"DSN string to connect to a database"`
 	FireplaceURL       string `flag:"fireplaceurl" env:"FIREPLACE_URL" default:"" description:"URL to a Fireplace logging server"`
 	FireplacePassword  string `flag:"fireplacepassword" env:"FIREPLACE_PASSWORD" default:"" description:"Password to the Fireplace logging server"`
