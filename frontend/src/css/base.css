@@ -18,22 +18,23 @@
    * Tables
    */
   --table-border: #EEEEEE;
-	--table-header-background-color: #394263;
-	--table-header-color: #fff;
+  --table-header-background-color: #394263;
+  --table-header-color: #fff;
 
   /*
-   * Dialogs 
-   */ 
+   * Dialogs
+   */
   --dialog-background-color: white;
 
   /*
-   * Buttons 
-   */ 
+   * Buttons
+   */
+  --header-button-row-background-color: #ccc;
   --action-button-background: var(--primary-color);
   --action-button-color: white;
 
   /*
-   * Menus 
+   * Menus
    */
   --popup-menu-item-hover-color: white;
 }
@@ -63,12 +64,16 @@ html, body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font: normal 20px/1.5 sans-serif;
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 16pt;
   height: 100vh;
   width: 100vw;
   position: relative;
   color: var(--text-color);
+}
+
+a {
+	color: var(--link-color);
 }
 
 p, code {
@@ -141,6 +146,7 @@ button {
 
 button:disabled {
   opacity: 0.5;
+  cursor: default
 }
 
 button svg {

@@ -1,0 +1,101 @@
+:root {
+	--header-color: #5582a8;
+	--gap: min(1.5rem, 2vw);
+	--dull-white: #EEEADE;
+	--action-button-background: #426583;
+	--action-button-color: white;
+	--link-color: #426583;
+	--border-color: #426583;
+	--primary-color: #426583;
+	--table-header-background-color: #5582a8;
+	--header-button-row-background-color: #ccc;
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	color: var(--text-color);
+}
+
+#top, #bottom {
+	width: 100%;
+	flex-grow: 0;
+	padding: 1.5rem;
+	background: var(--header-color);
+	box-shadow: var(--shadow-color);
+	color: var(--dull-white);
+}
+
+#top {
+	display: flex;
+	flex-wrap: wrap;
+	padding-top: 0.5rem;
+	padding-bottom: 1rem;
+}
+
+#top a {
+	color: var(--dull-white);
+}
+
+#top a:hover {
+	color: white;
+}
+
+#main-menu {
+	flex-grow: 0;
+	list-style: none;
+	margin-top: 1rem;
+}
+
+#main-menu nav {
+	margin-top: 0.5rem;
+}
+
+#main-menu ul {
+	margin: 0;
+}
+
+#main-menu li {
+	display: inline;
+	padding-left: 1rem;
+}
+
+#main-menu li svg {
+	color: var(--dull-white);
+}
+
+#main-menu li svg {
+	position: relative;
+	top: 0.2rem;
+	margin-right: 0.2rem;
+}
+
+#main-menu li member-login-bar {
+	position: relative;
+	top: 0.4rem;
+}
+
+#main-menu li member-login-bar svg {
+	position: absolute;
+	margin-right: 0;
+}
+
+.content {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0 var(--gap);
+}
+
+main {
+	width: 100%;
+}
+
+.header-button-row {
+	background-color: var(--header-button-row-background-color);
+	padding: 0.7em;
+}
+
+.header-button-row button {
+	padding: 0.4rem;
+	border-radius: 0.25rem;
+}

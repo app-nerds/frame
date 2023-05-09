@@ -21,8 +21,9 @@ clean: ## Removes all files from the dist folder
 
 build-library: rollup
 	uglifyjs dist/frame.js -c -m -o dist/frame.min.js --comments '/v\d.\d.\d/' --source-map
-	uglifycss --output dist/base.min.css src/css/base.css 
+	uglifycss --output dist/base.min.css src/css/base.css
 	uglifycss --output dist/admin-left-side-nav.min.css src/css/base.css src/css/admin-left-side-nav.css
+	uglifycss --output dist/admin-top-nav.min.css src/css/base.css src/css/admin-top-nav.css
 	uglifycss --output dist/components.min.css src/dialogs/alert.css \
 		src/dialogs/confirm.css src/menus/popup-menu.css src/shim/shim.css \
 		src/spinner/spinner.css src/members/member-login-bar.css \

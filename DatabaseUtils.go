@@ -1,6 +1,14 @@
 package frame
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+	"time"
+)
+
+func (f *FrameApplication) GetDBContext() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), time.Duration(f.Config.DatabaseTimeout)*time.Second)
+}
 
 func GetDBPaging(page int, pageSize int) string {
 	if page < 1 {
