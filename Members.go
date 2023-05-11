@@ -13,7 +13,6 @@ import (
 	"github.com/app-nerds/gobucket/v2/pkg/requestcontracts"
 	"github.com/app-nerds/gobucket/v2/pkg/responsecontracts"
 	"github.com/app-nerds/kit/v6/passwords"
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/jackskj/carta"
@@ -805,12 +804,10 @@ func (s MemberService) ActivateMember(id string) error {
 }
 
 func (s MemberService) CreateMember(member *Member) error {
-	id := uuid.NewString()
 	member.Password = member.Password.Hash()
 
 	query := `
 		INSERT INTO members (
-			id,
 			created_at,
 			avatar_url,
 			email,
@@ -829,14 +826,12 @@ func (s MemberService) CreateMember(member *Member) error {
 			$6,
 			$7,
 			$8,
-			$9,
-			$10
+			$9
 		)
 	`
 
 	_, err := s.db.Exec(
 		query,
-		id,
 		time.Now().UTC(),
 		member.AvatarURL,
 		member.Email,

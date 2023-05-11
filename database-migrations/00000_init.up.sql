@@ -1,5 +1,7 @@
 BEGIN;
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- 
 -- Member Statuses
 --
@@ -42,7 +44,7 @@ INSERT INTO public.member_roles (
 -- Members
 --
 CREATE TABLE IF NOT EXISTS public.members (
-	id character varying NOT NULL,
+	id uuid DEFAULT uuid_generate_v4(),
 	created_at timestamp without time zone NOT NULL,
 	updated_at timestamp without time zone,
 	deleted_at timestamp without time zone,
