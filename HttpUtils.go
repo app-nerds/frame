@@ -6,6 +6,10 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"time"
+
+	"github.com/app-nerds/kit/v6/datetime"
+	"github.com/gorilla/mux"
 )
 
 type GenericErrorResponse struct {
@@ -36,22 +40,85 @@ func CreateGenericSuccessResponse(message string) GenericSuccessResponse {
 	}
 }
 
-func GetPageFromRequest(r *http.Request) int {
+func GetIntFromRequest(r *http.Request, name string) int {
 	var (
-		err        error
-		pageString string
-		page       int
+		err         error
+		valueString string
+		value       int
 	)
 
-	if r.Method == http.MethodGet {
-		pageString = r.URL.Query().Get("page")
+	valueString = r.FormValue(name)
+
+	if value, err = strconv.Atoi(valueString); err != nil {
+		vars := mux.Vars(r)
+		valueString = vars[name]
+
+		if value, err = strconv.Atoi(valueString); err != nil {
+			value = 0
+		}
 	}
 
-	if r.Method == http.MethodPost || r.Method == http.MethodPut {
-		pageString = r.FormValue("page")
+	return value
+}
+
+func GetFloatFromRequest(r *http.Request, name string) float64 {
+	var (
+		err         error
+		valueString string
+		value       float64
+	)
+
+	valueString = r.FormValue(name)
+
+	if value, err = strconv.ParseFloat(valueString, 64); err != nil {
+		vars := mux.Vars(r)
+		valueString = vars[name]
+
+		if value, err = strconv.ParseFloat(valueString, 64); err != nil {
+			value = 0
+		}
 	}
 
-	if page, err = strconv.Atoi(pageString); err != nil {
+	return value
+}
+
+func GetStringFromRequest(r *http.Request, name string) string {
+	value := r.FormValue(name)
+
+	if value == "" {
+		vars := mux.Vars(r)
+		value = vars[name]
+	}
+
+	return value
+}
+
+func GetTimeFromRequest(r *http.Request, name string) time.Time {
+	var (
+		err         error
+		valueString string
+		value       time.Time
+	)
+
+	parser := datetime.DateTimeParser{}
+	valueString = r.FormValue(name)
+
+	if value, err = parser.Parse(valueString); err != nil {
+		vars := mux.Vars(r)
+		valueString = vars[name]
+
+		if value, err = parser.Parse(valueString); err != nil {
+			return time.Now().UTC()
+		}
+	}
+
+	return value
+}
+
+func GetPageFromRequest(r *http.Request) int {
+	page := GetIntFromRequest(r, "page")
+
+	if page < 1 {
 		page = 1
 	}
 
