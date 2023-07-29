@@ -6,7 +6,7 @@
   --header-height: 5rem;
   --footer-height: 5rem;
 
-  /* Colors */ 
+  /* Colors */
   --footer-background-color: #eee;
   --section-background-color: #ccc4;
 }
@@ -18,7 +18,7 @@ html, body {
   display: grid;
   grid-template-columns: 1fr 3fr;
   grid-template-rows: var(--header-height) auto var(--footer-height);
-  grid-template-areas: 
+  grid-template-areas:
     "header header"
     "sidebar content"
     "footer footer";
@@ -27,7 +27,7 @@ html, body {
 @media only screen and (max-width: 1000px) {
   html, body {
     grid-template-columns: 4fr;
-    grid-template-areas: 
+    grid-template-areas:
       "header"
       "content"
       "sidebar"
@@ -35,8 +35,8 @@ html, body {
   }
 }
 
-/* 
- * Header 
+/*
+ * Header
  */
 header {
   grid-area: header;
@@ -99,14 +99,14 @@ nav.sidenav a:hover {
 }
 
 /*
- * Main 
+ * Main
  */
 main {
   grid-area: content;
 }
 
-/* 
- * Footer 
+/*
+ * Footer
  */
 footer {
   grid-area: footer;
@@ -144,12 +144,7 @@ section.filters {
   opacity: 0.8;
 }
 
-section.filters label > input, textarea, select {
-  margin-top: 0.4rem;
-}
-
 section.filters input, section.filters textarea, section.filters select {
-	margin-bottom: 0.5rem;
 	padding: 0.5rem 0.75rem;
 	font-size: 1rem;
 	border: 1px solid var(--border-color);
@@ -166,6 +161,3 @@ section.filters input:focus, section.filters textarea:focus, section.filters sel
 	box-shadow: 0 0 0 .20rem var(--primary-color);
 }
 
-section.filters button {
-  margin-top: 1rem;
-}
