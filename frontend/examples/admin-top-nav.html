@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Admin Top Example</title>
+	<link rel="stylesheet" href="/static/base.min.css" />
+	<link rel="stylesheet" href="/static/admin-top-nav.min.css" />
+	<link rel="stylesheet" href="/static/icons.min.css" />
+	<link rel="stylesheet" href="/static/components.min.css" />
+</head>
+
+<body>
+	<header>
+		<h1>Admin Top</h1>
+
+		<nav class="sidenav">
+			<ul>
+				<li><a href="#"><i class="icon--mdi icon--mdi--home"></i> Home</a></li>
+				<li><a href="#"><i class="icon--mdi icon--mdi--cog"></i> Settings</a></li>
+				<li><a href="#">Link 3</a></li>
+				<li><a href="#">Link 4</a></li>
+			</ul>
+		</nav>
+
+		<div>Member Info</div>
+	</header>
+
+	<main>
+		<h2>Dashboard</h2>
+
+		<div class="action-bar">
+			<button><i class="icon--mdi icon--mdi--arrow-left"></i> Back</button>
+			<button class="action-button"><i class="icon--mdi icon--mdi--plus"></i> Add</button>
+		</div>
+
+		<p>
+			This page showcases the Admin Left Navigation template and CSS.
+		</p>
+
+		<section class="filters">
+			<label for="user">User</label>
+			<select id="user">
+				<option value="1">User 1</option>
+				<option value="2">User 2</option>
+				<option value="3">User 3</option>
+			</select>
+
+			<label for="search">Search</label>
+			<input type="text" id="search" placeholder="Search..." />
+
+			<button>Search</button>
+		</section>
+
+		<table>
+			<caption>Results Table</caption>
+			<thead>
+				<tr>
+					<th scope="col">Col 1</th>
+					<th scope="col">Col 2</th>
+					<th scope="col">Col 3</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th scope="row">Value 1</th>
+					<td>Value 2</td>
+					<td>Value 3</td>
+				</tr>
+				<tr>
+					<th scope="row">Another set</th>
+					<td>Value 2</td>
+					<td>Value 3</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<form>
+			<label for="first">First</label>
+			<input type="text" id="first" />
+			<small>
+				This is additional information for this form field
+			</small>
+
+			<label for="second">Second</label>
+			<select id="second">
+				<option value="value1">Value 1</option>
+				<option value="value2">Value 2</option>
+				<option value="value3">Value 3</option>
+			</select>
+
+			<label for="third">Third</label>
+			<textarea id="third">Text goes here</textarea>
+
+			<label for="fourth">
+				<input type="checkbox" id="fourth" />
+				Fourth
+			</label>
+
+			<nav>
+				<button type="button" id="cancel"><i class="icon--mdi icon--mdi--arrow-left" alt="Left arrow"></i>
+					Cancel</button>
+				<button type="button" class="action-button" id="action">Action!</button>
+			</nav>
+		</form>
+
+	</main>
+
+	<footer>
+		<p>
+			&copy; 2023 App Nerds LLC
+		</p>
+	</footer>
+
+
+	<script type="module">
+		import frame from "/static/frame.js";
+
+		document.addEventListener("DOMContentLoaded", () => {
+			const alerter = frame.alert();
+			const confirmer = frame.confirm();
+			const spinnerer = frame.spinner();
+
+			document.querySelector("#cancel").addEventListener("click", () => {
+				alerter.info("Canceled!");
+			});
+
+			document.querySelector("#action").addEventListener("click", async () => {
+				const result = await confirmer.yesNo("Are you sure?");
+
+				alerter.success(`You said ${result ? "yes" : "no"}`);
+			});
+		});
+	</script>
+
+</body>
+
+</html>

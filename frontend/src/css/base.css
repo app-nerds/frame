@@ -29,7 +29,6 @@
 	--dialog-background-color: white;
 
 	/* Buttons */
-	--header-button-row-background-color: #ccc;
 	--action-button-background: var(--primary-color);
 
 	/* Menus */
@@ -117,13 +116,21 @@ button:disabled {
 	cursor: default
 }
 
-.button-row {
+.action-bar, .table-actions {
   display: flex;
   gap: 0.6rem;
   width: 100%;
-  justify-content: center;
+  margin-bottom: 1.3rem;
 }
 
+.table-actions {
+  justify-content: end;
+  align-items: center;
+}
+
+.table-actions input {
+  width: 30%;
+}
 .action-button { background-color: var(--action-color); color: var(--white); }
 .success-button { background-color: var(--success-color); color: var(--white); }
 .danger-button { background-color: var(--danger-color); color: var(--white); }
