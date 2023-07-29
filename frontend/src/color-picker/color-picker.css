@@ -1,6 +1,6 @@
 /*
  * color-picker is a tool that allows users to select from a pre-defined set of colors.
- * If the color the user wants is not there, they can type a hex code into the box to get 
+ * If the color the user wants is not there, they can type a hex code into the box to get
  * the color they want.
  *
  * Copyright © 2022 App Nerds LLC
@@ -30,5 +30,6 @@
 }
 
 .color-picker .color-input {
-  margin-top: 0.4rem;
+	margin-top: 0.4rem;
+	width: 100%;
 }

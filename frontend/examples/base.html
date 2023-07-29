@@ -2,284 +2,372 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Base Example</title>
-  <link rel="stylesheet" href="base.min.css" />
-  <link rel="stylesheet" href="components.min.css" />
-
-  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Base Example</title>
+	<link rel="stylesheet" href="/static/base.min.css" />
+	<link rel="stylesheet" href="/static/icons.min.css" />
+	<link rel="stylesheet" href="/static/components.min.css" />
 </head>
 
 <body>
-  <main>
-    <h1>Base Example</h1>
+	<main>
+		<h1>Base Example</h1>
 
-    <p>
-      This page showcases the Base CSS and Components CSS.
-    </p>
+		<p>
+			This page showcases the Base CSS and Components CSS.
+		</p>
 
-    <h2>Styles</h2>
+		<h2>Styles</h2>
 
-    <p>
-      A number of styles are built-in.
-    </p>
+		<p>
+			A number of styles are built-in.
+		</p>
 
-    <h3>Headers</h3>
+		<h3>Headers</h3>
 
-    <p>
-      Here's what all the headers look like.
-    </p>
+		<p>
+			Here's what all the headers look like.
+		</p>
 
-    <div style="background-color: var(--border-color)">
-      <h1>Heading 1</h1>
-      <h2>Heading 2</h2>
-      <h3>Heading 3</h3>
-      <h4>Heading 4</h4>
-      <h5>Heading 5</h5>
-    </div>
+		<div>
+			<h1>Heading 1</h1>
+			<h2>Heading 2</h2>
+			<h3>Heading 3</h3>
+			<h4>Heading 4</h4>
+			<h5>Heading 5</h5>
+		</div>
 
-    <h3>Tables</h3>
+		<h3>Tables</h3>
 
-    <table>
-      <caption>Table Example</caption>
-      <thead>
-        <tr>
-          <th scope="col">Col 1</th>
-          <th scope="col">Col 2</th>
-          <th scope="col">Col 3</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th scope="row">Value 1</th>
-          <td>Value 2</td>
-          <td>Value 3</td>
-        </tr>
-      </tbody>
-    </table>
+		<table>
+			<caption>Table Example</caption>
+			<thead>
+				<tr>
+					<th scope="col">Col 1</th>
+					<th scope="col">Col 2</th>
+					<th scope="col">Col 3</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th scope="row">Value 1</th>
+					<td>Value 2</td>
+					<td>Value 3</td>
+				</tr>
+				<tr>
+					<th scope="row">Another set</th>
+					<td>Value 2</td>
+					<td>Value 3</td>
+				</tr>
+			</tbody>
+		</table>
 
-    <h3>Forms</h3>
+		<h3>Forms</h3>
 
-    <form>
-      <label for="first">First</label>
-      <input type="text" id="first" />
-      <small>
-        This is additional information for this form field
-      </small>
+		<form>
+			<label for="first">First</label>
+			<input type="text" id="first" />
+			<small>
+				This is additional information for this form field
+			</small>
 
-      <label for="second">Second</label>
-      <select id="second">
-        <option value="value1">Value 1</option>
-        <option value="value2">Value 2</option>
-        <option value="value3">Value 3</option>
-      </select>
+			<label for="second">Second</label>
+			<select id="second">
+				<option value="value1">Value 1</option>
+				<option value="value2">Value 2</option>
+				<option value="value3">Value 3</option>
+			</select>
 
-      <label for="third">Third</label>
-      <textarea id="third">Text goes here</textarea>
+			<label for="third">Third</label>
+			<textarea id="third">Text goes here</textarea>
 
-      <nav>
-        <button type="button">Cancel</button>
-        <button type="button" class="action-button">Action!</button>
-      </nav>
-    </form>
+			<nav>
+				<button type="button"><i class="icon--mdi icon--mdi--arrow-left" alt="Left arrow"></i> Cancel</button>
+				<button type="button" class="action-button">Action!</button>
+			</nav>
+		</form>
 
-    <section>
-      <h3>Cards</h3>
+		<section>
+			<h3>Cards</h3>
 
-      <div class="cards">
-        <article>
-          <h3>Card Demonstration</h3>
-          <p>
-            This is the first card. It contains content.
-            The markup is simple.
-          </p>
+			<div class="cards">
+				<article>
+					<h3>Card Demonstration</h3>
+					<p>
+						This is the first card. It contains content.
+						The markup is simple.
+					</p>
 
-          <footer>
-            <button>Secondary</button>
-            <button class="action-button">Primary</button>
-          </footer>
-        </article>
+					<footer>
+						<button>Secondary</button>
+						<button class="action-button">Primary</button>
+					</footer>
+				</article>
 
-        <article>
-          <h3>First: Container</h3>
-          <p>
-            Start with a DIV that has a class of <strong>.cards</strong>.
-          </p>
+				<article>
+					<h3>First: Container</h3>
+					<p>
+						Start with a DIV that has a class of <strong>.cards</strong>.
+					</p>
 
-          <code>
-            &lt;div class="cards"&gt;<br />
-            <br />
-            &lt;/div&gt;
-          </code>
-        </article>
+					<code>
+						&lt;div class="cards"&gt;<br />
+						<br />
+						&lt;/div&gt;
+					</code>
+				</article>
 
-        <article>
-          <h3>Second: Articles</h3>
-          <p>
-            Then add articles that look like this:
-          </p>
+				<article>
+					<h3>Second: Articles</h3>
+					<p>
+						Then add articles that look like this:
+					</p>
 
-          <code>
-            &lt;article&gt;<br />
-            &nbsp;&nbsp;&lt;h3&gt;Title Goes Here&lt;/h3&gt;<br />
-            <br />
-            &nbsp;&nbsp;&lt;p&gt;<br />
-            &nbsp;&nbsp;&nbsp;&nbsp;Content goes in here. Put what you want!<br />
-            &nbsp;&nbsp;&lt;/p&gt;<br />
-            <br />
-            &nbsp;&nbsp;&lt;footer&gt;<br />
-            &nbsp;&nbsp;&nbsp;&nbsp;&lt;button&gt;Button&lt;/button&gt;<br />
-            &nbsp;&nbsp;&lt;/footer&gt;<br />
-            &lt;/article&gt;
-          </code>
-        </article>
+					<code>
+						&lt;article&gt;<br />
+						&nbsp;&nbsp;&lt;h3&gt;Title Goes Here&lt;/h3&gt;<br />
+						<br />
+						&nbsp;&nbsp;&lt;p&gt;<br />
+						&nbsp;&nbsp;&nbsp;&nbsp;Content goes in here. Put what you want!<br />
+						&nbsp;&nbsp;&lt;/p&gt;<br />
+						<br />
+						&nbsp;&nbsp;&lt;footer&gt;<br />
+						&nbsp;&nbsp;&nbsp;&nbsp;&lt;button&gt;Button&lt;/button&gt;<br />
+						&nbsp;&nbsp;&lt;/footer&gt;<br />
+						&lt;/article&gt;
+					</code>
+				</article>
 
-        <article>
-          <h3>All Together!</h3>
+				<article>
+					<h3>All Together!</h3>
 
-          <p>
-            That's it! Here's a full sample!
-          </p>
+					<p>
+						That's it! Here's a full sample!
+					</p>
 
-          <code>
-            &lt;div class="cards"&gt;<br />
-            &nbsp;&nbsp;&lt;article&gt;<br />
-            &nbsp;&nbsp;&nbsp;&nbsp;&lt;h3&gt;Title Goes Here&lt;/h3&gt;<br />
-            <br />
-            &nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;<br />
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Content goes in here. Put what you want!<br />
-            &nbsp;&nbsp;&nbsp;&nbsp;&lt;/p&gt;<br />
-            <br />
-            &nbsp;&nbsp;&nbsp;&nbsp;&lt;footer&gt;<br />
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;button&gt;Secondary&lt;/button&gt;<br />
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;button class="action-button"&gt;Primary&lt;/button&gt;<br />
-            &nbsp;&nbsp;&nbsp;&nbsp;&lt;/footer&gt;<br />
-            &nbsp;&nbsp;&lt;/article&gt;<br />
-            &lt;/div&gt;
-          </code>
+					<code>
+						&lt;div class="cards"&gt;<br />
+						&nbsp;&nbsp;&lt;article&gt;<br />
+						&nbsp;&nbsp;&nbsp;&nbsp;&lt;h3&gt;Title Goes Here&lt;/h3&gt;<br />
+						<br />
+						&nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;<br />
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Content goes in here. Put what you want!<br />
+						&nbsp;&nbsp;&nbsp;&nbsp;&lt;/p&gt;<br />
+						<br />
+						&nbsp;&nbsp;&nbsp;&nbsp;&lt;footer&gt;<br />
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;button&gt;Secondary&lt;/button&gt;<br />
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;button class="action-button"&gt;Primary&lt;/button&gt;<br />
+						&nbsp;&nbsp;&nbsp;&nbsp;&lt;/footer&gt;<br />
+						&nbsp;&nbsp;&lt;/article&gt;<br />
+						&lt;/div&gt;
+					</code>
 
-          <footer>
-            <button>Secondary</button>
-            <button class="action-button">Primary</button>
-          </footer>
-        </article>
-      </div>
-    </section>
+					<footer>
+						<button>Secondary</button>
+						<button class="action-button">Primary</button>
+					</footer>
+				</article>
+			</div>
+		</section>
 
-    <h2>Components</h2>
+		<h2>Icons</h2>
 
-    <p>
-      Here are the components provided by this library.
-    </p>
+		<p>
+			This library includes a couple of icons provided by <a href="https://icon-sets.iconify.design/mdi/">Iconify</a>
+			and the
+			Material Design Icons set. To include new ones, search for the icons you want and add them to the
+			<em>icons.css</em>
+			file by URL like <code>https://api.iconify.design/mdi.css?icons=home,arrow-left,arrow-right,cog</code>.
+		</p>
 
-    <h3>Color Picker</h3>
+		<p>
+			<i class="icon--mdi icon--mdi--home" style="width: 24px; height: 24px;"></i>
+			<i class="icon--mdi icon--mdi--arrow-left" style="width: 24px; height: 24px;"></i>
+			<i class="icon--mdi icon--mdi--arrow-right" style="width: 24px; height: 24px;"></i>
+			<i class="icon--mdi icon--mdi--cog" style="width: 24px; height: 24px;"></i>
+		</p>
 
-    <p>
-      Color picker is a control that allows a user to pick a color from a predefined list.
-    </p>
 
-    <color-picker></color-picker>
+		<h2>Components</h2>
 
-    <h3>Message Bar</h3>
+		<p>
+			Here are the components provided by this library.
+		</p>
 
-    <p>
-      A basic component which displays a message. The background color
-      depends upon the type of message being displayed.
-    </p>
+		<h3>Color Picker</h3>
 
-    <message-bar message-type="info" message="This is an informational message. Use 'message-type' of 'info'.">
-    </message-bar>
+		<p>
+			Color picker is a control that allows a user to pick a color from a predefined list.
+		</p>
 
-    <message-bar message-type="success" message="This is a success message. Use 'message-type' of 'success'.">
-    </message-bar>
+		<color-picker></color-picker>
 
-    <message-bar message-type="warn" message="This is a warning message. Use 'message-type' of 'warn'.">
-    </message-bar>
+		<h3>Message Bar</h3>
 
-    <message-bar message-type="error" message="This is an error message. Use 'message-type' of 'error'.">
-    </message-bar>
+		<p>
+			A basic component which displays a message. The background color
+			depends upon the type of message being displayed.
+		</p>
 
-    <h3>Dialogs</h3>
+		<message-bar message-type="info" message="This is an informational message. Use 'message-type' of 'info'.">
+		</message-bar>
 
-    <p>
-      Dialogs are window-based components that display or prompt user for information.
-    </p>
+		<message-bar message-type="success" message="This is a success message. Use 'message-type' of 'success'.">
+		</message-bar>
 
-    <ul>
-      <li>Alert Dialog</li>
-      <li>Confirmation dialog</li>
-    </ul>
+		<message-bar message-type="warn" message="This is a warning message. Use 'message-type' of 'warn'.">
+		</message-bar>
 
-    <div style="margin-bottom: 1rem;">
-      <button id="showInfoAlert">Show Info Alert</button>
-      <button id="showSuccessAlert">Show Success Alert</button>
-      <button id="showWarnAlert">Show Warn Alert</button>
-      <button id="showErrorAlert">Show Error Alert</button>
-      <button id="showConfirm">Show Confirm</button>
-    </div>
+		<message-bar message-type="error" message="This is an error message. Use 'message-type' of 'error'.">
+		</message-bar>
 
-    <h3>Menus</h3>
+		<h3>Dialogs</h3>
 
-    <ul>
-      <li>Popup Menu</li>
-    </ul>
+		<p>
+			Dialogs are window-based components that display or prompt user for information.
+		</p>
 
-    <div style="margin-bottom: 1rem;">
-      <button id="showPopup">Show popup menu</button>
-      <popup-menu id="popup" trigger="#showPopup">
-        <popup-menu-item id="menuItem1" text="Menu Item 1" icon="airplay"></popup-menu-item>
-        <popup-menu-item id="menuItem2" text="Menu Item 2" icon="archive"></popup-menu-item>
-        <popup-menu-item id="menuItem3" text="Menu Item 3" icon="bar-chart-2"></popup-menu-item>
-      </popup-menu>
-    </div>
+		<ul>
+			<li>Alert Dialog</li>
+			<li>Confirmation dialog</li>
+		</ul>
 
-    <h3>Shim and Spinner</h3>
+		<div style="margin-bottom: 1rem;">
+			<button id="showInfoAlert">Show Info Alert</button>
+			<button id="showSuccessAlert">Show Success Alert</button>
+			<button id="showWarnAlert">Show Warn Alert</button>
+			<button id="showErrorAlert">Show Error Alert</button>
+			<button id="showConfirm">Show Confirm</button>
+		</div>
 
-    <ul>
-      <li>Shim</li>
-      <li>Spinner</li>
-    </ul>
+		<h3>Menus</h3>
 
-    <div style="margin-bottom: 1rem;">
-      <button id="showSpinner">Show Spinner</button>
-    </div>
+		<ul>
+			<li>Popup Menu</li>
+		</ul>
 
-    <h3>Tabs</h3>
+		<div style="margin-bottom: 1rem;">
+			<button id="showPopup">Show popup menu</button>
+			<popup-menu id="popup" trigger="#showPopup">
+				<popup-menu-item id="menuItem1" text="Menu Item 1" icon="airplay"></popup-menu-item>
+				<popup-menu-item id="menuItem2" text="Menu Item 2" icon="archive"></popup-menu-item>
+				<popup-menu-item id="menuItem3" text="Menu Item 3" icon="bar-chart-2"></popup-menu-item>
+			</popup-menu>
+		</div>
 
-    <div class="tabset">
-      <input type="radio" name="tabset1" id="tabset-description" hidden aria-hidden="true" checked>
-      <input type="radio" name="tabset1" id="tabset-about" hidden aria-hidden="true">
+		<h3>Shim and Spinner</h3>
 
-      <ul hidden aria-hidden="true">
-        <li>
-          <label for="tabset-description">Description</label>
-        </li>
-        <li>
-          <label for="tabset-about">About</label>
-        </li>
-      </ul>
+		<ul>
+			<li>Shim</li>
+			<li>Spinner</li>
+		</ul>
 
-      <div>
-        <section>
-          <h4>Description</h4>
-          <p>
-            This is a tabbed interface that doesn't use any JavaScript. All CSS baby!
-          </p>
-        </section>
+		<div style="margin-bottom: 1rem;">
+			<button id="showSpinner">Show Spinner</button>
+		</div>
 
-        <section>
-          <h4>About</h4>
-          <p>
-            This is pulled from <a href="https://cutcodedown.com/for_others/medium_articles/tabsWithoutJS/">Jason
-              Knight</a>, who is brilliant at CSS and accessibility.
-          </p>
-        </section>
-      </div>
-    </div>
-  </main>
+		<h3>Tabs</h3>
 
-  <script src="base.js" type="module"></script>
+		<div class="tabset">
+			<input type="radio" name="tabset1" id="tabset-description" hidden aria-hidden="true" checked>
+			<input type="radio" name="tabset1" id="tabset-about" hidden aria-hidden="true">
+
+			<ul hidden aria-hidden="true">
+				<li>
+					<label for="tabset-description">Description</label>
+				</li>
+				<li>
+					<label for="tabset-about">About</label>
+				</li>
+			</ul>
+
+			<div>
+				<section>
+					<h4>Description</h4>
+					<p>
+						This is a tabbed interface that doesn't use any JavaScript. All CSS baby!
+					</p>
+				</section>
+
+				<section>
+					<h4>About</h4>
+					<p>
+						This is pulled from <a href="https://cutcodedown.com/for_others/medium_articles/tabsWithoutJS/">Jason
+							Knight</a>, who is brilliant at CSS and accessibility.
+					</p>
+				</section>
+			</div>
+		</div>
+	</main>
+
+
+	<script type="module">
+		import frame from "/static/frame.js";
+
+		document.addEventListener("DOMContentLoaded", () => {
+			const alerter = frame.alert();
+			const confirmer = frame.confirm();
+			const spinnerer = frame.spinner();
+
+			/*
+			 * Click button to show alert
+			 */
+			document.getElementById("showInfoAlert").addEventListener("click", () => {
+				alerter.info("This is an information alert!");
+			});
+
+			document.getElementById("showSuccessAlert").addEventListener("click", () => {
+				alerter.success("This is a success alert!");
+			});
+
+			document.getElementById("showWarnAlert").addEventListener("click", () => {
+				alerter.warn("This is a warning alert!");
+			});
+
+			document.getElementById("showErrorAlert").addEventListener("click", () => {
+				alerter.error("This is an error alert!");
+			});
+
+			/*
+			 * Click to show confirm
+			 */
+			document.getElementById("showConfirm").addEventListener("click", async () => {
+				const result = await confirmer.yesNo("Are you sure?");
+				alerter.info(`You chose "${result}"`);
+			});
+
+			/*
+			 * Click to show spinner
+			 */
+			document.getElementById("showSpinner").addEventListener("click", () => {
+				spinnerer.show();
+
+				setTimeout(() => {
+					spinnerer.hide();
+				}, 3000);
+			});
+
+			/*
+			 * Popup menu events
+			 */
+			document.getElementById("showPopup").addEventListener("click", () => {
+				frame.showPopup("#popup");
+			});
+			document.getElementById("menuItem1").addEventListener("click", () => {
+				alerter.info("Menu item 1");
+			});
+
+			document.getElementById("menuItem2").addEventListener("click", () => {
+				alerter.error("Menu item 1");
+			});
+
+			document.getElementById("menuItem3").addEventListener("click", () => {
+				alerter.warn("Menu item 1");
+			});
+		});
+	</script>
+
 </body>
 
 </html>

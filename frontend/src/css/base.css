@@ -2,41 +2,43 @@
  * Copyright © 2022 App Nerds LLC
  */
 :root {
-  /* Colors */
-  --primary-color: #394263;
-  --secondary-color: #F9FAFC;
-  --third-color: #303753;
-  --text-color: rgba(0, 0, 0, 0.8);
-  --link-color: #1BBAE1;
-  --background-color: white;
-  --light-text-color: rgb(255, 255, 255, 0.8);
-  --shadow-color: rgba(100, 100, 111, 0.2);
-  --border-color: #ccc;
-  --light-background-color: #eee;
+	/* Base colors */
+	--white: white;
 
-  /*
-   * Tables
-   */
-  --table-border: #EEEEEE;
-  --table-header-background-color: #394263;
-  --table-header-color: #fff;
+	/* Colors */
+	--primary-color: #1b6ec2;
+	--secondary-color: #F9FAFC;
+	--third-color: #303753;
+	--text-color: rgba(0, 0, 0, 0.8);
+	--link-color: #1BBAE1;
+	--background-color: white;
+	--light-text-color: rgb(255, 255, 255, 0.8);
+	--shadow-color: rgba(100, 100, 111, 0.2);
+	--border-color: #ccc;
+	--light-background-color: #eee;
+	--action-color: var(--primary-color);
+	--success-color: #198754;
+	--danger-color: #dc3545;
 
-  /*
-   * Dialogs
-   */
-  --dialog-background-color: white;
+	/* Tables */
+	--table-border: #EEEEEE;
+	--table-header-background-color: #ccccccbd;
+	--table-header-color: black;
 
-  /*
-   * Buttons
-   */
-  --header-button-row-background-color: #ccc;
-  --action-button-background: var(--primary-color);
-  --action-button-color: white;
+	/* Dialogs */
+	--dialog-background-color: white;
 
-  /*
-   * Menus
-   */
-  --popup-menu-item-hover-color: white;
+	/* Buttons */
+	--header-button-row-background-color: #ccc;
+	--action-button-background: var(--primary-color);
+
+	/* Menus */
+	--popup-menu-item-hover-color: white;
+
+	/* Tabs */
+	--tab-background-color: #1b6ec29c;
+	--tab-border-color: var(--border-color);
+	--tab-content-background-color: white;
 }
 
 /* Resets */
@@ -64,14 +66,15 @@ html, body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font: normal 20px/1.5 sans-serif;
-  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 16px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   height: 100vh;
   width: 100vw;
   position: relative;
   color: var(--text-color);
 }
 
+/* Text elements */
 a {
 	color: var(--link-color);
 }
@@ -85,39 +88,47 @@ code {
   display: block;
 }
 
-h1 {
-  color: var(--primary-color);
-  font-weight: bold;
-  font-size: 2.2rem;
-  margin: 1rem 0;
+h1, h2, h3, h4, h5 { margin: 1.8rem 0; }
+h1 { color: var(--primary-color); font-weight: bold; font-size: 2.2rem; }
+h2 { font-weight: bold; font-size: 1.8rem; }
+h3 { font-size: 1.4rem; }
+
+small { font-size: 0.8rem; }
+
+/* List elements */
+ul { list-style: disc; margin: 0.5rem 2rem; }
+
+/* Buttons */
+button {
+	font-size: 1.1rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.3rem;
+	padding: 0.5rem;
+	cursor: pointer;
+	border-radius: 0.25rem;
+	border: 1px solid var(--border-color);
+	transition: all 0.2s ease-in-out;
 }
 
-h2 {
-  color: var(--primary-color);
-  font-weight: bold;
-  font-size: 2rem;
-  margin: 1rem 0;
+button:disabled {
+	opacity: 0.5;
+	cursor: default
 }
 
-h3 {
-  color: var(--primary-color);
-  font-size: 1.6rem;
-  margin: 1rem 0;
+.button-row {
+  display: flex;
+  gap: 0.6rem;
+  width: 100%;
+  justify-content: center;
 }
 
-h4 {
-  margin: 1rem 0;
-}
+.action-button { background-color: var(--action-color); color: var(--white); }
+.success-button { background-color: var(--success-color); color: var(--white); }
+.danger-button { background-color: var(--danger-color); color: var(--white); }
 
-h5 {
-  margin: 1rem 0;
-}
-
-ul {
-  list-style: disc;
-  margin: 0.5rem 2rem;
-}
-
+/* Form elements */
 select {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -132,58 +143,17 @@ select:disabled, input:disabled {
   background-color: white;
 }
 
-button {
-  font-size: 16pt;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
-  padding: 0.6rem;
-  cursor: pointer;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: default
-}
-
-button svg {
-  width: 18px;
-  height: 18px;
-}
-
-.button-row {
-  display: flex;
-  gap: 0.6rem;
-  width: 100%;
-  justify-content: center;
-}
-
-.action-button {
-  background-color: var(--action-button-background);
-  color: var(--action-button-color);
-}
-
-label {
-	display: block;
-	margin-top: 0.5rem;
-	margin-bottom: 0.5rem;
-}
+label { display: block; margin: 0.5rem 0; }
 
 input, textarea, select {
-	margin-bottom: 0.5rem;
-	width: 100%;
 	padding: 0.5rem 0.75rem;
-	font-size: 1rem;
+	width: 50%;
 	border: 1px solid var(--border-color);
 	border-radius: 0.25rem;
+	font-size: 1rem;
 }
 
-input[type="checkbox"] {
-	width: auto;
-}
+input[type="checkbox"] { width: auto; }
 
 input:focus, textarea:focus, select:focus {
 	border-color: var(--primary-color);
@@ -191,40 +161,26 @@ input:focus, textarea:focus, select:focus {
 	box-shadow: 0 0 0 .20rem var(--primary-color);
 }
 
-form small {
-  position: relative;
-  top: -10px;
-  opacity: 0.8;
-}
+form input, form textarea, form select { margin-bottom: 0.5rem; }
+form small { position: relative; top: -5px; opacity: 0.8; display: block; }
 
 form nav {
-  display: flex;
-  gap: 0.5rem;
-  width: 100%;
-  background-color: transparent;
-  padding: 0;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  border: 0;
-  justify-content: flex-start;
+	display: flex;
+	gap: 0.5rem;
+	width: 100%;
+	background-color: transparent;
+	padding: 0;
+	margin: 1rem 0;
+	border: 0;
+	justify-content: flex-start;
 }
 
-/*
- * Main
- */
-main {
-  background-color: var(--background-color);
-  padding: 1rem;
-}
-
-/*
- * Tables
- */
+/* Tables */
 table {
 	width: 100%;
-	border: 1px solid var(--table-border);
+	border: 1px solid var(--table-border-color);
 	border-spacing: 0px;
-  margin: 1rem 0 0.5rem 0;
+	margin: 1rem 0 1.5rem 0;
 }
 
 table caption {
@@ -239,14 +195,8 @@ table caption {
 	border-width: 0;
 }
 
-thead {
-	background-color: var(--table-header-background-color);
-	color: var(--table-header-color);
-}
-
-th, td {
-	padding: 1rem 0.5rem;
-}
+thead { background-color: var(--table-header-background-color); color: var(--table-header-color); }
+th, td { padding: 0.5rem; text-align: left; }
 
 tr:nth-child(even) {
 	background-color: var(--table-border);
@@ -254,12 +204,13 @@ tr:nth-child(even) {
 
 /* Cards */
 .cards {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  max-width: 89.999rem;
-  margin: 0 auto;
-  gap: 1rem;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: stretch;
+	max-width: 89.999rem;
+	margin: 0 auto;
+	gap: 1rem;
+	margin-bottom: 2rem;
 }
 
 .cards > article {
@@ -267,7 +218,7 @@ tr:nth-child(even) {
   flex-direction: column;
   flex: 1 0 20rem;
   max-width: 30rem;
-  padding: 0.5rem;
+  padding: 1.2rem;
   box-shadow: var(--shadow-color) 0px 7px 29px 0px;
 }
 
@@ -276,12 +227,17 @@ tr:nth-child(even) {
 .cards > article > h4
 {
   margin: 0;
+	font-size: 1.4rem;
 }
 
 .cards > article > footer {
-  margin-top: auto;
-  padding: 0.5rem;
+	margin-top: auto;
+	padding: 0.5rem;
+	display: flex;
+	gap: 0.5rem;
 }
+
+.cards > article >  a.action-button { text-align: center; }
 
 @media (max-width: 30em) {
   .cards {
@@ -306,13 +262,14 @@ tr:nth-child(even) {
 
 .tabset > ul label,
 .tabset > div {
-  border:1px solid hsl(220, 100%, 60%);
+	border: 1px solid var(--tab-border-color);
 }
 
 .tabset > ul label {
   display:inline-block;
   padding:0.25em 1em;
-  background:hsl(220, 100%, 90%);
+  /* background:hsl(220, 100%, 90%); */
+	background: var(--tab-background-color);
   border-right-width:0;
 }
 
@@ -327,7 +284,8 @@ tr:nth-child(even) {
 
 .tabset > div {
   position:relative;
-  background:hsl(220, 100%, 98%);
+  /* background:hsl(220, 100%, 98%); */
+	background: var(--tab-content-background-color);
   border-radius:0 0.5em 0.5em 0.5em;
   top: -0.5em;
 }
@@ -391,6 +349,14 @@ tr:nth-child(even) {
   -ms-user-select:none;
   user-select:none;
 }
+/*
+ * Main
+ */
+main {
+  background-color: var(--background-color);
+  padding: 1rem;
+}
+
 
 /* Utility */
 .gone {

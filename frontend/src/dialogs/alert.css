@@ -42,7 +42,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 12px 20px;
+  padding: 2rem;
   background-color: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   color: #000;
@@ -52,6 +52,7 @@
   pointer-events: all;
   border-left: 3px solid #8b8b8b;
   cursor: pointer;
+	font-size: 1.2rem;
 }
 
 .alert-card.success {
@@ -85,8 +86,8 @@
   margin: 0;
 }
 
-@media(max-width: 768px){ 
-  .alert-col { flex: unset; } 
-} 
+@media(max-width: 768px){
+  .alert-col { flex: unset; }
+}
 
 

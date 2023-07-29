@@ -8,7 +8,6 @@ require (
 	github.com/app-nerds/gobucket/v2 v2.6.1
 	github.com/app-nerds/kit/v6 v6.4.2
 	github.com/golang-migrate/migrate/v4 v4.15.2
-	github.com/google/uuid v1.3.0
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/sessions v1.2.1

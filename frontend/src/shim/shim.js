@@ -4,80 +4,62 @@
  */
 
 export function shim(baseOptions = {
-  closeOnClick: false,
+	closeOnClick: false,
 }) {
-  /*
-   * internal constructor function to build a new shim
-   */
-  function newShim(options) {
-    options = { ...baseOptions, ...options };
-    let shim = undefined;
+	/*
+	 * internal constructor function to build a new shim
+	 */
+	function newShim(options) {
+		options = { ...baseOptions, ...options };
+		let shim = undefined;
 
-    function calculateHeight() {
-      const body = document.body;
-      const html = document.documentElement;
+		function show() {
+			if (!shim && !document.getElementsByClassName("shim").length) {
+				shim = document.createElement("div");
+				shim.classList.add("shim");
 
-      const bodyHeight = body.getBoundingClientRect().height;
-      const htmlHeight = html.getBoundingClientRect().height;
+				if (options.closeOnClick) {
+					shim.addEventListener("click", () => {
+						destroy(true);
+					});
+				}
 
-      const height = Math.max(bodyHeight, htmlHeight);
-      return height;
-    }
+				document.body.appendChild(shim);
+			} else if (document.getElementsByClassName("shim").length) {
+				shim = document.getElementsByClassName("shim")[0];
+			}
+		}
 
-    function calculateTop() {
-      const r = document.documentElement.getBoundingClientRect();
-      return r.top;
-    }
+		function destroy(fireCallback = true) {
+			if (shim) {
+				shim.remove();
+				shim = undefined;
 
-    function show() {
-      if (!shim && !document.getElementsByClassName("shim").length) {
-        shim = document.createElement("div");
-        shim.style.top = `${calculateTop()}px`;
-        shim.style.height = `${calculateHeight()}px`;
-        shim.classList.add("shim");
+				if (typeof options.callback === "function" && fireCallback) {
+					options.callback();
+				}
+			}
+		}
 
-        if (options.closeOnClick) {
-          shim.addEventListener("click", (e) => {
-            destroy(true);
-          });
-        }
+		return {
+			hide(fireCallback = true) {
+				destroy(fireCallback);
+			},
 
-        document.body.appendChild(shim);
-      } else if (document.getElementsByClassName("shim").length) {
-        shim = document.getElementsByClassName("shim")[0];
-      }
-    }
+			show() {
+				show();
+			},
+		}
+	}
 
-    function destroy(fireCallback = true) {
-      if (shim) {
-        shim.remove();
-        shim = undefined;
-
-        if (typeof options.callback === "function" && fireCallback) {
-          options.callback();
-        }
-      }
-    }
-
-    return {
-      hide(fireCallback = true) {
-        destroy(fireCallback);
-      },
-
-      show() {
-        show();
-      },
-    }
-  }
-
-  /*
-   * Public functions
-   */
-  return {
-    new(options) {
-      options = { ...{ callback: undefined }, ...options };
-      return newShim(options);
-    }
-  };
+	/*
+	 * Public functions
+	 */
+	return {
+		new(options) {
+			options = { ...{ callback: undefined }, ...options };
+			return newShim(options);
+		}
+	};
 }
 
