@@ -37,7 +37,5 @@ build-css:
 		src/color-picker/color-picker.css
 
 copy:
-	cp dist/*.css examples/
-	cp dist/*.js examples/
 	cp dist/*.css ../admin-static/css/
 	cp dist/*.js ../admin-static/js/
