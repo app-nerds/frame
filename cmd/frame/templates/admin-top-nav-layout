@@ -1,0 +1,55 @@
+{{- define "layout"}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title></title>
+  <link rel="stylesheet" href="/static/css/base.min.css" />
+  <link rel="stylesheet" href="/static/css/admin-top-nav.min.css" />
+  <link rel="stylesheet" href="/static/css/icons.min.css" />
+  <link rel="stylesheet" href="/static/css/components.min.css" />
+
+  {{if (IsSet "Stylesheets" .)}}
+  {{range .Stylesheets}}
+  <link rel="stylesheet" href="{{.}}" />
+  {{end}}
+  {{end}}
+</head>
+
+<body>
+  <header>
+    <h1>Admin Top Nav Template</h1>
+
+    <nav class="sidenav">
+      <ul>
+        <li><a href="#"><i class="icon--mdi icon--mdi--home"></i> Home</a></li>
+        <li><a href="#"><i class="icon--mdi icon--mdi--cog"></i> Settings</a></li>
+        <li><a href="#">Link 3</a></li>
+        <li><a href="#">Link 4</a></li>
+      </ul>
+    </nav>
+
+    <div>Member Info</div>
+  </header>
+
+  <main>
+    {{template "content" .}}
+  </main>
+
+  <footer>
+    <p>
+      &copy; {{.Year}} App Nerds LLC
+    </p>
+  </footer>
+
+  {{if (IsSet "JavascriptIncludes" .)}}
+  {{range .JavascriptIncludes}}
+  <script type="{{.Type}}" src="{{.Src}}"></script>
+  {{end}}
+  {{end}}
+</body>
+
+</html>
+{{end}}

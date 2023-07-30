@@ -1,0 +1,20 @@
+package handlers
+
+import (
+	"net/http"
+  "time"
+
+	"github.com/app-nerds/frame"
+  "{{.ModulePath}}/internal/viewmodels"
+)
+
+func IndexPageHandler(app *frame.FrameApplication) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+    viewModel := viewmodels.IndexPageViewModel{
+      Title: "Home",
+      Year: time.Now().Format("2006"),
+    }
+
+    app.RenderTemplate(w, "index.tmpl", viewModel)
+  }
+}

@@ -1,0 +1,48 @@
+# Start from golang base image
+FROM golang:1.20-bullseye as development
+
+# We use this to point to a specific application for building and testing
+ARG GITHUB_TOKEN
+
+# Installing compile daemon for golang
+RUN go install github.com/githubnemo/CompileDaemon@latest
+
+# Set the current working directory inside the container
+WORKDIR /build
+RUN git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+
+# Copy go.mod, go.sum files and download deps
+COPY go.mod ./
+COPY go.sum ./
+RUN go mod download
+
+# Copy sources to the working directory
+COPY . .
+
+# Building the application before the container gets up
+RUN make build
+ENTRYPOINT CompileDaemon --build="make build" --command=./server -pattern="(.+\.go|.+\.json|.+\.js|.+\.tmpl|.+\.css)$"
+
+# Start from previous stage
+FROM development as builder
+
+# Build the Go app
+RUN echo "Building app"
+RUN make build
+
+# Start a new stage from debian
+FROM debian:bullseye
+LABEL org.opencontainers.image.source=https://{{.ModulePath}}
+
+WORKDIR /dist
+
+RUN apt-get update -y && apt-get install -y ca-certificates && update-ca-certificates
+
+# Copy the build artifacts from the previous stage
+COPY --from=builder /build/server .
+COPY --from=builder /build/database-migrations/* /dist/database-migrations/
+
+# Run the executable
+CMD ["./server"]
+
+

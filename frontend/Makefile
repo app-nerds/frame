@@ -39,3 +39,6 @@ build-css:
 copy:
 	cp dist/*.css ../admin-static/css/
 	cp dist/*.js ../admin-static/js/
+	cp dist/*.css ../cmd/frame/templates
+	cp dist/*.js ../cmd/frame/templates
+

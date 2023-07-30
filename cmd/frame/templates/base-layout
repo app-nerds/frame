@@ -1,0 +1,33 @@
+{{- define "layout"}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title></title>
+  <link rel="stylesheet" href="/static/css/base.min.css" />
+  <link rel="stylesheet" href="/static/css/icons.min.css" />
+  <link rel="stylesheet" href="/static/css/components.min.css" />
+
+  {{if (IsSet "Stylesheets" .)}}
+  {{range .Stylesheets}}
+  <link rel="stylesheet" href="{{.}}" />
+  {{end}}
+  {{end}}
+</head>
+
+<body>
+  <main>
+    {{template "content" .}}
+  </main>
+
+  {{if (IsSet "JavascriptIncludes" .)}}
+  {{range .JavascriptIncludes}}
+  <script type="{{.Type}}" src="{{.Src}}"></script>
+  {{end}}
+  {{end}}
+</body>
+
+</html>
+{{end}}

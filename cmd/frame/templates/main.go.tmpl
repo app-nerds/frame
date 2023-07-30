@@ -1,0 +1,60 @@
+package main
+
+import (
+	"embed"
+	"net/http"
+
+	"github.com/app-nerds/frame"
+	"github.com/sirupsen/logrus"
+  "{{.ModulePath}}/internal/handlers"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+)
+
+var (
+	Version string = "development"
+  appName string = "{{.AppName}}"
+
+	app *frame.FrameApplication
+
+	//go:embed app
+	appFS embed.FS
+
+	//go:embed frontend-templates/*
+	templateFS embed.FS
+)
+
+func main() {
+	/*
+	 * Configure our application
+	 */
+	app = frame.NewFrameApplication(appName, Version).
+		AddWebApp(&frame.WebAppConfig{
+			AppFolder:         "app",
+			AppFS:             appFS,
+			PrimaryLayoutName: "layout",
+			TemplateFS:        templateFS,
+			TemplateManifest: frame.TemplateCollection{
+				{Name: "layout.tmpl", IsLayout: true},
+				{Name: "index.tmpl", UseLayout: "layout.tmpl"},
+			},
+		}).
+		Database("database-migrations")
+
+	/*
+	 * Setup services
+	 */
+
+	app.Logger.WithFields(logrus.Fields{
+		"frameConfig": app.Config,
+	}).Info("configuration")
+
+	/*
+	 * Setup our endpoint mapping and start the application.
+	 */
+	app = app.SetupEndpoints(frame.Endpoints{
+		{Path: "/", Methods: []string{http.MethodGet}, HandlerFunc: handlers.IndexPageHandler(app)},
+	})
+
+  <-app.Start()
+	app.Stop()
+}

@@ -1,0 +1,16 @@
+{{template "layout" .}}
+{{define "title"}}Home{{end}}
+{{define "content"}}
+
+<h2>Dashboard</h2>
+
+<div class="action-bar">
+  <button><i class="icon--mdi icon--mdi--arrow-left"></i> Back</button>
+  <button class="action-button"><i class="icon--mdi icon--mdi--plus"></i> Add</button>
+</div>
+
+<p>
+  Hello there!
+</p>
+
+{{end}}
