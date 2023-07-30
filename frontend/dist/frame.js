@@ -1,4 +1,4 @@
-/* Copyright © 2022 App Nerds LLC v1.1.0 */
+/* Copyright © 2022 App Nerds LLC v1.2.0 */
 /*
  * alert is a simple toast library inspired by vanilla-toast (https://github.com/mehmetemineker/vanilla-toast)
  * It is self contained and only relies on styles provided by alert.css.
