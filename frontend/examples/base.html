@@ -67,20 +67,20 @@
 
 		<form>
 			<label for="first">First</label>
-			<input type="text" id="first" />
+			<input type="text" id="first" autocomplete="name" />
 			<small>
 				This is additional information for this form field
 			</small>
 
 			<label for="second">Second</label>
-			<select id="second">
+			<select id="second" autocomplete="on">
 				<option value="value1">Value 1</option>
 				<option value="value2">Value 2</option>
 				<option value="value3">Value 3</option>
 			</select>
 
 			<label for="third">Third</label>
-			<textarea id="third">Text goes here</textarea>
+			<textarea id="third" autocomplete="off">Text goes here</textarea>
 
 			<nav>
 				<button type="button"><i class="icon--mdi icon--mdi--arrow-left" alt="Left arrow"></i> Cancel</button>
@@ -258,7 +258,7 @@
 		</ul>
 
 		<div style="margin-bottom: 1rem;">
-			<button id="showPopup">Show popup menu</button>
+			<button id="showPopup" aria-haspopup="menu">Show popup menu</button>
 			<popup-menu id="popup" trigger="#showPopup">
 				<popup-menu-item id="menuItem1" text="Menu Item 1" icon="airplay"></popup-menu-item>
 				<popup-menu-item id="menuItem2" text="Menu Item 2" icon="archive"></popup-menu-item>
