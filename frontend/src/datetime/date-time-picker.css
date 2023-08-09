@@ -1,0 +1,113 @@
+:root {
+	--date-time-picker-background-color: white;
+	--date-time-picker-header-color: #cccccc9c;
+}
+
+date-time-picker {
+	display: block;
+	margin-bottom: 1.1em;
+}
+
+date-time-picker p {
+	margin-top: -0.3em;
+}
+
+.date-time-picker-popup {
+	display: grid;
+	grid-template-rows: 0fr 1fr;
+	border: 1px solid var(--border-color);
+	max-width: 20em;
+	width: 20em;
+	box-shadow: var(--shadow-color) 0px 7px 29px 0px;
+	background-color: var(--date-time-picker-background-color);
+	position: absolute;
+	z-index: 1;
+	transform: translateY(-2em);
+}
+
+.date-time-picker-popup > section {
+	padding: 0.5em;
+}
+
+.calendar-hidden {
+	display: none !important;
+}
+
+.date-time-picker-popup a {
+	cursor: pointer;
+}
+
+.date-time-picker-popup header {
+	display: grid;
+	background-color: var(--date-time-picker-header-color);
+	grid-template-columns: repeat(4, 25%);
+	justify-items: center;
+	align-items: center;
+	height: 1.8em;
+	margin-bottom: 0.3em;
+	box-shadow: var(--shadow-color) 0px 7px 29px 0px;
+	font-weight: bold;
+}
+
+.date-time-picker-popup .header-day {
+	padding: 0.2em;
+}
+
+.date-time-picker-popup .calendar-body {
+	width: 100%;
+	display: grid;
+}
+
+.date-time-picker-popup .calendar-body select {
+	width: 100%;
+	margin-top: 1em;
+	margin-bottom: 0.2em;
+}
+
+.date-time-picker-popup .calendar-body a.ok {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	text-align: center;
+	width: 100%;
+}
+
+.date-time-picker-popup .calendar-body a {
+	text-decoration: none;
+}
+
+.date-time-picker-popup .calendar-body a.today {
+	text-decoration: underline;
+}
+
+.date-time-picker-popup .calendar-body .week {
+	grid-template-columns: repeat(7, 1fr);
+	display: grid;
+	height: 100%;
+	width: 100%;
+	align-items: center;
+}
+
+.date-time-picker-popup .calendar-body .week .day {
+	text-align: center;
+	padding: 0.5em;
+}
+
+.date-time-picker-popup .month-list-body {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.4em;
+}
+
+.date-time-picker-popup .year-list-body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3em;
+	align-items: center;
+}
+
+.date-time-picker-popup .year-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.4em;
+	margin: 0.3em 0 0.5em 0;
+}

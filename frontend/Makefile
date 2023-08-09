@@ -26,7 +26,7 @@ build-library: rollup
 	uglifyjs dist/frame.js -c -m -o dist/frame.min.js --comments '/v\d.\d.\d/' --source-map
 
 rollup: build-css
-	rollup src/frame.js --name dist/frame.js --format es -o dist/frame.js --banner "/* Copyright © 2022 App Nerds LLC $(VERSION) */"
+	rollup src/frame.js --name dist/frame.js --format es -o dist/frame.js --banner "/* Copyright © 2023 App Nerds LLC $(VERSION) */"
 
 build-css:
 	uglifycss --output dist/base.min.css src/css/base.css
@@ -34,6 +34,7 @@ build-css:
 	uglifycss --output dist/admin-left-side-nav.min.css src/css/base.css src/css/admin-left-side-nav.css
 	uglifycss --output dist/admin-top-nav.min.css src/css/base.css src/css/admin-top-nav.css
 	uglifycss --output dist/components.min.css src/dialogs/alert.css \
+		src/datetime/date-time-picker.css \
 		src/dialogs/confirm.css src/menus/popup-menu.css src/shim/shim.css \
 		src/spinner/spinner.css src/members/member-login-bar.css \
 		src/members/google-login-form.css src/message-bar/message-bar.css \

@@ -3,7 +3,7 @@
  * If the color the user wants is not there, they can type a hex code into the box to get
  * the color they want.
  *
- * Copyright © 2022 App Nerds LLC
+ * Copyright © 2023 App Nerds LLC
  */
 
 export default class ColorPicker extends HTMLElement {
