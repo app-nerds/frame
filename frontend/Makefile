@@ -12,6 +12,9 @@ setup: ## Sets up dependencies
 run: ## Runs the example
 	@cd examples && python3 -m http.server 8000
 
+watch: ## Watches for changes and rebuilds
+	watchman-make -p 'src/**/*.css' 'src/**/*.js' -t build
+
 build: clean build-library copy ## Builds Nerd JS Library for distribution
 
 build-debug: clean rollup ## Builds a non-minified version of Nerd JS Library
