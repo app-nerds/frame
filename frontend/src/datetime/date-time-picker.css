@@ -37,7 +37,7 @@ date-time-picker p {
 	cursor: pointer;
 }
 
-.date-time-picker-popup header {
+.date-time-picker-popup > header {
 	display: grid;
 	background-color: var(--date-time-picker-header-color);
 	grid-template-columns: repeat(4, 25%);

@@ -28,7 +28,10 @@ export default class DateTimePicker extends HTMLElement {
 		];
 
 		this.name = this.getAttribute("name") || "dateTime";
-		this.date = parseDateTime(this.getAttribute("date")) || Date.now();
+
+		/* Get the date from attributes. If one isn't passed in, use now, but zero out the time. */
+		this.date = (this.getAttribute("date") !== "") ? parseDateTime(this.getAttribute("date")) : new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0);
+
 		this.dateFormat = this.getAttribute("date-format") || DateFormats.IsoWithTimezone;
 		this.showTimeSelector = this.dateFormat === DateFormats.IsoWithTimezone || this.dateFormat === DateFormats.IsoWithoutTimezone ||
 			this.dateFormat === DateFormats.UsDateTimeWithSeconds || this.dateFormat === DateFormats.UsDateTimeWithoutSeconds ||

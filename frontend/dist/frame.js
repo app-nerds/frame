@@ -1,4 +1,4 @@
-/* Copyright © 2023 App Nerds LLC v1.2.3 */
+/* Copyright © 2023 App Nerds LLC v1.3.1 */
 /*
  * alert is a simple toast library inspired by vanilla-toast (https://github.com/mehmetemineker/vanilla-toast)
  * It is self contained and only relies on styles provided by alert.css.
@@ -557,7 +557,10 @@ class DateTimePicker extends HTMLElement {
 		];
 
 		this.name = this.getAttribute("name") || "dateTime";
-		this.date = parseDateTime(this.getAttribute("date")) || Date.now();
+
+		/* Get the date from attributes. If one isn't passed in, use now, but zero out the time. */
+		this.date = (this.getAttribute("date") !== "") ? parseDateTime(this.getAttribute("date")) : new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0);
+
 		this.dateFormat = this.getAttribute("date-format") || DateFormats.IsoWithTimezone;
 		this.showTimeSelector = this.dateFormat === DateFormats.IsoWithTimezone || this.dateFormat === DateFormats.IsoWithoutTimezone ||
 			this.dateFormat === DateFormats.UsDateTimeWithSeconds || this.dateFormat === DateFormats.UsDateTimeWithoutSeconds ||
