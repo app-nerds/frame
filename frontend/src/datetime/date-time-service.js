@@ -20,6 +20,11 @@ const formatMap = {
 	"mm/dd/yyyy": format8,
 }
 
+/**
+ * parseDateTime parses a date/time string into a Date object.
+ * @param {string|number|Date} dt
+ * @returns {Date}
+ */
 export function parseDateTime(dt) {
 	if (typeof dt === "number") {
 		return new Date(dt);
@@ -34,6 +39,12 @@ export function parseDateTime(dt) {
 	}
 }
 
+/**
+ * formatDateTime formats a Date object into a string using the specified format.
+ * @param {string|number|Date} dt
+ * @param {string} format
+ * @returns {string}
+ */
 export function formatDateTime(dt, format) {
 	let date = parseDateTime(dt);
 	let formatter = formatMap[format.toLowerCase()];
@@ -45,26 +56,46 @@ export function formatDateTime(dt, format) {
 	return formatter(date);
 }
 
+/**
+ * @param {Date} dt
+ * @returns {string}
+ */
 function format1(dt) {
 	let { year, month, day, hour, minute, second } = breakDownDate(dt);
 	return `${zeroPad(year)}-${zeroPad(month)}-${zeroPad(day)}T${zeroPad(hour)}:${zeroPad(minute)}:${zeroPad(second)}Z`;
 }
 
+/**
+ * @param {Date} dt
+ * @returns {string}
+ */
 function format2(dt) {
 	let { year, month, day, hour, minute, second } = breakDownDate(dt);
 	return `${zeroPad(year)}-${zeroPad(month)}-${zeroPad(day)}T${zeroPad(hour)}:${zeroPad(minute)}:${zeroPad(second)}`;
 }
 
+/**
+ * @param {Date} dt
+ * @returns {string}
+ */
 function format3(dt) {
 	let { year, month, day, hour, minute, second } = breakDownDate(dt);
 	return `${zeroPad(year)}-${zeroPad(month)}-${zeroPad(day)} ${zeroPad(hour)}:${zeroPad(minute)}:${zeroPad(second)}`;
 }
 
+/**
+ * @param {Date} dt
+ * @returns {string}
+ */
 function format4(dt) {
 	let { year, month, day, hour, minute } = breakDownDate(dt);
 	return `${zeroPad(year)}-${zeroPad(month)}-${zeroPad(day)} ${zeroPad(hour)}:${zeroPad(minute)}`;
 }
 
+/**
+ * @param {Date} dt
+ * @returns {string}
+ */
 function format5(dt) {
 	let { year, month, day, hour, minute, second } = breakDownDate(dt);
 	let meridian = "AM";
@@ -81,6 +112,10 @@ function format5(dt) {
 	return `${zeroPad(month)}/${zeroPad(day)}/${zeroPad(year)} ${zeroPad(hour)}:${zeroPad(minute)}:${zeroPad(second)} ${meridian}`;
 }
 
+/**
+ * @param {Date} dt
+ * @returns {string}
+ */
 function format6(dt) {
 	let { year, month, day, hour, minute } = breakDownDate(dt);
 	let meridian = "AM";
@@ -97,16 +132,28 @@ function format6(dt) {
 	return `${zeroPad(month)}/${zeroPad(day)}/${zeroPad(year)} ${zeroPad(hour)}:${zeroPad(minute)} ${meridian}`;
 }
 
+/**
+ * @param {Date} dt
+ * @returns {string}
+ */
 function format7(dt) {
 	let { year, month, day } = breakDownDate(dt);
 	return `${zeroPad(year)}-${zeroPad(month)}-${zeroPad(day)}`;
 }
 
+/**
+ * @param {Date} dt
+ * @returns {string}
+ */
 function format8(dt) {
 	let { year, month, day } = breakDownDate(dt);
 	return `${zeroPad(month)}/${zeroPad(day)}/${zeroPad(year)}`;
 }
 
+/**
+ * @param {Date} dt
+ * @returns {object}
+ */
 function breakDownDate(dt) {
 	let year = dt.getFullYear();
 	let month = dt.getMonth() + 1;
@@ -125,10 +172,18 @@ function breakDownDate(dt) {
 	};
 }
 
+/**
+ * @param {number} num
+ * @returns {string}
+ */
 function zeroPad(num) {
 	return num.toString().padStart(2, "0");
 }
 
+/**
+ * @param {string} dt
+ * @returns {Date}
+ */
 function parseDateString(dt) {
 	const formatRegexes = [
 		/(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})t(?<hour>\d{2}):(?<minute>\d{2}):(?<second>\d{2})z/i,                         /* YYYY-MM-DDTHH-mm-ssZ */
@@ -143,23 +198,21 @@ function parseDateString(dt) {
 		let match = dt.match(formatRegexes[i]);
 
 		if (match) {
-			let year = match.groups.year || new Date().getFullYear();
-			let month = match.groups.month || new Date().getMonth();
-			let day = match.groups.day || new Date().getDate();
-			let hour = match.groups.hour || 0;
-			let minute = match.groups.minute || 0;
-			let second = match.groups.second || 0;
+			let year = parseInt(match.groups.year) || new Date().getFullYear();
+			let month = parseInt(match.groups.month) || new Date().getMonth();
+			let day = parseInt(match.groups.day) || new Date().getDate();
+			let hour = parseInt(match.groups.hour) || 0;
+			let minute = parseInt(match.groups.minute) || 0;
+			let second = parseInt(match.groups.second) || 0;
 			let meridian = match.groups.meridian || "";
 
 			if (meridian !== "") {
-				hour = parseInt(hour);
-
 				if (meridian.toLowerCase() === "pm" && hour < 12) {
-					hour = parseInt(hour) + 12;
+					hour += 12;
 				}
 			}
 
-			return new Date(year, parseInt(month) - 1, day, hour, minute, second);
+			return new Date(year, month - 1, day, hour, minute, second);
 		}
 	}
 

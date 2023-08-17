@@ -1,18 +1,16 @@
-/*
- * Copyright © 2022 App Nerds LLC
- */
-
 /**
  * Converts a classic JS object to a Map
+ * Copyright © 2023 App Nerds LLC
  * @param o object The object to convert
+ * @returns {Map} A Map
  */
 export const objectToMap = (o = {}) => {
-  let result = new Map();
+	let result = new Map();
 
-  for (const key in o) {
-    result.set(key, o[key]);
-  }
+	for (const key in o) {
+		result.set(key, o[key]);
+	}
 
-  return result;
+	return result;
 };
 

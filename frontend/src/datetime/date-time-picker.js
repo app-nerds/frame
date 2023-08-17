@@ -1,13 +1,12 @@
-/*
- * date-time-picker is a custom HTML element that allows the user to select a date and time.
- * It supports custom date formats.
- *
- * Copyright © 2023 App Nerds LLC
- */
-
 import { parseDateTime, formatDateTime, DateFormats } from "./date-time-service.js";
 
-export default class DateTimePicker extends HTMLElement {
+/**
+ * date-time-picker is a custom HTML element that allows the user to select a date and time.
+ * It supports custom date formats.
+ * @class DateTimePicker
+ * @extends HTMLElement
+ */
+export class DateTimePicker extends HTMLElement {
 	constructor() {
 		super();
 
@@ -30,7 +29,7 @@ export default class DateTimePicker extends HTMLElement {
 		this.name = this.getAttribute("name") || "dateTime";
 
 		/* Get the date from attributes. If one isn't passed in, use now, but zero out the time. */
-		this.date = (this.getAttribute("date") !== "") ? parseDateTime(this.getAttribute("date")) : new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0);
+		this.date = (this.getAttribute("date") !== "") ? parseDateTime(this.getAttribute("date")) : "";
 
 		this.dateFormat = this.getAttribute("date-format") || DateFormats.IsoWithTimezone;
 		this.showTimeSelector = this.dateFormat === DateFormats.IsoWithTimezone || this.dateFormat === DateFormats.IsoWithoutTimezone ||
@@ -47,7 +46,7 @@ export default class DateTimePicker extends HTMLElement {
 		this.day = 0;
 		this.timeSelectorEl = null;
 		this.selectedTimeIndex = 0;
-		this.yearBlockStart = this.getYear() - 5;
+		this.yearBlockStart = this._getYear() - 5;
 	}
 
 	connectedCallback() {
@@ -57,32 +56,75 @@ export default class DateTimePicker extends HTMLElement {
 		this.inputEl = this._createInputEl();
 		let formatP = this._createInputLabel();
 
-		this.popupEl = this.createPopupEl();
-		this.drawHeaderEl();
-		this.drawCalendarBody();
+		this.popupEl = this._createPopupEl();
+		this._drawHeaderEl();
+		this._drawCalendarBody();
 
 		this.insertAdjacentElement("beforeend", this.inputEl);
 		this.insertAdjacentElement("beforeend", formatP);
 		this.insertAdjacentElement("beforeend", this.popupEl);
 	}
 
-	createPopupEl() {
-		let el = document.createElement("div");
-		this.headerEl = document.createElement("header");
-		this.bodyEl = document.createElement("section");
+	/****************************************************
+	 * PUBLIC METHODS
+	 ****************************************************/
 
-		el.classList.add("date-time-picker-popup", "calendar-hidden");
-		el.setAttribute("role", "dialog");
-		el.setAttribute("aria-modal", "true");
-		el.setAttribute("aria-label", `Choose Date`);
-
-		el.insertAdjacentElement("beforeend", this.headerEl);
-		el.insertAdjacentElement("beforeend", this.bodyEl);
-
-		return el;
+	/**
+	 * clear clears the date picker value.
+	 * @returns {void}
+	 */
+	clear() {
+		this.inputEl.value = "";
 	}
 
-	drawHeaderEl() {
+	/**
+	 * getDate returns the currently selected date.
+	 * @returns {string|Date}
+	 */
+	getDate() {
+		return this.date;
+	}
+
+	/**
+	 * Moves the calendar forward or backward one month. A positive number moves forward, a negative number moves backward.
+	 * @param {number} direction
+	 */
+	moveMonth(direction) {
+		let newDate = new Date(this.date);
+		newDate.setMonth(newDate.getMonth() + direction);
+
+		this.date = newDate;
+		/** @type {HTMLAnchorElement} */ (this.popupEl.querySelector("header a:nth-child(2)")).innerText = this._getMonthName();
+		/** @type {HTMLAnchorElement} */ (this.popupEl.querySelector("header a:nth-child(3)")).innerText = this._getYear().toString();
+		this.popupEl.querySelector(".calendar-body").remove();
+		this._drawCalendarBody();
+	}
+
+	/**
+	 * setDate sets the date picker value.
+	 * @param {Date} dt
+	 * @returns {void}
+	 */
+	setDate(dt) {
+		this.date = dt;
+		this.day = dt.getDate();
+		this._setInputDate();
+	}
+
+	/**
+	 * toggleCalendar shows or hides the calendar.
+	 * @returns {void}
+	 */
+	toggleCalendar() {
+		this.popupEl.classList.toggle("calendar-hidden");
+		this.inputEl.focus();
+	}
+
+	/****************************************************
+	 * PRIVATE METHODS
+	 ****************************************************/
+
+	_drawHeaderEl() {
 		let previousMonthEl = this._createPreviousMonthButton();
 		let nextMonthEl = this._createNextMonthButton();
 		let currentMonthEl = this._createCurrentMonthButton();
@@ -95,13 +137,13 @@ export default class DateTimePicker extends HTMLElement {
 		this.headerEl.insertAdjacentElement("beforeend", nextMonthEl);
 	}
 
-	drawCalendarBody() {
+	_drawCalendarBody() {
 		let bodyDiv = document.createElement("div");
 		let weekDiv = this._createCalendarBodyWeekDiv();
 
-		let firstDate = this.getFirstDayOfMonth();
+		let firstDate = this._getFirstDayOfMonth();
 		let firstDayOfWeek = firstDate.getDay();
-		let lastDate = this.getLastDayOfMonth();
+		let lastDate = this._getLastDayOfMonth();
 		let lastDay = lastDate.getDate();
 		let started = false;
 
@@ -142,10 +184,10 @@ export default class DateTimePicker extends HTMLElement {
 			bodyDiv.insertAdjacentElement("beforeend", okButton);
 		}
 
-		this.replaceBodyEl(bodyDiv);
+		this._replaceBodyEl(bodyDiv);
 	}
 
-	drawMonthListBody() {
+	_drawMonthListBody() {
 		const body = document.createElement("div");
 		body.classList.add("month-list-body");
 
@@ -154,10 +196,10 @@ export default class DateTimePicker extends HTMLElement {
 			body.insertAdjacentElement("beforeend", month);
 		}
 
-		this.replaceBodyEl(body);
+		this._replaceBodyEl(body);
 	}
 
-	drawYearListBody() {
+	_drawYearListBody() {
 		const body = document.createElement("div");
 		body.classList.add("year-list-body");
 
@@ -177,39 +219,31 @@ export default class DateTimePicker extends HTMLElement {
 		body.insertAdjacentElement("beforeend", yearList);
 		body.insertAdjacentElement("beforeend", yearDown);
 
-		this.replaceBodyEl(body);
+		this._replaceBodyEl(body);
 	}
 
-	getMonth() { return new Date(this.date).getMonth(); }
-	getMonthName() { return this._months[this.getMonth()]; }
-	getYear() { return new Date(this.date).getFullYear(); }
-	getDay() { return new Date(this.date).getDate(); }
-	getFirstDayOfMonth() {
-		let result = new Date(this.getYear(), this.getMonth(), 1);
+	_getMonth() { return new Date(this.date).getMonth(); }
+	_getMonthName() { return this._months[this._getMonth()]; }
+	_getYear() { return new Date(this.date).getFullYear(); }
+	_getDay() { return new Date(this.date).getDate(); }
+	_getFirstDayOfMonth() {
+		let result = new Date(this._getYear(), this._getMonth(), 1);
 		return result;
 	}
-	getLastDayOfMonth() {
-		let result = new Date(this.getYear(), this.getMonth() + 1, 0);
+	_getLastDayOfMonth() {
+		let result = new Date(this._getYear(), this._getMonth() + 1, 0);
 		return result;
 	}
-	getHour() { return new Date(this.date).getHours(); }
-	getMinute() { return new Date(this.date).getMinutes(); }
-	getSecond() { return new Date(this.date).getSeconds(); }
+	_getHour() { return new Date(this.date).getHours(); }
+	_getMinute() { return new Date(this.date).getMinutes(); }
+	_getSecond() { return new Date(this.date).getSeconds(); }
 
-	moveMonth(direction) {
-		let newDate = new Date(this.date);
-		newDate.setMonth(newDate.getMonth() + direction);
-
-		this.date = newDate;
-		this.popupEl.querySelector("header a:nth-child(2)").innerText = this.getMonthName();
-		this.popupEl.querySelector("header a:nth-child(3)").innerText = this.getYear();
-		this.popupEl.querySelector(".calendar-body").remove();
-		this.drawCalendarBody();
-	}
-
-	onCalendarDayClick(day) {
+	/**
+	 * @param {number} day
+	 */
+	_onCalendarDayClick(day) {
 		this.day = day;
-		this.setInputDate();
+		this._setInputDate();
 
 		if (!this.showTimeSelector) {
 			this.toggleCalendar();
@@ -219,65 +253,83 @@ export default class DateTimePicker extends HTMLElement {
 		}
 	}
 
-	onHeaderMonthClick() {
-		this.drawMonthListBody();
+	_onHeaderMonthClick() {
+		this._drawMonthListBody();
 	}
 
-	onHeaderYearClick() {
-		this.drawYearListBody();
+	/**
+	 * @returns {void}
+	 */
+	_onHeaderYearClick() {
+		this._drawYearListBody();
 	}
 
-	onMonthClick(monthIndex) {
-		this.date = new Date(this.getYear(), monthIndex, 1);
-		this.setInputDate(this.date);
-		this.drawHeaderEl();
-		this.drawCalendarBody();
+	/**
+	 * @param {number} monthIndex
+	 */
+	_onMonthClick(monthIndex) {
+		this.date = new Date(this._getYear(), monthIndex, 1);
+		this._setInputDate();
+		this._drawHeaderEl();
+		this._drawCalendarBody();
 	}
 
-	onTimeChange(e) {
+	/**
+	 * @param {Event & { target: HTMLSelectElement }} e
+	 */
+	_onTimeChange(e) {
 		let selected = e.target.value;
 		this.selectedTimeIndex = e.target.selectedIndex;
 		this.date = selected;
-		this.setInputDate();
+		this._setInputDate();
 	}
 
-	onYearClick(year) {
-		this.date = new Date(year, this.getMonth(), 1);
-		this.setInputDate(this.date);
-		this.drawHeaderEl();
-		this.drawCalendarBody();
+	/**
+	 * @param {number} year
+	 */
+	_onYearClick(year) {
+		this.date = new Date(year, this._getMonth(), 1);
+		this._setInputDate();
+		this._drawHeaderEl();
+		this._drawCalendarBody();
 	}
 
-	onYearDownClick() {
+	_onYearDownClick() {
 		this.yearBlockStart += 10;
-		this.drawYearListBody();
+		this._drawYearListBody();
 	}
 
-	onYearUpClick() {
+	_onYearUpClick() {
 		this.yearBlockStart -= 10;
-		this.drawYearListBody();
+		this._drawYearListBody();
 	}
 
-	replaceBodyEl(newBody) {
+	/**
+	 * @param {HTMLDivElement} newBody
+	 */
+	_replaceBodyEl(newBody) {
 		this.bodyEl.innerHTML = "";
 		this.bodyEl.insertAdjacentElement("beforeend", newBody);
 	}
 
-	setInputDate() {
-		let selected = new Date(this.getYear(), this.getMonth(), this.day, this.getHour(), this.getMinute(), this.getSecond());
+	_setInputDate() {
+		let selected = new Date(this._getYear(), this._getMonth(), this.day, this._getHour(), this._getMinute(), this._getSecond());
 
 		this.inputEl.value = formatDateTime(selected, this.dateFormat);
 		this.dispatchEvent(new CustomEvent("change", { detail: { value: selected } }));
 	}
 
-	toggleCalendar() {
-		this.popupEl.classList.toggle("calendar-hidden");
-		this.inputEl.focus();
-	}
 
 	/**********************************************************************
 	 * Methods to return invididual elements
 	 *********************************************************************/
+
+	/**
+	 * @param {boolean} started
+	 * @param {number} dayIndex
+	 * @param {number} firstDayOfWeek
+	 * @returns {HTMLDivElement}
+	 */
 	_createCalendarBodyDayDiv(started, dayIndex, firstDayOfWeek) {
 		let el = document.createElement("div");
 		el.classList.add("day");
@@ -288,9 +340,9 @@ export default class DateTimePicker extends HTMLElement {
 			let a = document.createElement("a");
 			a.href = "javascript:void(0)";
 			a.innerText = `${d}`;
-			a.addEventListener("click", this.onCalendarDayClick.bind(this, d));
+			a.addEventListener("click", this._onCalendarDayClick.bind(this, d));
 
-			let thisDay = new Date(this.getYear(), this.getMonth(), d);
+			let thisDay = new Date(this._getYear(), this._getMonth(), d);
 			if (thisDay === this.today) {
 				a.classList.add("today");
 			}
@@ -312,16 +364,16 @@ export default class DateTimePicker extends HTMLElement {
 	_createCurrentMonthButton() {
 		let el = document.createElement("a");
 		el.href = "javascript:void(0)";
-		el.innerHTML = this.getMonthName();
-		el.addEventListener("click", this.onHeaderMonthClick.bind(this));
+		el.innerHTML = this._getMonthName();
+		el.addEventListener("click", this._onHeaderMonthClick.bind(this));
 		return el;
 	}
 
 	_createCurrentYearButton() {
 		let el = document.createElement("a");
 		el.href = "javascript:void(0)";
-		el.innerHTML = this.getYear();
-		el.addEventListener("click", this.onHeaderYearClick.bind(this));
+		el.innerHTML = this._getYear().toString();
+		el.addEventListener("click", this._onHeaderYearClick.bind(this));
 		return el;
 	}
 
@@ -330,9 +382,19 @@ export default class DateTimePicker extends HTMLElement {
 		el.setAttribute("type", "datetime");
 		el.setAttribute("name", this.name);
 		el.setAttribute("aria-describedby", `${this.name}-format`);
-		el.value = formatDateTime(this.date, this.dateFormat);
+
+		if (this.date instanceof Date) {
+			el.value = formatDateTime(this.date, this.dateFormat);
+		}
 
 		el.addEventListener("click", () => {
+			if (this.date === "") {
+				this.date = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0);
+				this._drawHeaderEl();
+				this._drawCalendarBody();
+
+			}
+
 			this.toggleCalendar();
 		});
 
@@ -346,11 +408,15 @@ export default class DateTimePicker extends HTMLElement {
 		return el;
 	}
 
+	/**
+	 * @param {number} monthIndex
+	 * @returns {HTMLAnchorElement}
+	 */
 	_createMonthButton(monthIndex) {
 		let month = document.createElement("a");
 		month.href = "javascript:void(0)";
 		month.innerText = this._months[monthIndex];
-		month.addEventListener("click", this.onMonthClick.bind(this, monthIndex));
+		month.addEventListener("click", this._onMonthClick.bind(this, monthIndex));
 		return month;
 	}
 
@@ -371,6 +437,22 @@ export default class DateTimePicker extends HTMLElement {
 		return el;
 	}
 
+	_createPopupEl() {
+		let el = document.createElement("div");
+		this.headerEl = document.createElement("header");
+		this.bodyEl = document.createElement("section");
+
+		el.classList.add("date-time-picker-popup", "calendar-hidden");
+		el.setAttribute("role", "dialog");
+		el.setAttribute("aria-modal", "true");
+		el.setAttribute("aria-label", `Choose Date`);
+
+		el.insertAdjacentElement("beforeend", this.headerEl);
+		el.insertAdjacentElement("beforeend", this.bodyEl);
+
+		return el;
+	}
+
 	_createPreviousMonthButton() {
 		let el = document.createElement("a");
 		el.href = "javascript:void(0)";
@@ -382,7 +464,7 @@ export default class DateTimePicker extends HTMLElement {
 	_createTimeSelector() {
 		this.timeSelectorEl = document.createElement("select");
 		this._createTimeSelectorOptions();
-		this.timeSelectorEl.addEventListener("change", this.onTimeChange.bind(this));
+		this.timeSelectorEl.addEventListener("change", this._onTimeChange.bind(this));
 	}
 
 	_createTimeSelectorOptions() {
@@ -410,7 +492,7 @@ export default class DateTimePicker extends HTMLElement {
 			increment = 60;
 		}
 
-		let start = new Date(this.getYear(), this.getMonth(), this.getDay(), 0, 0, 0);
+		let start = new Date(this._getYear(), this._getMonth(), this._getDay(), 0, 0, 0);
 		let index = 0;
 
 		for (let i = 0; i < 1440; i += increment) {
@@ -451,11 +533,15 @@ export default class DateTimePicker extends HTMLElement {
 		}
 	}
 
+	/**
+	 * @param {number} year
+	 * @returns {HTMLAnchorElement}
+	 */
 	_createYearButton(year) {
 		let el = document.createElement("a");
 		el.href = "javascript:void(0)";
-		el.innerText = year;
-		el.addEventListener("click", this.onYearClick.bind(this, year));
+		el.innerText = year.toString();
+		el.addEventListener("click", this._onYearClick.bind(this, year));
 		return el;
 	}
 
@@ -463,7 +549,7 @@ export default class DateTimePicker extends HTMLElement {
 		const el = document.createElement("a");
 		el.href = "javascript:void(0)";
 		el.innerHTML = `<i class="icon--mdi icon--mdi--arrow-down"></i>`;
-		el.addEventListener("click", this.onYearDownClick.bind(this));
+		el.addEventListener("click", this._onYearDownClick.bind(this));
 		return el;
 	}
 
@@ -471,7 +557,7 @@ export default class DateTimePicker extends HTMLElement {
 		const el = document.createElement("a");
 		el.href = "javascript:void(0)";
 		el.innerHTML = `<i class="icon--mdi icon--mdi--arrow-up"></i>`;
-		el.addEventListener("click", this.onYearUpClick.bind(this));
+		el.addEventListener("click", this._onYearUpClick.bind(this));
 		return el;
 	}
 

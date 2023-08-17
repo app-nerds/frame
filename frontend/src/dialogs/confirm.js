@@ -1,5 +1,9 @@
-/*
- * confirm is a function to display a confirmation dialog. It has two mode: "yesno", "other".
+import { Shim } from "../shim/shim.js";
+
+/** @typedef {object & { callback: Function }} ConfirmOptions */
+
+/**
+ * Confirmer displays a confirmation dialog. It has two mode: "yesno", "other".
  * "yesno" mode will display two buttons: Yes and No. "other" will only display a Close button.
  * The result of the click will be returned in a promise value.
  *
@@ -8,40 +12,67 @@
  *   - --border-color
  *
  * Example:
- *    const confirmation = confirm();
- *    const result = await confirmation.yesNo("Are you sure?");
- *
- * Copyright © 2022 App Nerds LLC
+ *    const confirmer = new Confirmer();
+ *    const result = await confirmer.yesNo("Are you sure?");
  */
+export class Confirmer {
+	constructor() {
+	}
 
-import { shim } from "../shim/shim.js";
+	/**
+	 * confirm displays a confirmation dialog. It shows a message and a Close button.
+	 * @param {string} message
+	 * @param {function} callback
+	 * @returns {void}
+	 */
+	confirm(message, callback) {
+		this.show("confirm", message, callback);
+	}
 
-export function confirm(baseOptions = {
-	callback: undefined,
-}) {
-	const shimBuilder = shim({ closeOnClick: true });
-	let _shim;
+	/**
+	 * yesNo displays a confirmation dialog. It shows a message and Yes and No buttons.
+	 * @param {string} message
+	 * @returns {Promise<boolean>}
+	 */
+	yesNo(message) {
+		return new Promise((resolve) => {
+			const cb = (result) => {
+				return resolve(result);
+			};
 
-	function show(type, message, options) {
-		options = { ...baseOptions, ...options };
+			this.show("yesno", message, cb);
+		});
+	}
 
+	/**
+	 * show displays a confirmation dialog. This is a raw function that is normally
+	 * used by the yesNo and confirm functions.
+	 * @param {string} type
+	 * @param {string} message
+	 * @param {function} callback
+	 * @returns {void}
+	 */
+	show(type, message, callback) {
 		const container = document.createElement("dialog");
 		container.classList.add("confirm-container");
 
-		_shim = shimBuilder.new({ callback: () => { close(container, options.callback, false); } });
+		let shim = new Shim(true, () => { this._close(container, callback, false); });
 
-		setContent(container, message);
-		addButtons(container, type, options.callback);
+		container.innerHTML += `<p>${message}</p>`;
+		this._addButtons(container, type, shim, callback);
 
-		_shim.show();
+		shim.show();
 		document.body.appendChild(container);
 	}
 
-	function setContent(container, message) {
-		container.innerHTML += `<p>${message}</p>`;
+	_close(container, callback, callbackValue) {
+		container.remove();
+		if (typeof callback === "function") {
+			callback(callbackValue);
+		}
 	}
 
-	function addButtons(container, type, callback) {
+	_addButtons(container, type, shim, callback) {
 		let buttons = [];
 
 		switch (type) {
@@ -53,8 +84,8 @@ export function confirm(baseOptions = {
 					e.preventDefault();
 					e.stopPropagation();
 
-					_shim.hide(false);
-					close(container, callback, false)
+					shim.hide(false);
+					this._close(container, callback, false)
 				});
 
 				const yesB = document.createElement("button");
@@ -64,8 +95,8 @@ export function confirm(baseOptions = {
 					e.preventDefault();
 					e.stopPropagation();
 
-					_shim.hide(false);
-					close(container, callback, true);
+					shim.hide(false);
+					this._close(container, callback, true);
 				});
 
 				buttons.push(noB);
@@ -80,8 +111,8 @@ export function confirm(baseOptions = {
 					e.preventDefault();
 					e.stopPropagation();
 
-					_shim.hide(false);
-					close(container, callback);
+					shim.hide(false);
+					this._close(container, callback);
 				});
 
 				buttons.push(b);
@@ -94,29 +125,4 @@ export function confirm(baseOptions = {
 		buttons.forEach((button) => { buttonContainer.appendChild(button); });
 		container.appendChild(buttonContainer);
 	}
-
-	function close(container, callback, callbackValue) {
-		container.remove();
-		if (typeof callback === "function") {
-			callback(callbackValue);
-		}
-	}
-
-	return {
-		confirm(message, options) {
-			show("confirm", message, options);
-		},
-
-		yesNo(message, options) {
-			return new Promise((resolve) => {
-				const cb = (result) => {
-					return resolve(result);
-				};
-
-				options = { ...{ callback: cb }, ...options };
-				show("yesno", message, options);
-			});
-		},
-	};
 }
-

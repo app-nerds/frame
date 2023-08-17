@@ -1,10 +1,11 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "target": "es6",
-    "noUnusedParameters": false,
-  },
-  "exclude": [
-    "node_modules"
-  ]
+	"compilerOptions": {
+		"module": "commonjs",
+		"target": "ES2018",
+		"noUnusedParameters": false,
+		"allowJs": true,
+	},
+	"exclude": [
+		"node_modules"
+	]
 }

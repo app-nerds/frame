@@ -1,65 +1,54 @@
-/*
- * shim displays a full screen shim to cover elements. CSS is provided by shim.css.
- * Copyright © 2022 App Nerds LLC
+/** @typedef {object & { closeOnClick: boolean, onShimClick: function }} ShimOptions */
+
+/**
+ * Shim displays a full screen shim to cover elements.
+ * @param {ShimOptions} options
  */
+export class Shim {
+	constructor(closeOnClick = false, onShimClick) {
+		this.closeOnClick = closeOnClick;
+		this.onShimClick = onShimClick;
 
-export function shim(baseOptions = {
-	closeOnClick: false,
-}) {
-	/*
-	 * internal constructor function to build a new shim
+		this.shim = undefined;
+	}
+
+	/**
+	 * show displays the shim
+	 * @returns {void}
 	 */
-	function newShim(options) {
-		options = { ...baseOptions, ...options };
-		let shim = undefined;
+	show() {
+		if (!this.shim && !document.getElementsByClassName("shim").length) {
+			this.shim = document.createElement("div");
+			this.shim.classList.add("shim");
 
-		function show() {
-			if (!shim && !document.getElementsByClassName("shim").length) {
-				shim = document.createElement("div");
-				shim.classList.add("shim");
-
-				if (options.closeOnClick) {
-					shim.addEventListener("click", () => {
-						destroy(true);
-					});
-				}
-
-				document.body.appendChild(shim);
-			} else if (document.getElementsByClassName("shim").length) {
-				shim = document.getElementsByClassName("shim")[0];
+			if (this.closeOnClick) {
+				this.shim.addEventListener("click", () => {
+					this.hide(this.onShimClick);
+				});
 			}
-		}
 
-		function destroy(fireCallback = true) {
-			if (shim) {
-				shim.remove();
-				shim = undefined;
-
-				if (typeof options.callback === "function" && fireCallback) {
-					options.callback();
-				}
-			}
-		}
-
-		return {
-			hide(fireCallback = true) {
-				destroy(fireCallback);
-			},
-
-			show() {
-				show();
-			},
+			document.body.appendChild(this.shim);
+		} else if (document.getElementsByClassName("shim").length) {
+			this.shim = document.getElementsByClassName("shim")[0];
 		}
 	}
 
-	/*
-	 * Public functions
+	/**
+	 * hide removes the shim
+	 * @returns {void}
 	 */
-	return {
-		new(options) {
-			options = { ...{ callback: undefined }, ...options };
-			return newShim(options);
-		}
-	};
-}
+	hide(callback) {
+		this._destroy();
 
+		if (typeof callback === "function") {
+			callback();
+		}
+	}
+
+	_destroy() {
+		if (this.shim) {
+			this.shim.remove();
+			this.shim = undefined;
+		}
+	}
+}

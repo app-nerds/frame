@@ -1,14 +1,10 @@
-/*
- * Copyright © 2023 App Nerds LLC
- */
-
-import { alertPosition, alert } from "./dialogs/alert.js";
-import { confirm } from "./dialogs/confirm.js";
-import DateTimePicker from "./datetime/date-time-picker.js";
+import { AlertPosition, Alerter } from "./dialogs/alert.js";
+import { Confirmer } from "./dialogs/confirm.js";
+import { DateTimePicker } from "./datetime/date-time-picker.js";
 import { parseDateTime, formatDateTime, DateFormats } from "./datetime/date-time-service.js";
 import { PopupMenu, PopupMenuItem, showPopup, hidePopup } from "./menus/popup-menu.js";
-import { shim } from "./shim/shim.js";
-import { spinner } from "./spinner/spinner.js";
+import { Shim } from "./shim/shim.js";
+import { Spinner } from "./spinner/spinner.js";
 import { fetcher } from "./http/fetcher.js";
 import { GraphQL } from "./http/graphql.js";
 import { debounce } from "./utilities/debounce.js";
@@ -22,10 +18,10 @@ import GoogleLoginForm from "./members/google-login-form.js";
 import MessageBar from "./message-bar/message-bar.js";
 import ColorPicker from "./color-picker/color-picker.js";
 
-export default {
-	alertPosition,
-	alert,
-	confirm,
+export {
+	AlertPosition,
+	Alerter,
+	Confirmer,
 	DateFormats,
 	DateTimePicker,
 	formatDateTime,
@@ -33,8 +29,8 @@ export default {
 	PopupMenuItem,
 	showPopup,
 	hidePopup,
-	shim,
-	spinner,
+	Shim,
+	Spinner,
 	fetcher,
 	GraphQL,
 	debounce,

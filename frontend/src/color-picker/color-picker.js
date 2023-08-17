@@ -1,11 +1,13 @@
-/*
- * color-picker is a tool that allows users to select from a pre-defined set of colors.
+/**
+ * ColorPicker is a component used to display a color picker on the screen.
  * If the color the user wants is not there, they can type a hex code into the box to get
  * the color they want.
- *
- * Copyright © 2023 App Nerds LLC
+ * @class ColorPicker
+ * @extends {HTMLElement}
+ * @property {string} color The currently selected color.
+ * @property {string} colors A comma-separated list of colors to display in the grid. These must be valid hex codes.
+ * @property {string} name The name of the input field.
  */
-
 export default class ColorPicker extends HTMLElement {
 	constructor() {
 		super();
@@ -16,34 +18,34 @@ export default class ColorPicker extends HTMLElement {
 
 		const colorOptions = this._colors.split(",");
 
-		const outerContainer = this.createOuterContainer();
-		const colorGrid = this.createColorGrid(colorOptions, this._color);
-		this.input = this.createInput(this._name, this._color);
+		const outerContainer = this._createOuterContainer();
+		const colorGrid = this._createColorGrid(colorOptions, this._color);
+		this.input = this._createInput(this._name, this._color);
 
 		outerContainer.insertAdjacentElement("beforeend", colorGrid);
 		outerContainer.insertAdjacentElement("beforeend", this.input);
 		this.appendChild(outerContainer);
 	}
 
-	createOuterContainer() {
+	_createOuterContainer() {
 		const el = document.createElement("div");
 		el.classList.add("color-picker");
 		return el;
 	}
 
-	createColorGrid(colors, selectedColor) {
+	_createColorGrid(colors, selectedColor) {
 		const grid = document.createElement("div");
 		grid.classList.add("grid");
 
 		colors.forEach(color => {
-			const el = this.createColorItem(color, selectedColor);
+			const el = this._createColorItem(color, selectedColor);
 			grid.insertAdjacentElement("beforeend", el);
 		});
 
 		return grid;
 	}
 
-	createColorItem(color, selectedColor) {
+	_createColorItem(color, selectedColor) {
 		const el = document.createElement("div");
 		el.classList.add("grid-item");
 		el.style.backgroundColor = color;
@@ -53,11 +55,11 @@ export default class ColorPicker extends HTMLElement {
 			el.classList.add("grid-item-selected");
 		}
 
-		el.addEventListener("click", this.onColorItemClicked.bind(this));
+		el.addEventListener("click", this._onColorItemClicked.bind(this));
 		return el;
 	}
 
-	createInput(name, color) {
+	_createInput(name, color) {
 		const el = document.createElement("input");
 		el.setAttribute("type", "text");
 		el.setAttribute("name", name);
@@ -69,8 +71,8 @@ export default class ColorPicker extends HTMLElement {
 		return el;
 	}
 
-	onColorItemClicked(e) {
-		this.clearGridSelectedClasses();
+	_onColorItemClicked(e) {
+		this._clearGridSelectedClasses();
 
 		const color = e.target.getAttribute("data-color");
 		e.target.classList.add("grid-item-selected");
@@ -79,7 +81,7 @@ export default class ColorPicker extends HTMLElement {
 		this.dispatchEvent(new CustomEvent("color-selected", { detail: color }));
 	}
 
-	clearGridSelectedClasses() {
+	_clearGridSelectedClasses() {
 		const gridItems = document.querySelectorAll(".grid-item");
 
 		for (let i = 0; i < gridItems.length; i++) {

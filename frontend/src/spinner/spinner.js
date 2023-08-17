@@ -1,38 +1,32 @@
-/*
- * spinner is simple library for displaying a loading spinner. It makes use
+/**
+ * Spinner is a simple library for displaying a loading spinner. It makes use
  * of the whole page to display the spinner. The spinner is pure CSS, SVG, and JavaScript.
  * Copyright © 2022 App Nerds LLC
+ * @class Spinner
  */
-export function spinner() {
-	let spinner = undefined;
+export class Spinner {
+	constructor() {
+		this.spinnerEl = null;
+	}
 
-	function show() {
-		if (!spinner) {
-			spinner = document.createElement("div");
-			spinner.classList.add("spinner");
-			spinner.innerHTML = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="50" cy="50" r="45" />
-        </svg>
-      `;
-
-			document.body.appendChild(spinner);
+	hide() {
+		if (this.spinnerEl) {
+			this.spinnerEl.remove();
+			this.spinnerEl = null;
 		}
 	}
 
-	function hide() {
-		if (spinner) {
-			spinner.remove();
-			spinner = undefined;
+	show() {
+		if (!this.spinnerEl) {
+			this.spinnerEl = document.createElement("div");
+			this.spinnerEl.classList.add("spinner");
+			this.spinnerEl.innerHTML = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+			 <circle cx="50" cy="50" r="45" />
+		  </svg>
+		`;
+
+			document.body.appendChild(this.spinnerEl);
 		}
-	}
-
-	return {
-		hide() {
-			hide();
-		},
-
-		show() {
-			show();
-		},
 	}
 }
+

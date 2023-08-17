@@ -1,248 +1,281 @@
-/* Copyright © 2023 App Nerds LLC v1.3.1 */
-/*
- * alert is a simple toast library inspired by vanilla-toast (https://github.com/mehmetemineker/vanilla-toast)
- * It is self contained and only relies on styles provided by alert.css.
- *
- * Copyright © 2022 App Nerds LLC
+/* Copyright © 2023 App Nerds LLC v1.4.0 */
+/** @typedef {object & { position: AlertPosition, duration: number, closable: boolean, focusable: boolean }} AlertOptions */
+
+/**
+ * Constants for alert position.
+ * @enum {AlertPosition}
  */
-const alertPosition = {
-  TopLeft: "top-left",
-  TopCenter: "top-center",
-  TopRight: "top-right",
-  BottomLeft: "bottom-left",
-  BottomCenter: "bottom-center",
-  BottomRight: "bottom-right"
+const AlertPosition = {
+	TopLeft: "top-left",
+	TopCenter: "top-center",
+	TopRight: "top-right",
+	BottomLeft: "bottom-left",
+	BottomCenter: "bottom-center",
+	BottomRight: "bottom-right"
 };
 
 const alertPositionIndex = [
-  [alertPosition.TopLeft, alertPosition.TopCenter, alertPosition.TopRight],
-  [alertPosition.BottomLeft, alertPosition.BottomCenter, alertPosition.BottomRight]
+	[AlertPosition.TopLeft, AlertPosition.TopCenter, AlertPosition.TopRight],
+	[AlertPosition.BottomLeft, AlertPosition.BottomCenter, AlertPosition.BottomRight]
 ];
 
 const svgs = {
-  success: '<svg viewBox="0 0 426.667 426.667" width="18" height="18"><path d="M213.333 0C95.518 0 0 95.514 0 213.333s95.518 213.333 213.333 213.333c117.828 0 213.333-95.514 213.333-213.333S331.157 0 213.333 0zm-39.134 322.918l-93.935-93.931 31.309-31.309 62.626 62.622 140.894-140.898 31.309 31.309-172.203 172.207z" fill="#6ac259"></path></svg>',
-  warn: '<svg viewBox="0 0 310.285 310.285" width=18 height=18> <path d="M264.845 45.441C235.542 16.139 196.583 0 155.142 0 113.702 0 74.743 16.139 45.44 45.441 16.138 74.743 0 113.703 0 155.144c0 41.439 16.138 80.399 45.44 109.701 29.303 29.303 68.262 45.44 109.702 45.44s80.399-16.138 109.702-45.44c29.303-29.302 45.44-68.262 45.44-109.701.001-41.441-16.137-80.401-45.439-109.703zm-132.673 3.895a12.587 12.587 0 0 1 9.119-3.873h28.04c3.482 0 6.72 1.403 9.114 3.888 2.395 2.485 3.643 5.804 3.514 9.284l-4.634 104.895c-.263 7.102-6.26 12.933-13.368 12.933H146.33c-7.112 0-13.099-5.839-13.345-12.945L128.64 58.594c-.121-3.48 1.133-6.773 3.532-9.258zm23.306 219.444c-16.266 0-28.532-12.844-28.532-29.876 0-17.223 12.122-30.211 28.196-30.211 16.602 0 28.196 12.423 28.196 30.211.001 17.591-11.456 29.876-27.86 29.876z" fill="#FFDA44" /> </svg>',
-  info: '<svg viewBox="0 0 23.625 23.625" width=18 height=18> <path d="M11.812 0C5.289 0 0 5.289 0 11.812s5.289 11.813 11.812 11.813 11.813-5.29 11.813-11.813S18.335 0 11.812 0zm2.459 18.307c-.608.24-1.092.422-1.455.548a3.838 3.838 0 0 1-1.262.189c-.736 0-1.309-.18-1.717-.539s-.611-.814-.611-1.367c0-.215.015-.435.045-.659a8.23 8.23 0 0 1 .147-.759l.761-2.688c.067-.258.125-.503.171-.731.046-.23.068-.441.068-.633 0-.342-.071-.582-.212-.717-.143-.135-.412-.201-.813-.201-.196 0-.398.029-.605.09-.205.063-.383.12-.529.176l.201-.828c.498-.203.975-.377 1.43-.521a4.225 4.225 0 0 1 1.29-.218c.731 0 1.295.178 1.692.53.395.353.594.812.594 1.376 0 .117-.014.323-.041.617a4.129 4.129 0 0 1-.152.811l-.757 2.68a7.582 7.582 0 0 0-.167.736 3.892 3.892 0 0 0-.073.626c0 .356.079.599.239.728.158.129.435.194.827.194.185 0 .392-.033.626-.097.232-.064.4-.121.506-.17l-.203.827zm-.134-10.878a1.807 1.807 0 0 1-1.275.492c-.496 0-.924-.164-1.28-.492a1.57 1.57 0 0 1-.533-1.193c0-.465.18-.865.533-1.196a1.812 1.812 0 0 1 1.28-.497c.497 0 .923.165 1.275.497.353.331.53.731.53 1.196 0 .467-.177.865-.53 1.193z" fill="#006DF0" /> </svg>',
-  error: '<svg viewBox="0 0 51.976 51.976" width=18 height=18> <path d="M44.373 7.603c-10.137-10.137-26.632-10.138-36.77 0-10.138 10.138-10.137 26.632 0 36.77s26.632 10.138 36.77 0c10.137-10.138 10.137-26.633 0-36.77zm-8.132 28.638a2 2 0 0 1-2.828 0l-7.425-7.425-7.778 7.778a2 2 0 1 1-2.828-2.828l7.778-7.778-7.425-7.425a2 2 0 1 1 2.828-2.828l7.425 7.425 7.071-7.071a2 2 0 1 1 2.828 2.828l-7.071 7.071 7.425 7.425a2 2 0 0 1 0 2.828z" fill="#D80027" /> </svg>'
+	success: '<svg viewBox="0 0 426.667 426.667" width="18" height="18"><path d="M213.333 0C95.518 0 0 95.514 0 213.333s95.518 213.333 213.333 213.333c117.828 0 213.333-95.514 213.333-213.333S331.157 0 213.333 0zm-39.134 322.918l-93.935-93.931 31.309-31.309 62.626 62.622 140.894-140.898 31.309 31.309-172.203 172.207z" fill="#6ac259"></path></svg>',
+	warn: '<svg viewBox="0 0 310.285 310.285" width=18 height=18> <path d="M264.845 45.441C235.542 16.139 196.583 0 155.142 0 113.702 0 74.743 16.139 45.44 45.441 16.138 74.743 0 113.703 0 155.144c0 41.439 16.138 80.399 45.44 109.701 29.303 29.303 68.262 45.44 109.702 45.44s80.399-16.138 109.702-45.44c29.303-29.302 45.44-68.262 45.44-109.701.001-41.441-16.137-80.401-45.439-109.703zm-132.673 3.895a12.587 12.587 0 0 1 9.119-3.873h28.04c3.482 0 6.72 1.403 9.114 3.888 2.395 2.485 3.643 5.804 3.514 9.284l-4.634 104.895c-.263 7.102-6.26 12.933-13.368 12.933H146.33c-7.112 0-13.099-5.839-13.345-12.945L128.64 58.594c-.121-3.48 1.133-6.773 3.532-9.258zm23.306 219.444c-16.266 0-28.532-12.844-28.532-29.876 0-17.223 12.122-30.211 28.196-30.211 16.602 0 28.196 12.423 28.196 30.211.001 17.591-11.456 29.876-27.86 29.876z" fill="#FFDA44" /> </svg>',
+	info: '<svg viewBox="0 0 23.625 23.625" width=18 height=18> <path d="M11.812 0C5.289 0 0 5.289 0 11.812s5.289 11.813 11.812 11.813 11.813-5.29 11.813-11.813S18.335 0 11.812 0zm2.459 18.307c-.608.24-1.092.422-1.455.548a3.838 3.838 0 0 1-1.262.189c-.736 0-1.309-.18-1.717-.539s-.611-.814-.611-1.367c0-.215.015-.435.045-.659a8.23 8.23 0 0 1 .147-.759l.761-2.688c.067-.258.125-.503.171-.731.046-.23.068-.441.068-.633 0-.342-.071-.582-.212-.717-.143-.135-.412-.201-.813-.201-.196 0-.398.029-.605.09-.205.063-.383.12-.529.176l.201-.828c.498-.203.975-.377 1.43-.521a4.225 4.225 0 0 1 1.29-.218c.731 0 1.295.178 1.692.53.395.353.594.812.594 1.376 0 .117-.014.323-.041.617a4.129 4.129 0 0 1-.152.811l-.757 2.68a7.582 7.582 0 0 0-.167.736 3.892 3.892 0 0 0-.073.626c0 .356.079.599.239.728.158.129.435.194.827.194.185 0 .392-.033.626-.097.232-.064.4-.121.506-.17l-.203.827zm-.134-10.878a1.807 1.807 0 0 1-1.275.492c-.496 0-.924-.164-1.28-.492a1.57 1.57 0 0 1-.533-1.193c0-.465.18-.865.533-1.196a1.812 1.812 0 0 1 1.28-.497c.497 0 .923.165 1.275.497.353.331.53.731.53 1.196 0 .467-.177.865-.53 1.193z" fill="#006DF0" /> </svg>',
+	error: '<svg viewBox="0 0 51.976 51.976" width=18 height=18> <path d="M44.373 7.603c-10.137-10.137-26.632-10.138-36.77 0-10.138 10.138-10.137 26.632 0 36.77s26.632 10.138 36.77 0c10.137-10.138 10.137-26.633 0-36.77zm-8.132 28.638a2 2 0 0 1-2.828 0l-7.425-7.425-7.778 7.778a2 2 0 1 1-2.828-2.828l7.778-7.778-7.425-7.425a2 2 0 1 1 2.828-2.828l7.425 7.425 7.071-7.071a2 2 0 1 1 2.828 2.828l-7.071 7.071 7.425 7.425a2 2 0 0 1 0 2.828z" fill="#D80027" /> </svg>'
 };
 
-function setup() {
-  const container = document.createElement("div");
-  container.className = "alert-container";
-
-  for (const rowIndex of [0, 1]) {
-    const row = document.createElement("div");
-    row.className = "alert-row";
-
-    for (const colIndex of [0, 1, 2]) {
-      const col = document.createElement("div");
-      col.className = `alert-col ${alertPositionIndex[rowIndex][colIndex]}`;
-
-      row.appendChild(col);
-    }
-
-    container.appendChild(row);
-  }
-
-  document.body.appendChild(container);
-}
-
-/*
- * Returns an object with functions to call to display alerts
+/**
+ * Alerter displays toast-like messages to users. It is inspired by vanilla-toast (
+ * https://github.com/mehmetemineker/vanilla-toast)
+ * @param {AlertOptions} options
  */
-function alert(baseOptions = {
-  title: undefined,
-  position: alertPosition.TopRight,
-  duration: 3000,
-  closable: true,
-  focusable: true,
-  callback: undefined,
-}) {
-  /*
-   * If the outer container doesn't exist, make it
-   */
-  if (!document.getElementsByClassName("alert-container").length) {
-    setup();
-  }
+class Alerter {
+	constructor(options = {
+		position: AlertPosition.TopRight,
+		duration: 3000,
+		closable: true,
+		focusable: true,
+	}) {
+		this.options = options;
 
-  /*
-   * Internal functions
-   */
-  function show(message = "Welcome to NerdAlert!", options, type) {
-    options = { ...baseOptions, ...options };
-    const col = document.getElementsByClassName(options.position)[0];
-
-    const card = document.createElement("div");
-    card.className = `alert-card ${type}`;
-    card.innerHTML += svgs[type];
-    card.options = {
-      ...options, ...{
-        message,
-        type: type,
-        yPos: options.position.indexOf("top") > -1 ? "top" : "bottom",
-        inFocus: false,
-      },
-    };
-
-    setContent(card);
-    setIntroAnimation(card);
-    bindEvents(card);
-    autoDestroy(card);
-
-    col.appendChild(card);
-  }
-
-  function setContent(card) {
-    const div = document.createElement("div");
-    div.className = "text-group";
-
-    if (card.options.title) {
-      div.innerHTML = `<h4>${card.options.title}</h3>`;
-    }
-
-    div.innerHTML += `<p>${card.options.message}</p>`;
-    card.appendChild(div);
-  }
-
-  function setIntroAnimation(card) {
-    card.style.setProperty(`margin-${card.options.yPos}`, "-15px");
-    card.style.setProperty(`opacity`, "0");
-
-    setTimeout(() => {
-      card.style.setProperty(`margin-${card.options.yPos}`, "15px");
-      card.style.setProperty("opacity", "1");
-    }, 50);
-  }
-
-  function bindEvents(card) {
-    card.addEventListener("click", () => {
-      if (card.options.closable) {
-        destroy(card);
-      }
-    });
-
-    card.addEventListener("mouseover", () => {
-      card.options.isFocus = card.options.focusable;
-    });
-
-    card.addEventListener("mouseout", () => {
-      card.options.isFocus = false;
-      autoDestroy(card, card.options.duration);
-    });
-  }
-
-  function autoDestroy(card) {
-    if (card.options.duration !== 0) {
-      setTimeout(() => {
-        if (!card.options.isFocus) {
-          destroy(card);
-        }
-      }, card.options.duration);
-    }
-  }
-
-  function destroy(card) {
-    card.style.setProperty(`margin-${card.options.yPos}`, `-${card.offsetHeight}px`);
-    card.style.setProperty("opacity", "0");
-
-    setTimeout(() => {
-      card.remove();
-
-      if (typeof card.options.callback === "function") {
-        card.options.callback();
-      }
-    }, 500);
-  }
-
-  /*
-   * Return the interface the user sees.
-   */
-  return {
-    success(message, options) {
-      show(message, options, "success");
-    },
-
-    info(message, options) {
-      show(message, options, "info");
-    },
-
-    warn(message, options) {
-      show(message, options, "warn");
-    },
-
-    error(message, options) {
-      show(message, options, "error");
-    },
-  };
-}
-
-/*
- * shim displays a full screen shim to cover elements. CSS is provided by shim.css.
- * Copyright © 2022 App Nerds LLC
- */
-
-function shim(baseOptions = {
-	closeOnClick: false,
-}) {
-	/*
-	 * internal constructor function to build a new shim
-	 */
-	function newShim(options) {
-		options = { ...baseOptions, ...options };
-		let shim = undefined;
-
-		function show() {
-			if (!shim && !document.getElementsByClassName("shim").length) {
-				shim = document.createElement("div");
-				shim.classList.add("shim");
-
-				if (options.closeOnClick) {
-					shim.addEventListener("click", () => {
-						destroy(true);
-					});
-				}
-
-				document.body.appendChild(shim);
-			} else if (document.getElementsByClassName("shim").length) {
-				shim = document.getElementsByClassName("shim")[0];
-			}
-		}
-
-		function destroy(fireCallback = true) {
-			if (shim) {
-				shim.remove();
-				shim = undefined;
-
-				if (typeof options.callback === "function" && fireCallback) {
-					options.callback();
-				}
-			}
-		}
-
-		return {
-			hide(fireCallback = true) {
-				destroy(fireCallback);
-			},
-
-			show() {
-				show();
-			},
+		/*
+		 * If the outer container doesn't exist, make it
+		 */
+		if (!document.getElementsByClassName("alert-container").length) {
+			this._setup();
 		}
 	}
 
-	/*
-	 * Public functions
+	/**
+	 * success displays a success alert. Use this for positive messages.
+	 * @param {string} message
+	 * @param {function} callback
+	 * @returns {void}
 	 */
-	return {
-		new(options) {
-			options = { ...{ callback: undefined }, ...options };
-			return newShim(options);
+	success(message, callback) {
+		this.show(message, "success", callback);
+	}
+
+	/**
+	 * info displays an info alert. Use this for neutral messages.
+	 * @param {string} message
+	 * @param {function} callback
+	 * @returns {void}
+	 */
+	info(message, callback) {
+		this.show(message, "info", callback);
+	}
+
+	/**
+	 * warn displays a warning alert. Use this to warn users of something.
+	 * @param {string} message
+	 * @param {function} callback
+	 * @returns {void}
+	 */
+	warn(message, callback) {
+		this.show(message, "warn", callback);
+	}
+
+	/**
+	 * error displays an error alert. Use this to warn users of something bad.
+	 * @param {string} message
+	 * @param {function} callback
+	 * @returns {void}
+	 */
+	error(message, callback) {
+		this.show(message, "error", callback);
+	}
+
+	/**
+	 * @param {string} message
+	 * @param {string} type
+	 * @param {function} callback
+	 * @returns {void}
+	 */
+	show(message, type, callback) {
+		const col = document.getElementsByClassName(this.options.position)[0];
+
+		const card = document.createElement("div");
+		card.className = `alert-card ${type}`;
+		card.innerHTML += svgs[type];
+		card.options = {
+			...this.options, ...{
+				message,
+				type: type,
+				yPos: this.options.position.indexOf("top") > -1 ? "top" : "bottom",
+				inFocus: false,
+			},
+		};
+
+		this._setContent(card);
+		this._setIntroAnimation(card);
+		this._bindEvents(card);
+		this._autoDestroy(card, callback);
+
+		col.appendChild(card);
+	}
+
+	_setContent(card) {
+		const div = document.createElement("div");
+		div.className = "text-group";
+
+		if (card.options.title) {
+			div.innerHTML = `<h4>${card.options.title}</h3>`;
 		}
-	};
+
+		div.innerHTML += `<p>${card.options.message}</p>`;
+		card.appendChild(div);
+	}
+
+	/**
+	 * @param {AlertCard} card
+	 * @returns {void}
+	 */
+	_setIntroAnimation(card) {
+		card.style.setProperty(`margin-${card.options.yPos}`, "-15px");
+		card.style.setProperty(`opacity`, "0");
+
+		setTimeout(() => {
+			card.style.setProperty(`margin-${card.options.yPos}`, "15px");
+			card.style.setProperty("opacity", "1");
+		}, 50);
+	}
+
+	/**
+	 * @param {AlertCard} card
+	 * @returns {void}
+	 */
+	_bindEvents(card) {
+		card.addEventListener("click", () => {
+			if (card.options.closable) {
+				this._destroy(card);
+			}
+		});
+
+		card.addEventListener("mouseover", () => {
+			card.options.inFocus = card.options.focusable;
+		});
+
+		card.addEventListener("mouseout", () => {
+			card.options.inFocus = false;
+			this._autoDestroy(card);
+		});
+	}
+
+	/**
+	 * @param {AlertCard} card
+	 * @returns {void}
+	 */
+	_autoDestroy(card, callback) {
+		if (card.options.duration !== 0) {
+			setTimeout(() => {
+				if (!card.options.inFocus) {
+					this._destroy(card, callback);
+				}
+			}, card.options.duration);
+		}
+	}
+
+	/**
+	 * @param {AlertCard} card
+	 * @returns {void}
+	 */
+	_destroy(card, callback) {
+		card.style.setProperty(`margin-${card.options.yPos}`, `-${card.offsetHeight}px`);
+		card.style.setProperty("opacity", "0");
+
+		setTimeout(() => {
+			card.remove();
+
+			if (typeof callback === "function") {
+				callback();
+			}
+		}, 500);
+	}
+
+	_setup() {
+		const container = document.createElement("div");
+		container.className = "alert-container";
+
+		for (const rowIndex of [0, 1]) {
+			const row = document.createElement("div");
+			row.className = "alert-row";
+
+			for (const colIndex of [0, 1, 2]) {
+				const col = document.createElement("div");
+				col.className = `alert-col ${alertPositionIndex[rowIndex][colIndex]}`;
+
+				row.appendChild(col);
+			}
+
+			container.appendChild(row);
+		}
+
+		document.body.appendChild(container);
+	}
 }
 
-/*
- * confirm is a function to display a confirmation dialog. It has two mode: "yesno", "other".
+/** @typedef {object & { closeOnClick: boolean, onShimClick: function }} ShimOptions */
+
+/**
+ * Shim displays a full screen shim to cover elements.
+ * @param {ShimOptions} options
+ */
+class Shim {
+	constructor(closeOnClick = false, onShimClick) {
+		this.closeOnClick = closeOnClick;
+		this.onShimClick = onShimClick;
+
+		this.shim = undefined;
+	}
+
+	/**
+	 * show displays the shim
+	 * @returns {void}
+	 */
+	show() {
+		if (!this.shim && !document.getElementsByClassName("shim").length) {
+			this.shim = document.createElement("div");
+			this.shim.classList.add("shim");
+
+			if (this.closeOnClick) {
+				this.shim.addEventListener("click", () => {
+					this.hide(this.onShimClick);
+				});
+			}
+
+			document.body.appendChild(this.shim);
+		} else if (document.getElementsByClassName("shim").length) {
+			this.shim = document.getElementsByClassName("shim")[0];
+		}
+	}
+
+	/**
+	 * hide removes the shim
+	 * @returns {void}
+	 */
+	hide(callback) {
+		this._destroy();
+
+		if (typeof callback === "function") {
+			callback();
+		}
+	}
+
+	_destroy() {
+		if (this.shim) {
+			this.shim.remove();
+			this.shim = undefined;
+		}
+	}
+}
+
+/** @typedef {object & { callback: Function }} ConfirmOptions */
+
+/**
+ * Confirmer displays a confirmation dialog. It has two mode: "yesno", "other".
  * "yesno" mode will display two buttons: Yes and No. "other" will only display a Close button.
  * The result of the click will be returned in a promise value.
  *
@@ -251,38 +284,67 @@ function shim(baseOptions = {
  *   - --border-color
  *
  * Example:
- *    const confirmation = confirm();
- *    const result = await confirmation.yesNo("Are you sure?");
- *
- * Copyright © 2022 App Nerds LLC
+ *    const confirmer = new Confirmer();
+ *    const result = await confirmer.yesNo("Are you sure?");
  */
+class Confirmer {
+	constructor() {
+	}
 
-function confirm(baseOptions = {
-	callback: undefined,
-}) {
-	const shimBuilder = shim({ closeOnClick: true });
-	let _shim;
+	/**
+	 * confirm displays a confirmation dialog. It shows a message and a Close button.
+	 * @param {string} message
+	 * @param {function} callback
+	 * @returns {void}
+	 */
+	confirm(message, callback) {
+		this.show("confirm", message, callback);
+	}
 
-	function show(type, message, options) {
-		options = { ...baseOptions, ...options };
+	/**
+	 * yesNo displays a confirmation dialog. It shows a message and Yes and No buttons.
+	 * @param {string} message
+	 * @returns {Promise<boolean>}
+	 */
+	yesNo(message) {
+		return new Promise((resolve) => {
+			const cb = (result) => {
+				return resolve(result);
+			};
 
+			this.show("yesno", message, cb);
+		});
+	}
+
+	/**
+	 * show displays a confirmation dialog. This is a raw function that is normally
+	 * used by the yesNo and confirm functions.
+	 * @param {string} type
+	 * @param {string} message
+	 * @param {function} callback
+	 * @returns {void}
+	 */
+	show(type, message, callback) {
 		const container = document.createElement("dialog");
 		container.classList.add("confirm-container");
 
-		_shim = shimBuilder.new({ callback: () => { close(container, options.callback, false); } });
+		let shim = new Shim(true, () => { this._close(container, callback, false); });
 
-		setContent(container, message);
-		addButtons(container, type, options.callback);
+		container.innerHTML += `<p>${message}</p>`;
+		this._addButtons(container, type, shim, callback);
 
-		_shim.show();
+		shim.show();
 		document.body.appendChild(container);
 	}
 
-	function setContent(container, message) {
-		container.innerHTML += `<p>${message}</p>`;
+	_close(container, callback, callbackValue) {
+		container.remove();
+		if (typeof callback === "function") {
+			callback(callbackValue);
+		}
 	}
 
-	function addButtons(container, type, callback) {
+	_addButtons(container, type, shim, callback) {
 		let buttons = [];
 
 		switch (type) {
@@ -294,8 +356,8 @@ function confirm(baseOptions = {
 					e.preventDefault();
 					e.stopPropagation();
 
-					_shim.hide(false);
-					close(container, callback, false);
+					shim.hide(false);
+					this._close(container, callback, false);
 				});
 
 				const yesB = document.createElement("button");
@@ -305,8 +367,8 @@ function confirm(baseOptions = {
 					e.preventDefault();
 					e.stopPropagation();
 
-					_shim.hide(false);
-					close(container, callback, true);
+					shim.hide(false);
+					this._close(container, callback, true);
 				});
 
 				buttons.push(noB);
@@ -321,8 +383,8 @@ function confirm(baseOptions = {
 					e.preventDefault();
 					e.stopPropagation();
 
-					_shim.hide(false);
-					close(container, callback);
+					shim.hide(false);
+					this._close(container, callback);
 				});
 
 				buttons.push(b);
@@ -335,30 +397,6 @@ function confirm(baseOptions = {
 		buttons.forEach((button) => { buttonContainer.appendChild(button); });
 		container.appendChild(buttonContainer);
 	}
-
-	function close(container, callback, callbackValue) {
-		container.remove();
-		if (typeof callback === "function") {
-			callback(callbackValue);
-		}
-	}
-
-	return {
-		confirm(message, options) {
-			show("confirm", message, options);
-		},
-
-		yesNo(message, options) {
-			return new Promise((resolve) => {
-				const cb = (result) => {
-					return resolve(result);
-				};
-
-				options = { ...{ callback: cb }, ...options };
-				show("yesno", message, options);
-			});
-		},
-	};
 }
 
 const DateFormats = {
@@ -383,6 +421,11 @@ const formatMap = {
 	"mm/dd/yyyy": format8,
 };
 
+/**
+ * parseDateTime parses a date/time string into a Date object.
+ * @param {string|number|Date} dt
+ * @returns {Date}
+ */
 function parseDateTime(dt) {
 	if (typeof dt === "number") {
 		return new Date(dt);
@@ -397,6 +440,12 @@ function parseDateTime(dt) {
 	}
 }
 
+/**
+ * formatDateTime formats a Date object into a string using the specified format.
+ * @param {string|number|Date} dt
+ * @param {string} format
+ * @returns {string}
+ */
 function formatDateTime(dt, format) {
 	let date = parseDateTime(dt);
 	let formatter = formatMap[format.toLowerCase()];
@@ -408,26 +457,46 @@ function formatDateTime(dt, format) {
 	return formatter(date);
 }
 
+/**
+ * @param {Date} dt
+ * @returns {string}
+ */
 function format1(dt) {
 	let { year, month, day, hour, minute, second } = breakDownDate(dt);
 	return `${zeroPad(year)}-${zeroPad(month)}-${zeroPad(day)}T${zeroPad(hour)}:${zeroPad(minute)}:${zeroPad(second)}Z`;
 }
 
+/**
+ * @param {Date} dt
+ * @returns {string}
+ */
 function format2(dt) {
 	let { year, month, day, hour, minute, second } = breakDownDate(dt);
 	return `${zeroPad(year)}-${zeroPad(month)}-${zeroPad(day)}T${zeroPad(hour)}:${zeroPad(minute)}:${zeroPad(second)}`;
 }
 
+/**
+ * @param {Date} dt
+ * @returns {string}
+ */
 function format3(dt) {
 	let { year, month, day, hour, minute, second } = breakDownDate(dt);
 	return `${zeroPad(year)}-${zeroPad(month)}-${zeroPad(day)} ${zeroPad(hour)}:${zeroPad(minute)}:${zeroPad(second)}`;
 }
 
+/**
+ * @param {Date} dt
+ * @returns {string}
+ */
 function format4(dt) {
 	let { year, month, day, hour, minute } = breakDownDate(dt);
 	return `${zeroPad(year)}-${zeroPad(month)}-${zeroPad(day)} ${zeroPad(hour)}:${zeroPad(minute)}`;
 }
 
+/**
+ * @param {Date} dt
+ * @returns {string}
+ */
 function format5(dt) {
 	let { year, month, day, hour, minute, second } = breakDownDate(dt);
 	let meridian = "AM";
@@ -444,6 +513,10 @@ function format5(dt) {
 	return `${zeroPad(month)}/${zeroPad(day)}/${zeroPad(year)} ${zeroPad(hour)}:${zeroPad(minute)}:${zeroPad(second)} ${meridian}`;
 }
 
+/**
+ * @param {Date} dt
+ * @returns {string}
+ */
 function format6(dt) {
 	let { year, month, day, hour, minute } = breakDownDate(dt);
 	let meridian = "AM";
@@ -460,16 +533,28 @@ function format6(dt) {
 	return `${zeroPad(month)}/${zeroPad(day)}/${zeroPad(year)} ${zeroPad(hour)}:${zeroPad(minute)} ${meridian}`;
 }
 
+/**
+ * @param {Date} dt
+ * @returns {string}
+ */
 function format7(dt) {
 	let { year, month, day } = breakDownDate(dt);
 	return `${zeroPad(year)}-${zeroPad(month)}-${zeroPad(day)}`;
 }
 
+/**
+ * @param {Date} dt
+ * @returns {string}
+ */
 function format8(dt) {
 	let { year, month, day } = breakDownDate(dt);
 	return `${zeroPad(month)}/${zeroPad(day)}/${zeroPad(year)}`;
 }
 
+/**
+ * @param {Date} dt
+ * @returns {object}
+ */
 function breakDownDate(dt) {
 	let year = dt.getFullYear();
 	let month = dt.getMonth() + 1;
@@ -488,10 +573,18 @@ function breakDownDate(dt) {
 	};
 }
 
+/**
+ * @param {number} num
+ * @returns {string}
+ */
 function zeroPad(num) {
 	return num.toString().padStart(2, "0");
 }
 
+/**
+ * @param {string} dt
+ * @returns {Date}
+ */
 function parseDateString(dt) {
 	const formatRegexes = [
 		/(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})t(?<hour>\d{2}):(?<minute>\d{2}):(?<second>\d{2})z/i,                         /* YYYY-MM-DDTHH-mm-ssZ */
@@ -506,36 +599,33 @@ function parseDateString(dt) {
 		let match = dt.match(formatRegexes[i]);
 
 		if (match) {
-			let year = match.groups.year || new Date().getFullYear();
-			let month = match.groups.month || new Date().getMonth();
-			let day = match.groups.day || new Date().getDate();
-			let hour = match.groups.hour || 0;
-			let minute = match.groups.minute || 0;
-			let second = match.groups.second || 0;
+			let year = parseInt(match.groups.year) || new Date().getFullYear();
+			let month = parseInt(match.groups.month) || new Date().getMonth();
+			let day = parseInt(match.groups.day) || new Date().getDate();
+			let hour = parseInt(match.groups.hour) || 0;
+			let minute = parseInt(match.groups.minute) || 0;
+			let second = parseInt(match.groups.second) || 0;
 			let meridian = match.groups.meridian || "";
 
 			if (meridian !== "") {
-				hour = parseInt(hour);
-
 				if (meridian.toLowerCase() === "pm" && hour < 12) {
-					hour = parseInt(hour) + 12;
+					hour += 12;
 				}
 			}
 
-			return new Date(year, parseInt(month) - 1, day, hour, minute, second);
+			return new Date(year, month - 1, day, hour, minute, second);
 		}
 	}
 
 	throw new Error(`no pattern match for ${dt}`);
 }
 
-/*
+/**
  * date-time-picker is a custom HTML element that allows the user to select a date and time.
  * It supports custom date formats.
- *
- * Copyright © 2023 App Nerds LLC
+ * @class DateTimePicker
+ * @extends HTMLElement
  */
-
 class DateTimePicker extends HTMLElement {
 	constructor() {
 		super();
@@ -559,7 +649,7 @@ class DateTimePicker extends HTMLElement {
 		this.name = this.getAttribute("name") || "dateTime";
 
 		/* Get the date from attributes. If one isn't passed in, use now, but zero out the time. */
-		this.date = (this.getAttribute("date") !== "") ? parseDateTime(this.getAttribute("date")) : new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0);
+		this.date = (this.getAttribute("date") !== "") ? parseDateTime(this.getAttribute("date")) : "";
 
 		this.dateFormat = this.getAttribute("date-format") || DateFormats.IsoWithTimezone;
 		this.showTimeSelector = this.dateFormat === DateFormats.IsoWithTimezone || this.dateFormat === DateFormats.IsoWithoutTimezone ||
@@ -576,7 +666,7 @@ class DateTimePicker extends HTMLElement {
 		this.day = 0;
 		this.timeSelectorEl = null;
 		this.selectedTimeIndex = 0;
-		this.yearBlockStart = this.getYear() - 5;
+		this.yearBlockStart = this._getYear() - 5;
 	}
 
 	connectedCallback() {
@@ -586,32 +676,75 @@ class DateTimePicker extends HTMLElement {
 		this.inputEl = this._createInputEl();
 		let formatP = this._createInputLabel();
 
-		this.popupEl = this.createPopupEl();
-		this.drawHeaderEl();
-		this.drawCalendarBody();
+		this.popupEl = this._createPopupEl();
+		this._drawHeaderEl();
+		this._drawCalendarBody();
 
 		this.insertAdjacentElement("beforeend", this.inputEl);
 		this.insertAdjacentElement("beforeend", formatP);
 		this.insertAdjacentElement("beforeend", this.popupEl);
 	}
 
-	createPopupEl() {
-		let el = document.createElement("div");
-		this.headerEl = document.createElement("header");
-		this.bodyEl = document.createElement("section");
+	/****************************************************
+	 * PUBLIC METHODS
+	 ****************************************************/
 
-		el.classList.add("date-time-picker-popup", "calendar-hidden");
-		el.setAttribute("role", "dialog");
-		el.setAttribute("aria-modal", "true");
-		el.setAttribute("aria-label", `Choose Date`);
-
-		el.insertAdjacentElement("beforeend", this.headerEl);
-		el.insertAdjacentElement("beforeend", this.bodyEl);
-
-		return el;
+	/**
+	 * clear clears the date picker value.
+	 * @returns {void}
+	 */
+	clear() {
+		this.inputEl.value = "";
 	}
 
-	drawHeaderEl() {
+	/**
+	 * getDate returns the currently selected date.
+	 * @returns {string|Date}
+	 */
+	getDate() {
+		return this.date;
+	}
+
+	/**
+	 * Moves the calendar forward or backward one month. A positive number moves forward, a negative number moves backward.
+	 * @param {number} direction
+	 */
+	moveMonth(direction) {
+		let newDate = new Date(this.date);
+		newDate.setMonth(newDate.getMonth() + direction);
+
+		this.date = newDate;
+		/** @type {HTMLAnchorElement} */ (this.popupEl.querySelector("header a:nth-child(2)")).innerText = this._getMonthName();
+		/** @type {HTMLAnchorElement} */ (this.popupEl.querySelector("header a:nth-child(3)")).innerText = this._getYear().toString();
+		this.popupEl.querySelector(".calendar-body").remove();
+		this._drawCalendarBody();
+	}
+
+	/**
+	 * setDate sets the date picker value.
+	 * @param {Date} dt
+	 * @returns {void}
+	 */
+	setDate(dt) {
+		this.date = dt;
+		this.day = dt.getDate();
+		this._setInputDate();
+	}
+
+	/**
+	 * toggleCalendar shows or hides the calendar.
+	 * @returns {void}
+	 */
+	toggleCalendar() {
+		this.popupEl.classList.toggle("calendar-hidden");
+		this.inputEl.focus();
+	}
+
+	/****************************************************
+	 * PRIVATE METHODS
+	 ****************************************************/
+
+	_drawHeaderEl() {
 		let previousMonthEl = this._createPreviousMonthButton();
 		let nextMonthEl = this._createNextMonthButton();
 		let currentMonthEl = this._createCurrentMonthButton();
@@ -624,13 +757,13 @@ class DateTimePicker extends HTMLElement {
 		this.headerEl.insertAdjacentElement("beforeend", nextMonthEl);
 	}
 
-	drawCalendarBody() {
+	_drawCalendarBody() {
 		let bodyDiv = document.createElement("div");
 		let weekDiv = this._createCalendarBodyWeekDiv();
 
-		let firstDate = this.getFirstDayOfMonth();
+		let firstDate = this._getFirstDayOfMonth();
 		let firstDayOfWeek = firstDate.getDay();
-		let lastDate = this.getLastDayOfMonth();
+		let lastDate = this._getLastDayOfMonth();
 		let lastDay = lastDate.getDate();
 		let started = false;
 
@@ -671,10 +804,10 @@ class DateTimePicker extends HTMLElement {
 			bodyDiv.insertAdjacentElement("beforeend", okButton);
 		}
 
-		this.replaceBodyEl(bodyDiv);
+		this._replaceBodyEl(bodyDiv);
 	}
 
-	drawMonthListBody() {
+	_drawMonthListBody() {
 		const body = document.createElement("div");
 		body.classList.add("month-list-body");
 
@@ -683,10 +816,10 @@ class DateTimePicker extends HTMLElement {
 			body.insertAdjacentElement("beforeend", month);
 		}
 
-		this.replaceBodyEl(body);
+		this._replaceBodyEl(body);
 	}
 
-	drawYearListBody() {
+	_drawYearListBody() {
 		const body = document.createElement("div");
 		body.classList.add("year-list-body");
 
@@ -706,39 +839,31 @@ class DateTimePicker extends HTMLElement {
 		body.insertAdjacentElement("beforeend", yearList);
 		body.insertAdjacentElement("beforeend", yearDown);
 
-		this.replaceBodyEl(body);
+		this._replaceBodyEl(body);
 	}
 
-	getMonth() { return new Date(this.date).getMonth(); }
-	getMonthName() { return this._months[this.getMonth()]; }
-	getYear() { return new Date(this.date).getFullYear(); }
-	getDay() { return new Date(this.date).getDate(); }
-	getFirstDayOfMonth() {
-		let result = new Date(this.getYear(), this.getMonth(), 1);
+	_getMonth() { return new Date(this.date).getMonth(); }
+	_getMonthName() { return this._months[this._getMonth()]; }
+	_getYear() { return new Date(this.date).getFullYear(); }
+	_getDay() { return new Date(this.date).getDate(); }
+	_getFirstDayOfMonth() {
+		let result = new Date(this._getYear(), this._getMonth(), 1);
 		return result;
 	}
-	getLastDayOfMonth() {
-		let result = new Date(this.getYear(), this.getMonth() + 1, 0);
+	_getLastDayOfMonth() {
+		let result = new Date(this._getYear(), this._getMonth() + 1, 0);
 		return result;
 	}
-	getHour() { return new Date(this.date).getHours(); }
-	getMinute() { return new Date(this.date).getMinutes(); }
-	getSecond() { return new Date(this.date).getSeconds(); }
+	_getHour() { return new Date(this.date).getHours(); }
+	_getMinute() { return new Date(this.date).getMinutes(); }
+	_getSecond() { return new Date(this.date).getSeconds(); }
 
-	moveMonth(direction) {
-		let newDate = new Date(this.date);
-		newDate.setMonth(newDate.getMonth() + direction);
-
-		this.date = newDate;
-		this.popupEl.querySelector("header a:nth-child(2)").innerText = this.getMonthName();
-		this.popupEl.querySelector("header a:nth-child(3)").innerText = this.getYear();
-		this.popupEl.querySelector(".calendar-body").remove();
-		this.drawCalendarBody();
-	}
-
-	onCalendarDayClick(day) {
+	/**
+	 * @param {number} day
+	 */
+	_onCalendarDayClick(day) {
 		this.day = day;
-		this.setInputDate();
+		this._setInputDate();
 
 		if (!this.showTimeSelector) {
 			this.toggleCalendar();
@@ -748,65 +873,83 @@ class DateTimePicker extends HTMLElement {
 		}
 	}
 
-	onHeaderMonthClick() {
-		this.drawMonthListBody();
+	_onHeaderMonthClick() {
+		this._drawMonthListBody();
 	}
 
-	onHeaderYearClick() {
-		this.drawYearListBody();
+	/**
+	 * @returns {void}
+	 */
+	_onHeaderYearClick() {
+		this._drawYearListBody();
 	}
 
-	onMonthClick(monthIndex) {
-		this.date = new Date(this.getYear(), monthIndex, 1);
-		this.setInputDate(this.date);
-		this.drawHeaderEl();
-		this.drawCalendarBody();
+	/**
+	 * @param {number} monthIndex
+	 */
+	_onMonthClick(monthIndex) {
+		this.date = new Date(this._getYear(), monthIndex, 1);
+		this._setInputDate();
+		this._drawHeaderEl();
+		this._drawCalendarBody();
 	}
 
-	onTimeChange(e) {
+	/**
+	 * @param {Event & { target: HTMLSelectElement }} e
+	 */
+	_onTimeChange(e) {
 		let selected = e.target.value;
 		this.selectedTimeIndex = e.target.selectedIndex;
 		this.date = selected;
-		this.setInputDate();
+		this._setInputDate();
 	}
 
-	onYearClick(year) {
-		this.date = new Date(year, this.getMonth(), 1);
-		this.setInputDate(this.date);
-		this.drawHeaderEl();
-		this.drawCalendarBody();
+	/**
+	 * @param {number} year
+	 */
+	_onYearClick(year) {
+		this.date = new Date(year, this._getMonth(), 1);
+		this._setInputDate();
+		this._drawHeaderEl();
+		this._drawCalendarBody();
 	}
 
-	onYearDownClick() {
+	_onYearDownClick() {
 		this.yearBlockStart += 10;
-		this.drawYearListBody();
+		this._drawYearListBody();
 	}
 
-	onYearUpClick() {
+	_onYearUpClick() {
 		this.yearBlockStart -= 10;
-		this.drawYearListBody();
+		this._drawYearListBody();
 	}
 
-	replaceBodyEl(newBody) {
+	/**
+	 * @param {HTMLDivElement} newBody
+	 */
+	_replaceBodyEl(newBody) {
 		this.bodyEl.innerHTML = "";
 		this.bodyEl.insertAdjacentElement("beforeend", newBody);
 	}
 
-	setInputDate() {
-		let selected = new Date(this.getYear(), this.getMonth(), this.day, this.getHour(), this.getMinute(), this.getSecond());
+	_setInputDate() {
+		let selected = new Date(this._getYear(), this._getMonth(), this.day, this._getHour(), this._getMinute(), this._getSecond());
 
 		this.inputEl.value = formatDateTime(selected, this.dateFormat);
 		this.dispatchEvent(new CustomEvent("change", { detail: { value: selected } }));
 	}
 
-	toggleCalendar() {
-		this.popupEl.classList.toggle("calendar-hidden");
-		this.inputEl.focus();
-	}
 
 	/**********************************************************************
 	 * Methods to return invididual elements
 	 *********************************************************************/
+
+	/**
+	 * @param {boolean} started
+	 * @param {number} dayIndex
+	 * @param {number} firstDayOfWeek
+	 * @returns {HTMLDivElement}
+	 */
 	_createCalendarBodyDayDiv(started, dayIndex, firstDayOfWeek) {
 		let el = document.createElement("div");
 		el.classList.add("day");
@@ -817,9 +960,9 @@ class DateTimePicker extends HTMLElement {
 			let a = document.createElement("a");
 			a.href = "javascript:void(0)";
 			a.innerText = `${d}`;
-			a.addEventListener("click", this.onCalendarDayClick.bind(this, d));
+			a.addEventListener("click", this._onCalendarDayClick.bind(this, d));
 
-			let thisDay = new Date(this.getYear(), this.getMonth(), d);
+			let thisDay = new Date(this._getYear(), this._getMonth(), d);
 			if (thisDay === this.today) {
 				a.classList.add("today");
 			}
@@ -841,16 +984,16 @@ class DateTimePicker extends HTMLElement {
 	_createCurrentMonthButton() {
 		let el = document.createElement("a");
 		el.href = "javascript:void(0)";
-		el.innerHTML = this.getMonthName();
-		el.addEventListener("click", this.onHeaderMonthClick.bind(this));
+		el.innerHTML = this._getMonthName();
+		el.addEventListener("click", this._onHeaderMonthClick.bind(this));
 		return el;
 	}
 
 	_createCurrentYearButton() {
 		let el = document.createElement("a");
 		el.href = "javascript:void(0)";
-		el.innerHTML = this.getYear();
-		el.addEventListener("click", this.onHeaderYearClick.bind(this));
+		el.innerHTML = this._getYear().toString();
+		el.addEventListener("click", this._onHeaderYearClick.bind(this));
 		return el;
 	}
 
@@ -859,9 +1002,19 @@ class DateTimePicker extends HTMLElement {
 		el.setAttribute("type", "datetime");
 		el.setAttribute("name", this.name);
 		el.setAttribute("aria-describedby", `${this.name}-format`);
-		el.value = formatDateTime(this.date, this.dateFormat);
+
+		if (this.date instanceof Date) {
+			el.value = formatDateTime(this.date, this.dateFormat);
+		}
 
 		el.addEventListener("click", () => {
+			if (this.date === "") {
+				this.date = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0);
+				this._drawHeaderEl();
+				this._drawCalendarBody();
+
+			}
+
 			this.toggleCalendar();
 		});
 
@@ -875,11 +1028,15 @@ class DateTimePicker extends HTMLElement {
 		return el;
 	}
 
+	/**
+	 * @param {number} monthIndex
+	 * @returns {HTMLAnchorElement}
+	 */
 	_createMonthButton(monthIndex) {
 		let month = document.createElement("a");
 		month.href = "javascript:void(0)";
 		month.innerText = this._months[monthIndex];
-		month.addEventListener("click", this.onMonthClick.bind(this, monthIndex));
+		month.addEventListener("click", this._onMonthClick.bind(this, monthIndex));
 		return month;
 	}
 
@@ -900,6 +1057,22 @@ class DateTimePicker extends HTMLElement {
 		return el;
 	}
 
+	_createPopupEl() {
+		let el = document.createElement("div");
+		this.headerEl = document.createElement("header");
+		this.bodyEl = document.createElement("section");
+
+		el.classList.add("date-time-picker-popup", "calendar-hidden");
+		el.setAttribute("role", "dialog");
+		el.setAttribute("aria-modal", "true");
+		el.setAttribute("aria-label", `Choose Date`);
+
+		el.insertAdjacentElement("beforeend", this.headerEl);
+		el.insertAdjacentElement("beforeend", this.bodyEl);
+
+		return el;
+	}
+
 	_createPreviousMonthButton() {
 		let el = document.createElement("a");
 		el.href = "javascript:void(0)";
@@ -911,7 +1084,7 @@ class DateTimePicker extends HTMLElement {
 	_createTimeSelector() {
 		this.timeSelectorEl = document.createElement("select");
 		this._createTimeSelectorOptions();
-		this.timeSelectorEl.addEventListener("change", this.onTimeChange.bind(this));
+		this.timeSelectorEl.addEventListener("change", this._onTimeChange.bind(this));
 	}
 
 	_createTimeSelectorOptions() {
@@ -939,7 +1112,7 @@ class DateTimePicker extends HTMLElement {
 			increment = 60;
 		}
 
-		let start = new Date(this.getYear(), this.getMonth(), this.getDay(), 0, 0, 0);
+		let start = new Date(this._getYear(), this._getMonth(), this._getDay(), 0, 0, 0);
 		let index = 0;
 
 		for (let i = 0; i < 1440; i += increment) {
@@ -980,11 +1153,15 @@ class DateTimePicker extends HTMLElement {
 		}
 	}
 
+	/**
+	 * @param {number} year
+	 * @returns {HTMLAnchorElement}
+	 */
 	_createYearButton(year) {
 		let el = document.createElement("a");
 		el.href = "javascript:void(0)";
-		el.innerText = year;
-		el.addEventListener("click", this.onYearClick.bind(this, year));
+		el.innerText = year.toString();
+		el.addEventListener("click", this._onYearClick.bind(this, year));
 		return el;
 	}
 
@@ -992,7 +1169,7 @@ class DateTimePicker extends HTMLElement {
 		const el = document.createElement("a");
 		el.href = "javascript:void(0)";
 		el.innerHTML = `<i class="icon--mdi icon--mdi--arrow-down"></i>`;
-		el.addEventListener("click", this.onYearDownClick.bind(this));
+		el.addEventListener("click", this._onYearDownClick.bind(this));
 		return el;
 	}
 
@@ -1000,7 +1177,7 @@ class DateTimePicker extends HTMLElement {
 		const el = document.createElement("a");
 		el.href = "javascript:void(0)";
 		el.innerHTML = `<i class="icon--mdi icon--mdi--arrow-up"></i>`;
-		el.addEventListener("click", this.onYearUpClick.bind(this));
+		el.addEventListener("click", this._onYearUpClick.bind(this));
 		return el;
 	}
 
@@ -1008,13 +1185,13 @@ class DateTimePicker extends HTMLElement {
 
 customElements.define("date-time-picker", DateTimePicker);
 
-/*
- * PopupMenu is a Web Component that displays a popup menu. It attaches to a trigger element 
- * that, when clicked, will show a list of menu items. It supports icons through the Feather 
+/**
+ * PopupMenu is a Web Component that displays a popup menu. It attaches to a trigger element
+ * that, when clicked, will show a list of menu items. It supports icons through the Feather
  * Icons library (https://feathericons.com/).
  *
- * Styling is provided by popup-menu.css. It relies on variables: 
- *   - --dialog-background-color 
+ * Styling is provided by popup-menu.css. It relies on variables:
+ *   - --dialog-background-color
  *   - --prmiary-color (for the hover).
  *   - --border-color
  *
@@ -1023,688 +1200,905 @@ customElements.define("date-time-picker", DateTimePicker);
  *       <popup-menu-item id="item1" text="Menu Item 1" icon="log-out"></popup-menu-item>
  *    </popup-menu>
  *
- * Copyright © 2022 App Nerds LLC
+ * @class PopupMenu
+ * @extends HTMLElement
  */
-
 class PopupMenu extends HTMLElement {
-  constructor() {
-    super();
-    this._trigger = null;
-    this._el = null;
-  }
+	constructor() {
+		super();
+		this._trigger = null;
+		this.isVisible = false;
+	}
 
-  connectedCallback() {
-    this._trigger = this.getAttribute("trigger");
+	connectedCallback() {
+		this._trigger = this.getAttribute("trigger");
 
-    if (!this._trigger) {
-      throw new Error(
-        "You must provide a query selector for the element used to trigger this popup."
-      );
-    }
+		if (!this._trigger) {
+			throw new Error(
+				"You must provide a query selector for the element used to trigger this popup."
+			);
+		}
 
-    this.style.visibility = "hidden";
+		this.style.visibility = "hidden";
 
-    document
-      .querySelector(this._trigger)
-      .addEventListener("click", this.toggle.bind(this));
-  }
+		document.addEventListener("click", (e) => {
+			if (e.target !== this && !this.contains(e.target)) {
+				if (e.target !== document.querySelector(this._trigger)) {
+					this._hide();
+				} else {
+					this.toggle();
+				}
+			}
+		});
 
-  disconnectedCallback() {
-    let el = document.querySelector(this._trigger);
+		const menuItemEls = document.querySelectorAll("popup-menu-item");
 
-    if (el) {
-      el.removeEventListener("click", this.toggle.bind(this));
-    }
-  }
+		menuItemEls.forEach((el) => {
+			el.addEventListener("internal-menu-item-click", (e) => {
+				this._hide();
+				this.dispatchEvent(new CustomEvent("menu-item-click", {
+					detail: {
+						id: e.target.id,
+						text: e.target.getAttribute("text"),
+						data: e.target.getAttribute("data"),
+					}
+				}));
+			});
+		});
+	}
 
-  toggle(e) {
-    if (e) {
-      e.preventDefault();
-    }
+	disconnectedCallback() {
+		let el = document.querySelector(this._trigger);
 
-    let triggerRect = document
-      .querySelector(this._trigger)
-      .getBoundingClientRect();
-    let thisRect = this.getBoundingClientRect();
-    let buffer = 3;
+		if (el) {
+			el.removeEventListener("click", this.toggle.bind(this));
+		}
+	}
 
-    if (thisRect.right > window.innerWidth) {
-      this.style.left =
-        "" +
-        (triggerRect.x + (window.innerWidth - thisRect.right) - buffer) +
-        "px";
-    } else {
-      this.style.left = "" + triggerRect.x + "px";
-    }
+	/**
+	* Toggles the visibility of the popup menu
+	* @param {Event} e The click event
+	* @returns {void}
+	*/
+	toggle(e) {
+		if (e) {
+			e.preventDefault();
+		}
 
-    this.style.top =
-      "" + (triggerRect.y + triggerRect.height + buffer) + "px";
+		if (!this.isVisible) {
+			this._show();
+		} else {
+			this._hide();
+		}
+	}
 
-    if (this.style.visibility === "hidden") {
-      this.style.visibility = "visible";
-    } else {
-      this.style.visibility = "hidden";
-    }
-  }
+	_hide() {
+		this.isVisible = false;
+		this.style.visibility = "hidden";
+	}
+
+	_show() {
+		let triggerRect = document
+			.querySelector(this._trigger)
+			.getBoundingClientRect();
+		let thisRect = this.getBoundingClientRect();
+		let buffer = 3;
+
+		if (thisRect.right > window.innerWidth) {
+			this.style.left =
+				"" +
+				(triggerRect.x + (window.innerWidth - thisRect.right) - buffer) +
+				"px";
+		} else {
+			this.style.left = "" + triggerRect.x + "px";
+		}
+
+		this.style.top =
+			"" + (triggerRect.y + triggerRect.height + buffer) + "px";
+
+		this.isVisible = true;
+		this.style.visibility = "visible";
+	}
 }
 
+/**
+ * Represents a popup menu item
+ * @class PopupMenuItem
+ * @extends HTMLElement
+ */
 class PopupMenuItem extends HTMLElement {
-  constructor() {
-    super();
-  }
+	constructor() {
+		super();
+	}
 
-  connectedCallback() {
-    this.render();
-  }
+	connectedCallback() {
+		this._render();
+	}
 
-  render() {
-    let text = this.getAttribute("text");
-    let icon = this.getAttribute("icon");
+	_render() {
+		let text = this.getAttribute("text");
+		let icon = this.getAttribute("icon");
 
-    const div = document.createElement("div");
-    div.classList.add("popup-menu-item");
+		const a = document.createElement("a");
+		a.href = "javascript:void(0)";
+		a.classList.add("popup-menu-item");
 
-    let inner = "";
+		let inner = "";
 
-    if (icon) {
-      inner += `<i data-feather="${icon}"></i> `;
-    }
+		if (icon) {
+			inner += `<i class="${icon}"></i> `;
+		}
 
-    inner += text;
-    div.innerHTML = inner;
+		inner += text;
+		a.innerHTML = inner;
 
-    div.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.dispatchEvent(new CustomEvent("click", { detail: e }));
+		a.addEventListener("click", (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			this.dispatchEvent(new CustomEvent("internal-menu-item-click", { detail: e }));
+		});
 
-      const parent = e.target.parentElement.parentElement;
-      parent.style.visibility = "hidden";
-    });
-
-    this.insertAdjacentElement("beforeend", div);
-  }
+		this.insertAdjacentElement("beforeend", a);
+	}
 }
 
+/**
+ * Shows a popup menu
+ * @param {string} el The query selector for the popup menu
+ * @returns {void}
+ */
 const showPopup = (el) => {
-  document.querySelector(el).style.visibility = "visible";
+	document.querySelector(el).style.visibility = "visible";
 };
 
+/**
+ * Hides a popup menu
+ * @param {string} el The query selector for the popup menu
+ */
 const hidePopup = (el) => {
-  document.querySelector(el).style.visibility = "hidden";
+	document.querySelector(el).style.visibility = "hidden";
 };
 
 if (!customElements.get("popup-menu")) {
-  customElements.define("popup-menu", PopupMenu);
+	customElements.define("popup-menu", PopupMenu);
 }
 
 if (!customElements.get("popup-menu-item")) {
-  customElements.define("popup-menu-item", PopupMenuItem);
+	customElements.define("popup-menu-item", PopupMenuItem);
 }
 
-/*
- * spinner is simple library for displaying a loading spinner. It makes use
+/**
+ * Spinner is a simple library for displaying a loading spinner. It makes use
  * of the whole page to display the spinner. The spinner is pure CSS, SVG, and JavaScript.
  * Copyright © 2022 App Nerds LLC
+ * @class Spinner
  */
-function spinner() {
-	let spinner = undefined;
+class Spinner {
+	constructor() {
+		this.spinnerEl = null;
+	}
 
-	function show() {
-		if (!spinner) {
-			spinner = document.createElement("div");
-			spinner.classList.add("spinner");
-			spinner.innerHTML = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="50" cy="50" r="45" />
-        </svg>
-      `;
-
-			document.body.appendChild(spinner);
+	hide() {
+		if (this.spinnerEl) {
+			this.spinnerEl.remove();
+			this.spinnerEl = null;
 		}
 	}
 
-	function hide() {
-		if (spinner) {
-			spinner.remove();
-			spinner = undefined;
+	show() {
+		if (!this.spinnerEl) {
+			this.spinnerEl = document.createElement("div");
+			this.spinnerEl.classList.add("spinner");
+			this.spinnerEl.innerHTML = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+			 <circle cx="50" cy="50" r="45" />
+		  </svg>
+		`;
+
+			document.body.appendChild(this.spinnerEl);
 		}
-	}
-
-	return {
-		hide() {
-			hide();
-		},
-
-		show() {
-			show();
-		},
 	}
 }
 
-/*
- * Copyright © 2022 App Nerds LLC
+/**
+ * A wrapper around fetch that will show a spinner
+ * while the request is being made. This is useful for
+ * long running requests.
+ * @param {string} url The URL to fetch
+ * @param {object} options The fetch options
+ * @param {object} spinner The spinner element to show
+ * @param {number} msBeforeShowSpinner The number of milliseconds to wait before showing the spinner. Default is 1000
+ * @returns {Promise<object>} A promise that resolves to the fetch response
  */
-
 async function fetcher(url, options, spinner, msBeforeShowSpinner = 1000) {
-  let timerID;
-  let response;
+	let timerID;
+	let response;
 
-  if (spinner) {
-    timerID = setTimeout(() => {
-      spinner.show();
-    }, msBeforeShowSpinner);
-  }
+	if (spinner) {
+		timerID = setTimeout(() => {
+			spinner.show();
+		}, msBeforeShowSpinner);
+	}
 
-  try {
-    response = await fetch(url, options);
-  } finally {
-    if (spinner) {
-      clearTimeout(timerID);
-      spinner.hide();
-    }
-  }
+	try {
+		response = await fetch(url, options);
+	} finally {
+		if (spinner) {
+			clearTimeout(timerID);
+			spinner.hide();
+		}
+	}
 
-  return response;
+	return response;
 }
 
-/*
- * Copyright © 2022 App Nerds LLC
- */
+/** @typedef { object & { http: fetcher, tokenGetterFunction: function, expiredTokenCallback: function, spinner: object, navigateTo: function } } GraphQLOptions */
 
+/**
+ * This class is a wrapper around the fetcher function
+ * that makes it easy to execute GraphQL queries and mutations.
+ * It also handles expired tokens.
+ * @class GraphQL
+ * @param {string} queryURL The URL to the GraphQL API
+ * @param {GraphQLOptions} options Options for the GraphQL class
+ */
 class GraphQL {
-  constructor(queryURL, options = {
-    http: fetcher,
-    tokenGetterFunction: null,
-    expiredTokenCallback: null,
-    spinner: null,
-    navigateTo: null,
-  }) {
-    options = {
-      http: fetcher,
-      tokenGetterFunction: null,
-      expiredTokenCallback: null,
-      spinner: null,
-      navigateTo: null,
-      ...options,
-    };
+	constructor(queryURL, options = {
+		http: fetcher,
+		tokenGetterFunction: null,
+		expiredTokenCallback: null,
+		spinner: null,
+		navigateTo: null,
+	}) {
+		options = {
+			http: fetcher,
+			tokenGetterFunction: null,
+			expiredTokenCallback: null,
+			spinner: null,
+			navigateTo: null,
+			...options,
+		};
 
-    this.queryURL = queryURL;
-    this.http = options.http;
-    this.tokenGetterFunction = options.tokenGetterFunction;
-    this.expiredTokenCallback = options.expiredTokenCallback;
-    this.spinner = options.spinner;
-    this.navigateTo = options.navigateTo;
-  }
+		this.queryURL = queryURL;
+		this.http = options.http;
+		this.tokenGetterFunction = options.tokenGetterFunction;
+		this.expiredTokenCallback = options.expiredTokenCallback;
+		this.spinner = options.spinner;
+		this.navigateTo = options.navigateTo;
+	}
 
-  /**
-   * Executes a query against a GraphQL API
-   * @param query string A graphql query. Omit the "query {}" portion.
-   */
-  async query(query) {
-    if (this.expiredTokenCallback && !this.expiredTokenCallback(null, "/", this.navigateTo)) {
-      return;
-    }
+	/**
+	 * Executes a query against a GraphQL API
+	 * @param query string A graphql query. Omit the "query {}" portion.
+	 * @returns {Promise<object>} A promise that resolves to the fetch response
+	 */
+	async query(query) {
+		if (this.expiredTokenCallback && !this.expiredTokenCallback(null, "/", this.navigateTo)) {
+			return;
+		}
 
-    const token = (this.tokenGetterFunction) ? this.tokenGetterFunction() : "";
+		const token = (this.tokenGetterFunction) ? this.tokenGetterFunction() : "";
 
-    query = `query {
+		query = `query {
 			${query}
 		}`;
 
-    let options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ query }),
-    };
+		let options = {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ query }),
+		};
 
-    if (token) {
-      options.headers["Authorization"] = `Bearer ${token}`;
-    }
+		if (token) {
+			options.headers["Authorization"] = `Bearer ${token}`;
+		}
 
-    let response = await this.http(this.queryURL, options, this.spinner);
+		let response = await this.http(this.queryURL, options, this.spinner);
 
-    if (response.status === 400 || response.status === 401) {
-      if (this.expiredTokenCallback) {
-        this.expiredTokenCallback(response, "/", this.navigateTo);
-      }
-      return;
-    }
+		if (response.status === 400 || response.status === 401) {
+			if (this.expiredTokenCallback) {
+				this.expiredTokenCallback(response, "/", this.navigateTo);
+			}
+			return;
+		}
 
-    let result = await response.json();
+		let result = await response.json();
 
-    if (!response.ok) {
-      throw new Error(result.message);
-    }
+		if (!response.ok) {
+			throw new Error(result.message);
+		}
 
-    return result;
-  }
+		return result;
+	}
 
-  /**
-   * Executes a mutation against a GraphQL API
-   * @param query string A graphql mutation. Omit the "mutation {}" portion
-   */
-  async mutation(query) {
-    if (this.expiredTokenCallback && !this.expiredTokenCallback(null, "/", this.navigateTo)) {
-      return;
-    }
+	/**
+	 * Executes a mutation against a GraphQL API
+	 * @param query string A graphql mutation. Omit the "mutation {}" portion
+	 * @returns {Promise<object>} A promise that resolves to the fetch response
+	 */
+	async mutation(query) {
+		if (this.expiredTokenCallback && !this.expiredTokenCallback(null, "/", this.navigateTo)) {
+			return;
+		}
 
-    const token = (this.tokenGetterFunction) ? this.tokenGetterFunction() : "";
+		const token = (this.tokenGetterFunction) ? this.tokenGetterFunction() : "";
 
-    query = `mutation {
+		query = `mutation {
 			${query}
 		}`;
 
-    let options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ query }),
-    };
+		let options = {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ query }),
+		};
 
-    if (token) {
-      options.headers["Authorization"] = `Bearer ${token}`;
-    }
+		if (token) {
+			options.headers["Authorization"] = `Bearer ${token}`;
+		}
 
-    let response = await this.http(this.queryURL, options, this.spinner);
+		let response = await this.http(this.queryURL, options, this.spinner);
 
-    if (response.status === 400 || response.status === 401) {
-      if (this.expiredTokenCallback) {
-        this.expiredTokenCallback(response, "/", this.navigateTo);
-      }
+		if (response.status === 400 || response.status === 401) {
+			if (this.expiredTokenCallback) {
+				this.expiredTokenCallback(response, "/", this.navigateTo);
+			}
 
-      return;
-    }
+			return;
+		}
 
-    let result = await response.json();
+		let result = await response.json();
 
-    if (!response.ok) {
-      throw new Error(result.message);
-    }
+		if (!response.ok) {
+			throw new Error(result.message);
+		}
 
-    return result;
-  }
+		return result;
+	}
 }
 
-/*
- * Copyright © 2022 App Nerds LLC
+/**
+ * Debounces a function call. This is useful for things like
+ * search boxes where you don't want to make a call to the
+ * server for every keystroke.
+ * Copyright © 2023 App Nerds LLC
+ * @param {function} fn The function to debounce
+ * @param {number} delay The delay in milliseconds. Default is 400
+ * @returns {function} The debounced function
  */
-
 const debounce = (fn, delay = 400) => {
-  let id = null;
+	let id = null;
 
-  return function() {
-    let args = arguments;
+	return function() {
+		let args = arguments;
 
-    clearTimeout(id);
+		clearTimeout(id);
 
-    id = setTimeout(() => {
-      fn.apply(this, args);
-    }, delay);
-  };
+		id = setTimeout(() => {
+			fn.apply(this, args);
+		}, delay);
+	};
 };
-
-/*
- * Copyright © 2022 App Nerds LLC
- */
 
 /**
  * Converts a classic JS object to a Map
+ * Copyright © 2023 App Nerds LLC
  * @param o object The object to convert
+ * @returns {Map} A Map
  */
 const objectToMap = (o = {}) => {
-  let result = new Map();
+	let result = new Map();
 
-  for (const key in o) {
-    result.set(key, o[key]);
-  }
+	for (const key in o) {
+		result.set(key, o[key]);
+	}
 
-  return result;
+	return result;
 };
-
-/*
- * Copyright © 2022 App Nerds LLC
- */
 
 const ErrTokenExpired = "token expired";
 
-class SessionService {
-  static clearMember() {
-    window.sessionStorage.removeItem("member");
-  }
-
-  static clearToken() {
-    window.sessionStorage.removeItem("token");
-  }
-
-  static getMember() {
-    return JSON.parse(window.sessionStorage.getItem("member"));
-  }
-
-  static getToken() {
-    return JSON.parse(window.sessionStorage.getItem("token"));
-  }
-
-  static hasMember() {
-    return window.sessionStorage.getItem("member") !== null;
-  }
-
-  static hasToken() {
-    return window.sessionStorage.getItem("token") !== null;
-  }
-
-  static navigateOnTokenExpired(e, path, navigateTo) {
-    if (e.message === ErrTokenExpired) {
-      SessionService.clearToken();
-      navigateTo(path);
-    }
-  }
-
-  static setMember(member) {
-    window.sessionStorage.setItem("member", JSON.stringify(member));
-  }
-
-  static setToken(token) {
-    window.sessionStorage.setItem("token", JSON.stringify(token));
-  }
-
-  static tokenExpireFunc(httpResponse, path, navigateTo) {
-    if (httpResponse && httpResponse.status === 401) {
-      SessionService.clearToken();
-      SessionService.navigateOnTokenExpired({ message: ErrTokenExpired }, path, navigateTo);
-      return false;
-    }
-
-    if (!SessionService.hasToken()) {
-      SessionService.navigateOnTokenExpired({ message: ErrTokenExpired }, path, navigateTo);
-      return false;
-    }
-
-    return true;
-  };
-}
-
-/*
- * Copyright © 2022 App Nerds LLC
+/**
+ * SessionService is a service used to manage session data. It makes use
+ * of the browser's sessionStorage object. This class provides
+ * only static methods.
+ * @class SessionService
  */
+class SessionService {
+	/**
+	 * Clears the member from session storage.
+	 * @static
+	 * @memberof SessionService
+	 * @returns {void}
+	 */
+	static clearMember() {
+		window.sessionStorage.removeItem("member");
+	}
 
-class BaseView extends HTMLElement {
-  constructor(params, _onRenderComplete) {
-    super();
+	/**
+	 * Clears the token from session storage.
+	 * @static
+	 * @memberof SessionService
+	 * @returns {void}
+	 */
+	static clearToken() {
+		window.sessionStorage.removeItem("token");
+	}
 
-    this._title = "";
-    this.params = params;
-    this._state = {};
-    this._onRenderComplete = window._router.onRenderComplete || null;
+	/**
+	 * Gets the member from session storage.
+	 * @static
+	 * @memberof SessionService
+	 * @returns {object} The member object
+	 */
+	static getMember() {
+		return JSON.parse(window.sessionStorage.getItem("member"));
+	}
 
-    this.router = window._router;
-  }
+	/**
+	 * Gets the token from session storage.
+	 * @static
+	 * @memberof SessionService
+	 * @returns {object} The token object
+	 */
+	static getToken() {
+		return JSON.parse(window.sessionStorage.getItem("token"));
+	}
 
-  async connectedCallback() {
-    await this.beforeRender();
-    await this.render();
-    this._setDocumentTitle();
-    await this.afterRender();
+	/**
+	 * Determines if the session has a member.
+	 * @static
+	 * @memberof SessionService
+	 * @returns {boolean} True if the session has a member, otherwise false.
+	 */
+	static hasMember() {
+		return window.sessionStorage.getItem("member") !== null;
+	}
 
-    if (this._onRenderComplete) {
-      this._onRenderComplete(this);
-    }
-  }
+	/**
+	 * Determines if the session has a token.
+	 * @static
+	 * @memberof SessionService
+	 * @returns {boolean} True if the session has a token, otherwise false.
+	 */
+	static hasToken() {
+		return window.sessionStorage.getItem("token") !== null;
+	}
 
-  disconnectedCallback() {
-    this.onUnload();
-  }
+	/**
+	 * Navigates to the specified path if the token has expired.
+	 * This is determined by examing the error message. If the
+	 * error message is "token expired", the user is navigated
+	 * to the specified path.
+	 * @static
+	 * @param {object} e The error object
+	 * @param {string} path The path to navigate to
+	 * @param {function} navigateTo The function to use to navigate
+	 * @memberof SessionService
+	 */
+	static navigateOnTokenExpired(e, path, navigateTo) {
+		if (e.message === ErrTokenExpired) {
+			SessionService.clearToken();
+			navigateTo(path);
+		}
+	}
 
-  _setDocumentTitle() {
-    let titles = this.querySelectorAll("title");
+	/**
+	 * Sets the member in session storage.
+	 * @static
+	 * @param {object} member The member object
+	 * @memberof SessionService
+	 * @returns {void}
+	 */
+	static setMember(member) {
+		window.sessionStorage.setItem("member", JSON.stringify(member));
+	}
 
-    if (titles && titles.length > 0) {
-      this._title = titles[0].innerText;
-      document.title = this._title;
-      this.removeChild(titles[0]);
-      return;
-    }
-  }
+	/**
+	 * Sets the token in session storage.
+	 * @static
+	 * @param {object} token The token object
+	 * @memberof SessionService
+	 * @returns {void}
+	 */
+	static setToken(token) {
+		window.sessionStorage.setItem("token", JSON.stringify(token));
+	}
 
-  async beforeRender() { }
-  async afterRender() { }
-  async onUnload() { }
+	/**
+	 * This is a function that can be used as a callback for the fetcher
+	 * class. It will check the response for a 401 status code. If it
+	 * finds one, it will clear the token and navigate to the specified
+	 * path.
+	 * @static
+	 * @param {object} httpResponse The HTTP response object
+	 * @param {string} path The path to navigate to
+	 * @param {function} navigateTo The function to use to navigate
+	 * @memberof SessionService
+	 * @returns {boolean} True if the token is valid, otherwise false.
+	 */
+	static tokenExpireFunc(httpResponse, path, navigateTo) {
+		if (httpResponse && httpResponse.status === 401) {
+			SessionService.clearToken();
+			SessionService.navigateOnTokenExpired({ message: ErrTokenExpired }, path, navigateTo);
+			return false;
+		}
 
-  async render() {
-    throw new Error("not implemented");
-  }
+		if (!SessionService.hasToken()) {
+			SessionService.navigateOnTokenExpired({ message: ErrTokenExpired }, path, navigateTo);
+			return false;
+		}
 
-  get title() {
-    return this._title;
-  }
-
-  get html() {
-    return this._html;
-  }
-
-  get state() {
-    return this._state;
-  }
-
-  set state(newState) {
-    this._state = newState;
-  }
-
-  getQueryParam(paramName) {
-    return this.router.getQueryParam(paramName);
-  }
-
-  navigateTo(url, queryParams = {}, state = {}) {
-    this.router.navigateTo(url, queryParams, state);
-  }
+		return true;
+	};
 }
 
-// Used when a route cannot be found
-class DefaultPageNotFound extends BaseView {
-  constructor(params) {
-    super(params);
-  }
+/**
+ * BaseView is the base class for all views in the application. It provides
+ * a common set of functionality that all views can use. Your view JavaScript
+ * components should extend this class and register themselves as custom elements.
+ * @class BaseView
+ * @extends {HTMLElement}
+ * @property {string} title The title of the view. This is used to set the document title.
+ * @property {object} params The parameters passed to the view.
+ * @property {object} state The state of the view.
+ */
+class BaseView extends HTMLElement {
+	constructor(params, _onRenderComplete) {
+		super();
 
-  async render() {
-    return `
+		this._title = "";
+		this.params = params;
+		this._state = {};
+		this._onRenderComplete = window._router.onRenderComplete || null;
+
+		this.router = window._router;
+	}
+
+	async connectedCallback() {
+		await this.beforeRender();
+		await this.render();
+		this._setDocumentTitle();
+		await this.afterRender();
+
+		if (this._onRenderComplete) {
+			this._onRenderComplete(this);
+		}
+	}
+
+	disconnectedCallback() {
+		this.onUnload();
+	}
+
+	/**
+	 * This method is called before the view is rendered. Override this method
+	 * to perform any actions before the view is rendered.
+	 * @returns {Promise<void>}
+	 */
+	async beforeRender() { }
+
+	/**
+	 * This method is called after the view is rendered. Override this method
+	 * to perform any actions after the view is rendered.
+	 * @returns {Promise<void>}
+	 */
+	async afterRender() { }
+
+	/**
+	 * This method is called when the view is unloaded. Override this method
+	 * to perform any actions when the view is unloaded.
+	 * @returns {Promise<void>}
+	 */
+	async onUnload() { }
+
+	/**
+	 * This method is called when the view is navigated to. Override this method
+	 * render your page contents.
+	 * @returns {Promise<void>}
+	 */
+	async render() {
+		throw new Error("not implemented");
+	}
+
+	/**
+	 * Get the title for the current view.
+	 * @returns {string}
+	 */
+	get title() {
+		return this._title;
+	}
+
+	/**
+	 * Get the HTML for the current view.
+	 * @returns {string}
+	 */
+	get html() {
+		return this._html;
+	}
+
+	/**
+	 * Get the state for the current view.
+	 * @returns {object}
+	 */
+	get state() {
+		return this._state;
+	}
+
+	/**
+	 * Set the state for the current view.
+	 * @param {object} newState The new state for the view.
+	 * @returns {void}
+	 */
+	set state(newState) {
+		this._state = newState;
+	}
+
+	/**
+	 * Get the value of a query parameter.
+	 * @param {string} paramName The name of the query parameter.
+	 * @returns {string}
+	 */
+	getQueryParam(paramName) {
+		return this.router.getQueryParam(paramName);
+	}
+
+	/**
+	 * Navigate to a new URL.
+	 * @param {string} url The URL to navigate to.
+	 * @param {object} queryParams Query parameters to add to the URL.
+	 * @param {object} state The state to pass to the new view.
+	 * @returns {void}
+	 */
+	navigateTo(url, queryParams = {}, state = {}) {
+		this.router.navigateTo(url, queryParams, state);
+	}
+
+	_setDocumentTitle() {
+		let titles = this.querySelectorAll("title");
+
+		if (titles && titles.length > 0) {
+			this._title = titles[0].innerText;
+			document.title = this._title;
+			this.removeChild(titles[0]);
+			return;
+		}
+	}
+}
+
+/**
+ * DefaultPageNotFound is the default view to display when a page is not found.
+ * @class DefaultPageNotFound
+ * @extends {BaseView}
+ */
+class DefaultPageNotFound extends BaseView {
+	constructor(params) {
+		super(params);
+	}
+
+	async render() {
+		return `
 			<title>Page Not Found</title>
 			<p>The page ${this.params.path} could not be found.</p>
 		`;
-  }
+	}
 }
 
 if (!customElements.get("default-page-not-found")) {
-  customElements.define("default-page-not-found", DefaultPageNotFound);
+	customElements.define("default-page-not-found", DefaultPageNotFound);
 }
 
-/*
- * Copyright © 2022 App Nerds LLC
- */
+/** @typedef {object & { path: string, view: BaseView }} Route */
 
-/*
- * Router
+/**
+ * Router is responsible for routing requests to the correct view.
+ * @class Router
  */
 class Router {
-  constructor(targetEl, routes, pageNotFoundView = null) {
-    this.targetEl = targetEl;
-    this.routes = routes;
-    this.pageNotFoundView = pageNotFoundView;
+	/**
+	 * Creates a new instance of Router.
+	 * @param {string} targetEl The element to render the SPA into.
+	 * @param {Array<Route>} routes The routes to use for the SPA.
+	 * @param {BaseView} pageNotFoundView The view to use when a route is not found.
+	 */
+	constructor(targetEl, routes, pageNotFoundView = null) {
+		this.targetEl = targetEl;
+		this.routes = routes;
+		this.pageNotFoundView = pageNotFoundView;
 
-    this.beforeRoute = null;
-    this.afterRoute = null;
-    this.injectParams = null;
-    this.onRenderComplete = null;
+		this.beforeRoute = null;
+		this.afterRoute = null;
+		this.injectParams = null;
+		this.onRenderComplete = null;
 
-    if (this.pageNotFoundView) {
-      this.routes.push({
-        path: "/404notfound/:path",
-        view: this.pageNotFoundView,
-      });
-    } else {
-      this.routes.push({
-        path: "/404notfound/:path",
-        view: DefaultPageNotFound,
-      });
-    }
-  }
+		if (this.pageNotFoundView) {
+			this.routes.push({
+				path: "/404notfound/:path",
+				view: this.pageNotFoundView,
+			});
+		} else {
+			this.routes.push({
+				path: "/404notfound/:path",
+				view: DefaultPageNotFound,
+			});
+		}
+	}
 
-  _pathToRegex(path) {
-    return new RegExp(
-      "^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$"
-    );
-  }
+	/**
+	 * Retrieves a query parameter from the URL by name.
+	 * @param {string} paramName The name of the query parameter to retrieve.
+	 * @returns {string}
+	 */
+	getQueryParam(paramName) {
+		let params = new URLSearchParams(location.search);
+		return params.get(paramName);
+	}
 
-  _getParams(match) {
-    let index = 0;
+	/**
+	 * Navigates to a URL.
+	 * @param {string} url The URL to navigate to.
+	 * @param {object} queryParams Query parameters to add to the URL.
+	 * @param {object} state The state to pass to the new view.
+	 * @returns {void}
+	 */
+	navigateTo(url, queryParams = {}, state = {}) {
+		let q = "";
 
-    const values = match.result.slice(1);
-    const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(
-      (result) => result[1]
-    );
+		if (Object.keys(queryParams).length > 0) {
+			let m = objectToMap(queryParams);
+			q += "?";
 
-    let result = {};
+			for (const [key, value] of m) {
+				let encodedKey = encodeURIComponent(key);
+				let jsonValue = value;
 
-    for (index = 0; index < values.length; index++) {
-      result[keys[index]] = values[index];
-    }
+				if (typeof value === "object") {
+					jsonValue = JSON.stringify(value);
+				}
 
-    if (this.injectParams) {
-      const whatToInject = this.injectParams(match);
+				let encodedValue = encodeURIComponent(jsonValue);
 
-      for (const key in whatToInject) {
-        result[key] = whatToInject[key];
-      }
-    }
+				q += `${encodedKey}=${encodedValue}&`;
+			}
+		}
 
-    return result;
-  }
+		history.pushState(state, null, `${url}${q}`);
+		this._route({
+			state: state,
+		});
+	}
 
-  async _route(e) {
-    let state = {};
+	_pathToRegex(path) {
+		return new RegExp(
+			"^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$"
+		);
+	}
 
-    if (e.state) {
-      state = e.state;
-    }
+	_getParams(match) {
+		let index = 0;
 
-    const potentialMatches = this.routes.map((route) => {
-      return {
-        route,
-        result: location.pathname.match(this._pathToRegex(route.path)),
-      };
-    });
+		const values = match.result.slice(1);
+		const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(
+			(result) => result[1]
+		);
 
-    let match = potentialMatches.find(
-      (potentialMatch) => potentialMatch.result !== null
-    );
+		let result = {};
 
-    /*
-     * Route not found - return first route
-     */
-    if (!match) {
-      this.navigateTo(`/404notfound${location.pathname}`);
-      return;
-    }
+		for (index = 0; index < values.length; index++) {
+			result[keys[index]] = values[index];
+		}
 
-    if (this.beforeRoute) {
-      if (this.beforeRoute.apply(this, match.route) === false) {
-        return;
-      }
-    }
+		if (this.injectParams) {
+			const whatToInject = this.injectParams(match);
 
-    /*
-     * Get parameters, then initialie the view and render.
-     */
-    const params = this._getParams(match);
-    const view = new match.route.view(params);
-    view.state = state;
+			for (const key in whatToInject) {
+				result[key] = whatToInject[key];
+			}
+		}
 
-    const el = document.querySelector(this.targetEl);
-    el.innerHTML = "";
-    el.appendChild(view);
+		return result;
+	}
 
-    if (this.afterRoute) {
-      this.afterRoute(match.route);
-    }
-  }
+	async _route(e) {
+		let state = {};
 
-  getQueryParam(paramName) {
-    let params = new URLSearchParams(location.search);
-    return params.get(paramName);
-  }
+		if (e.state) {
+			state = e.state;
+		}
 
-  navigateTo(url, queryParams = {}, state = {}) {
-    let q = "";
+		const potentialMatches = this.routes.map((route) => {
+			return {
+				route,
+				result: location.pathname.match(this._pathToRegex(route.path)),
+			};
+		});
 
-    if (Object.keys(queryParams).length > 0) {
-      let m = objectToMap(queryParams);
-      q += "?";
+		let match = potentialMatches.find(
+			(potentialMatch) => potentialMatch.result !== null
+		);
 
-      for (const [key, value] of m) {
-        let encodedKey = encodeURIComponent(key);
-        let jsonValue = value;
+		/*
+		 * Route not found - return first route
+		 */
+		if (!match) {
+			this.navigateTo(`/404notfound${location.pathname}`);
+			return;
+		}
 
-        if (typeof value === "object") {
-          jsonValue = JSON.stringify(value);
-        }
+		if (this.beforeRoute) {
+			if (this.beforeRoute.apply(this, match.route) === false) {
+				return;
+			}
+		}
 
-        let encodedValue = encodeURIComponent(jsonValue);
+		/*
+		 * Get parameters, then initialie the view and render.
+		 */
+		const params = this._getParams(match);
+		const view = new match.route.view(params);
+		view.state = state;
 
-        q += `${encodedKey}=${encodedValue}&`;
-      }
-    }
+		const el = document.querySelector(this.targetEl);
+		el.innerHTML = "";
+		el.appendChild(view);
 
-    history.pushState(state, null, `${url}${q}`);
-    this._route({
-      state: state,
-    });
-  }
+		if (this.afterRoute) {
+			this.afterRoute(match.route);
+		}
+	}
 }
 
-/*
- * Copyright © 2022 App Nerds LLC
+/** @typedef {import("./router.js").Route} Route */
+/** @typedef {object & {routes: Array<Route>, targetElement: HTMLElement, router: Router, afterRoute: function, beforeRoute: function, injectParams: function, onRenderComplete: function, go: function }} Application */
+
+/**
+ * Creates a new single-page application.
+ * @param {HTMLElement} targetElement The element to render the SPA into.
+ * @param {Array<Route>} routes The routes to use for the SPA.
+ * @param {BaseView} pageNotFoundView The view to use when a route is not found.
+ * @returns {Application}
  */
-
 const application = (
-  targetElement,
-  routes,
-  pageNotFoundView = DefaultPageNotFound
+	targetElement,
+	routes,
+	pageNotFoundView = DefaultPageNotFound
 ) => {
-  window._router = new Router(targetElement, routes, pageNotFoundView);
-  window.navigateTo = window._router.navigateTo.bind(window._router);
+	window._router = new Router(targetElement, routes, pageNotFoundView);
+	window.navigateTo = window._router.navigateTo.bind(window._router);
 
-  window.addEventListener("popstate", (e) => {
-    window._router._route({
-      state: e.state,
-    });
-  });
+	window.addEventListener("popstate", (e) => {
+		window._router._route({
+			state: e.state,
+		});
+	});
 
-  return {
-    routes: routes,
-    targetElement: targetElement,
-    router: window._router,
+	return {
+		routes: routes,
+		targetElement: targetElement,
+		router: window._router,
 
-    afterRoute: (f) => {
-      window._router.afterRoute = f.bind(window._router);
-    },
+		afterRoute: (f) => {
+			window._router.afterRoute = f.bind(window._router);
+		},
 
-    beforeRoute: (f) => {
-      window._router.beforeRoute = f.bind(window._router);
-    },
+		beforeRoute: (f) => {
+			window._router.beforeRoute = f.bind(window._router);
+		},
 
-    injectParams: (f) => {
-      window._router.injectParams = f.bind(window._router);
-    },
+		injectParams: (f) => {
+			window._router.injectParams = f.bind(window._router);
+		},
 
-    onRenderComplete: (f) => {
-      window._router.onRenderComplete = f.bind(window._router);
-    },
+		onRenderComplete: (f) => {
+			window._router.onRenderComplete = f.bind(window._router);
+		},
 
-    go: () => {
-      window._router._route({});
-    },
-  };
+		go: () => {
+			window._router._route({});
+		},
+	};
 };
 
 class MemberService {
@@ -1936,91 +2330,95 @@ if (!customElements.get("google-login-form")) {
   customElements.define("google-login-form", GoogleLoginForm);
 }
 
-/*
- * MessageBar is a component used to display a message on the screen. It is typically used to display 
- * the results of submitting a form. It can also be used to provide informational breakout.
- *
- * Copyright © 2022 App Nerds LLC
-*/
-
+/**
+ * MessageBar is a component used to display a message on the screen.
+ * @class MessageBar
+ * @extends {HTMLElement}
+ * @property {string} messageType The type of message to display. Valid values are "error", "warn", "info", and "success".
+ * @property {string} message The message to display.
+ */
 class MessageBar extends HTMLElement {
-  constructor() {
-    super();
+	constructor() {
+		super();
 
-    this.messageType = this.getAttribute("message-type") || "info";
-    this.message = this.getAttribute("message") || "";
+		this.messageType = this.getAttribute("message-type") || "info";
+		this.message = this.getAttribute("message") || "";
 
-    this.containerEl = null;
-  }
+		this.containerEl = null;
+	}
 
-  connectedCallback() {
-    this.containerEl = this.createContainerEl();
-    const closeButtonEl = this.createCloseButtonEl();
-    const textEl = this.createTextEl();
+	connectedCallback() {
+		this.containerEl = this._createContainerEl();
+		const closeButtonEl = this._createCloseButtonEl();
+		const textEl = this._createTextEl();
 
-    this.containerEl.insertAdjacentElement("beforeend", closeButtonEl);
-    this.containerEl.insertAdjacentElement("beforeend", textEl);
+		this.containerEl.insertAdjacentElement("beforeend", closeButtonEl);
+		this.containerEl.insertAdjacentElement("beforeend", textEl);
 
-    this.insertAdjacentElement("beforeend", this.containerEl);
-  }
+		this.insertAdjacentElement("beforeend", this.containerEl);
+	}
 
-  createContainerEl() {
-    const el = document.createElement("div");
-    el.classList.add("message-bar");
+	_createContainerEl() {
+		const el = document.createElement("div");
+		el.classList.add("message-bar");
 
-    switch (this.messageType) {
-      case "error":
-        el.classList.add("message-bar-error");
-        break;
+		switch (this.messageType) {
+			case "error":
+				el.classList.add("message-bar-error");
+				break;
 
-      case "warn":
-        el.classList.add("message-bar-warn");
-        break;
+			case "warn":
+				el.classList.add("message-bar-warn");
+				break;
 
-      case "info":
-        el.classList.add("message-bar-info");
-        break;
+			case "info":
+				el.classList.add("message-bar-info");
+				break;
 
-      case "success":
-        el.classList.add("message-bar-success");
-        break;
-    }
+			case "success":
+				el.classList.add("message-bar-success");
+				break;
+		}
 
-    return el;
-  }
+		return el;
+	}
 
-  createCloseButtonEl() {
-    const el = document.createElement("span");
-    el.innerHTML = "&times;";
+	_createCloseButtonEl() {
+		const el = document.createElement("span");
+		el.innerHTML = "&times;";
 
-    el.addEventListener("click", () => {
-      if (this.containerEl) {
-        this.containerEl.remove();
-      }
-    });
+		el.addEventListener("click", () => {
+			if (this.containerEl) {
+				this.containerEl.remove();
+			}
+		});
 
-    return el;
-  }
+		return el;
+	}
 
-  createTextEl() {
-    const el = document.createElement("p");
-    el.setAttribute("role", "alert");
-    el.innerHTML = this.message;
+	_createTextEl() {
+		const el = document.createElement("p");
+		el.setAttribute("role", "alert");
+		el.innerHTML = this.message;
 
-    return el;
-  }
+		return el;
+	}
 }
 
-customElements.define("message-bar", MessageBar);
+if (!customElements.get("message-bar")) {
+	customElements.define("message-bar", MessageBar);
+}
 
-/*
- * color-picker is a tool that allows users to select from a pre-defined set of colors.
+/**
+ * ColorPicker is a component used to display a color picker on the screen.
  * If the color the user wants is not there, they can type a hex code into the box to get
  * the color they want.
- *
- * Copyright © 2023 App Nerds LLC
+ * @class ColorPicker
+ * @extends {HTMLElement}
+ * @property {string} color The currently selected color.
+ * @property {string} colors A comma-separated list of colors to display in the grid. These must be valid hex codes.
+ * @property {string} name The name of the input field.
  */
-
 class ColorPicker extends HTMLElement {
 	constructor() {
 		super();
@@ -2031,34 +2429,34 @@ class ColorPicker extends HTMLElement {
 
 		const colorOptions = this._colors.split(",");
 
-		const outerContainer = this.createOuterContainer();
-		const colorGrid = this.createColorGrid(colorOptions, this._color);
-		this.input = this.createInput(this._name, this._color);
+		const outerContainer = this._createOuterContainer();
+		const colorGrid = this._createColorGrid(colorOptions, this._color);
+		this.input = this._createInput(this._name, this._color);
 
 		outerContainer.insertAdjacentElement("beforeend", colorGrid);
 		outerContainer.insertAdjacentElement("beforeend", this.input);
 		this.appendChild(outerContainer);
 	}
 
-	createOuterContainer() {
+	_createOuterContainer() {
 		const el = document.createElement("div");
 		el.classList.add("color-picker");
 		return el;
 	}
 
-	createColorGrid(colors, selectedColor) {
+	_createColorGrid(colors, selectedColor) {
 		const grid = document.createElement("div");
 		grid.classList.add("grid");
 
 		colors.forEach(color => {
-			const el = this.createColorItem(color, selectedColor);
+			const el = this._createColorItem(color, selectedColor);
 			grid.insertAdjacentElement("beforeend", el);
 		});
 
 		return grid;
 	}
 
-	createColorItem(color, selectedColor) {
+	_createColorItem(color, selectedColor) {
 		const el = document.createElement("div");
 		el.classList.add("grid-item");
 		el.style.backgroundColor = color;
@@ -2068,11 +2466,11 @@ class ColorPicker extends HTMLElement {
 			el.classList.add("grid-item-selected");
 		}
 
-		el.addEventListener("click", this.onColorItemClicked.bind(this));
+		el.addEventListener("click", this._onColorItemClicked.bind(this));
 		return el;
 	}
 
-	createInput(name, color) {
+	_createInput(name, color) {
 		const el = document.createElement("input");
 		el.setAttribute("type", "text");
 		el.setAttribute("name", name);
@@ -2084,8 +2482,8 @@ class ColorPicker extends HTMLElement {
 		return el;
 	}
 
-	onColorItemClicked(e) {
-		this.clearGridSelectedClasses();
+	_onColorItemClicked(e) {
+		this._clearGridSelectedClasses();
 
 		const color = e.target.getAttribute("data-color");
 		e.target.classList.add("grid-item-selected");
@@ -2094,7 +2492,7 @@ class ColorPicker extends HTMLElement {
 		this.dispatchEvent(new CustomEvent("color-selected", { detail: color }));
 	}
 
-	clearGridSelectedClasses() {
+	_clearGridSelectedClasses() {
 		const gridItems = document.querySelectorAll(".grid-item");
 
 		for (let i = 0; i < gridItems.length; i++) {
@@ -2107,37 +2505,4 @@ if (!customElements.get("color-picker")) {
 	customElements.define("color-picker", ColorPicker);
 }
 
-/*
- * Copyright © 2023 App Nerds LLC
- */
-
-var frame = {
-	alertPosition,
-	alert,
-	confirm,
-	DateFormats,
-	DateTimePicker,
-	formatDateTime,
-	PopupMenu,
-	PopupMenuItem,
-	showPopup,
-	hidePopup,
-	shim,
-	spinner,
-	fetcher,
-	GraphQL,
-	debounce,
-	objectToMap,
-	parseDateTime,
-	SessionService,
-	ErrTokenExpired,
-	application,
-	BaseView,
-	MemberLoginBar,
-	MemberService,
-	GoogleLoginForm,
-	MessageBar,
-	ColorPicker,
-};
-
-export { frame as default };
+export { AlertPosition, Alerter, BaseView, ColorPicker, Confirmer, DateFormats, DateTimePicker, ErrTokenExpired, GoogleLoginForm, GraphQL, MemberLoginBar, MemberService, MessageBar, PopupMenu, PopupMenuItem, SessionService, Shim, Spinner, application, debounce, fetcher, formatDateTime, hidePopup, objectToMap, parseDateTime, showPopup };

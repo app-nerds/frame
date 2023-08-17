@@ -267,9 +267,12 @@
 		<div style="margin-bottom: 1rem;">
 			<button id="showPopup" aria-haspopup="menu">Show popup menu</button>
 			<popup-menu id="popup" trigger="#showPopup">
-				<popup-menu-item id="menuItem1" text="Menu Item 1" icon="airplay"></popup-menu-item>
-				<popup-menu-item id="menuItem2" text="Menu Item 2" icon="archive"></popup-menu-item>
-				<popup-menu-item id="menuItem3" text="Menu Item 3" icon="bar-chart-2"></popup-menu-item>
+				<popup-menu-item id="menuItem1" text="Menu Item 1" data="Value 1"
+					icon="icon--mdi icon--mdi--home"></popup-menu-item>
+				<popup-menu-item id="menuItem2" text="Menu Item 2" data="Value 2"
+					icon="icon--mdi icon--mdi--plus"></popup-menu-item>
+				<popup-menu-item id="menuItem3" text="Menu Item 3" data="Value 3"
+					icon="icon--mdi icon--mdi--cog"></popup-menu-item>
 			</popup-menu>
 		</div>
 
@@ -320,12 +323,12 @@
 
 
 	<script type="module">
-		import frame from "/static/frame.js";
+		import {Alerter, Confirmer, Spinner, showPopup, hidePopup} from "/static/frame.js";
 
 		document.addEventListener("DOMContentLoaded", () => {
-			const alerter = frame.alert();
-			const confirmer = frame.confirm();
-			const spinnerer = frame.spinner();
+			const alerter = new Alerter();
+			const confirmer = new Confirmer();
+			const spinnerer = new Spinner();
 
 			/*
 			 * Click button to show alert
@@ -369,18 +372,11 @@
 			 * Popup menu events
 			 */
 			document.getElementById("showPopup").addEventListener("click", () => {
-				frame.showPopup("#popup");
-			});
-			document.getElementById("menuItem1").addEventListener("click", () => {
-				alerter.info("Menu item 1");
+				showPopup("#popup");
 			});
 
-			document.getElementById("menuItem2").addEventListener("click", () => {
-				alerter.error("Menu item 1");
-			});
-
-			document.getElementById("menuItem3").addEventListener("click", () => {
-				alerter.warn("Menu item 1");
+			document.getElementById("popup").addEventListener("menu-item-click", (e) => {
+				alerter.info(`You clicked ${e.detail.text} with data ${e.detail.data}`);
 			});
 		});
 	</script>

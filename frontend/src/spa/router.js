@@ -1,145 +1,162 @@
-/*
- * Copyright © 2022 App Nerds LLC
- */
-
 import { objectToMap } from "../utilities/objectToMap.js";
 import { DefaultPageNotFound } from "./base-view.js";
 
-/*
- * Router
+/** @typedef {object & { path: string, view: BaseView }} Route */
+
+/**
+ * Router is responsible for routing requests to the correct view.
+ * @class Router
  */
 export class Router {
-  constructor(targetEl, routes, pageNotFoundView = null) {
-    this.targetEl = targetEl;
-    this.routes = routes;
-    this.pageNotFoundView = pageNotFoundView;
+	/**
+	 * Creates a new instance of Router.
+	 * @param {string} targetEl The element to render the SPA into.
+	 * @param {Array<Route>} routes The routes to use for the SPA.
+	 * @param {BaseView} pageNotFoundView The view to use when a route is not found.
+	 */
+	constructor(targetEl, routes, pageNotFoundView = null) {
+		this.targetEl = targetEl;
+		this.routes = routes;
+		this.pageNotFoundView = pageNotFoundView;
 
-    this.beforeRoute = null;
-    this.afterRoute = null;
-    this.injectParams = null;
-    this.onRenderComplete = null;
+		this.beforeRoute = null;
+		this.afterRoute = null;
+		this.injectParams = null;
+		this.onRenderComplete = null;
 
-    if (this.pageNotFoundView) {
-      this.routes.push({
-        path: "/404notfound/:path",
-        view: this.pageNotFoundView,
-      });
-    } else {
-      this.routes.push({
-        path: "/404notfound/:path",
-        view: DefaultPageNotFound,
-      });
-    }
-  }
+		if (this.pageNotFoundView) {
+			this.routes.push({
+				path: "/404notfound/:path",
+				view: this.pageNotFoundView,
+			});
+		} else {
+			this.routes.push({
+				path: "/404notfound/:path",
+				view: DefaultPageNotFound,
+			});
+		}
+	}
 
-  _pathToRegex(path) {
-    return new RegExp(
-      "^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$"
-    );
-  }
+	/**
+	 * Retrieves a query parameter from the URL by name.
+	 * @param {string} paramName The name of the query parameter to retrieve.
+	 * @returns {string}
+	 */
+	getQueryParam(paramName) {
+		let params = new URLSearchParams(location.search);
+		return params.get(paramName);
+	}
 
-  _getParams(match) {
-    let index = 0;
+	/**
+	 * Navigates to a URL.
+	 * @param {string} url The URL to navigate to.
+	 * @param {object} queryParams Query parameters to add to the URL.
+	 * @param {object} state The state to pass to the new view.
+	 * @returns {void}
+	 */
+	navigateTo(url, queryParams = {}, state = {}) {
+		let q = "";
 
-    const values = match.result.slice(1);
-    const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(
-      (result) => result[1]
-    );
+		if (Object.keys(queryParams).length > 0) {
+			let m = objectToMap(queryParams);
+			q += "?";
 
-    let result = {};
+			for (const [key, value] of m) {
+				let encodedKey = encodeURIComponent(key);
+				let jsonValue = value;
 
-    for (index = 0; index < values.length; index++) {
-      result[keys[index]] = values[index];
-    }
+				if (typeof value === "object") {
+					jsonValue = JSON.stringify(value);
+				}
 
-    if (this.injectParams) {
-      const whatToInject = this.injectParams(match);
+				let encodedValue = encodeURIComponent(jsonValue);
 
-      for (const key in whatToInject) {
-        result[key] = whatToInject[key];
-      }
-    }
+				q += `${encodedKey}=${encodedValue}&`;
+			}
+		}
 
-    return result;
-  }
+		history.pushState(state, null, `${url}${q}`);
+		this._route({
+			state: state,
+		});
+	}
 
-  async _route(e) {
-    let state = {};
+	_pathToRegex(path) {
+		return new RegExp(
+			"^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$"
+		);
+	}
 
-    if (e.state) {
-      state = e.state;
-    }
+	_getParams(match) {
+		let index = 0;
 
-    const potentialMatches = this.routes.map((route) => {
-      return {
-        route,
-        result: location.pathname.match(this._pathToRegex(route.path)),
-      };
-    });
+		const values = match.result.slice(1);
+		const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(
+			(result) => result[1]
+		);
 
-    let match = potentialMatches.find(
-      (potentialMatch) => potentialMatch.result !== null
-    );
+		let result = {};
 
-    /*
-     * Route not found - return first route
-     */
-    if (!match) {
-      this.navigateTo(`/404notfound${location.pathname}`);
-      return;
-    }
+		for (index = 0; index < values.length; index++) {
+			result[keys[index]] = values[index];
+		}
 
-    if (this.beforeRoute) {
-      if (this.beforeRoute.apply(this, match.route) === false) {
-        return;
-      }
-    }
+		if (this.injectParams) {
+			const whatToInject = this.injectParams(match);
 
-    /*
-     * Get parameters, then initialie the view and render.
-     */
-    const params = this._getParams(match);
-    const view = new match.route.view(params);
-    view.state = state;
+			for (const key in whatToInject) {
+				result[key] = whatToInject[key];
+			}
+		}
 
-    const el = document.querySelector(this.targetEl);
-    el.innerHTML = "";
-    el.appendChild(view);
+		return result;
+	}
 
-    if (this.afterRoute) {
-      this.afterRoute(match.route);
-    }
-  }
+	async _route(e) {
+		let state = {};
 
-  getQueryParam(paramName) {
-    let params = new URLSearchParams(location.search);
-    return params.get(paramName);
-  }
+		if (e.state) {
+			state = e.state;
+		}
 
-  navigateTo(url, queryParams = {}, state = {}) {
-    let q = "";
+		const potentialMatches = this.routes.map((route) => {
+			return {
+				route,
+				result: location.pathname.match(this._pathToRegex(route.path)),
+			};
+		});
 
-    if (Object.keys(queryParams).length > 0) {
-      let m = objectToMap(queryParams);
-      q += "?";
+		let match = potentialMatches.find(
+			(potentialMatch) => potentialMatch.result !== null
+		);
 
-      for (const [key, value] of m) {
-        let encodedKey = encodeURIComponent(key);
-        let jsonValue = value;
+		/*
+		 * Route not found - return first route
+		 */
+		if (!match) {
+			this.navigateTo(`/404notfound${location.pathname}`);
+			return;
+		}
 
-        if (typeof value === "object") {
-          jsonValue = JSON.stringify(value);
-        }
+		if (this.beforeRoute) {
+			if (this.beforeRoute.apply(this, match.route) === false) {
+				return;
+			}
+		}
 
-        let encodedValue = encodeURIComponent(jsonValue);
+		/*
+		 * Get parameters, then initialie the view and render.
+		 */
+		const params = this._getParams(match);
+		const view = new match.route.view(params);
+		view.state = state;
 
-        q += `${encodedKey}=${encodedValue}&`;
-      }
-    }
+		const el = document.querySelector(this.targetEl);
+		el.innerHTML = "";
+		el.appendChild(view);
 
-    history.pushState(state, null, `${url}${q}`);
-    this._route({
-      state: state,
-    });
-  }
+		if (this.afterRoute) {
+			this.afterRoute(match.route);
+		}
+	}
 }
