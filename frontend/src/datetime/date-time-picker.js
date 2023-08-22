@@ -29,7 +29,7 @@ export class DateTimePicker extends HTMLElement {
 		this.name = this.getAttribute("name") || "dateTime";
 
 		/* Get the date from attributes. If one isn't passed in, use now, but zero out the time. */
-		this.date = (this.getAttribute("date") !== "") ? parseDateTime(this.getAttribute("date")) : "";
+		this.date = (this.getAttribute("date")) ? parseDateTime(this.getAttribute("date")) : "";
 
 		this.dateFormat = this.getAttribute("date-format") || DateFormats.IsoWithTimezone;
 		this.showTimeSelector = this.dateFormat === DateFormats.IsoWithTimezone || this.dateFormat === DateFormats.IsoWithoutTimezone ||
@@ -55,6 +55,10 @@ export class DateTimePicker extends HTMLElement {
 
 		this.inputEl = this._createInputEl();
 		let formatP = this._createInputLabel();
+
+		if (this.date === "") {
+			this.date = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0);
+		}
 
 		this.popupEl = this._createPopupEl();
 		this._drawHeaderEl();
