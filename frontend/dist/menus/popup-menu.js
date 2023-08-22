@@ -1,4 +1,4 @@
-/* Copyright © 2023 App Nerds LLC v1.4.0 */
+/* Copyright © 2023 App Nerds LLC v1.4.1 */
 /**
  * PopupMenu is a Web Component that displays a popup menu. It attaches to a trigger element
  * that, when clicked, will show a list of menu items. It supports icons through the Feather

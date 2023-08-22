@@ -1,4 +1,4 @@
-/* Copyright © 2023 App Nerds LLC v1.4.0 */
+/* Copyright © 2023 App Nerds LLC v1.4.1 */
 /**
  * A wrapper around fetch that will show a spinner
  * while the request is being made. This is useful for

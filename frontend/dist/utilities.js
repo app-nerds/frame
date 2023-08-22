@@ -1,4 +1,4 @@
-/* Copyright © 2023 App Nerds LLC v1.4.0 */
+/* Copyright © 2023 App Nerds LLC v1.4.1 */
 /**
  * Converts a classic JS object to a Map
  * Copyright © 2023 App Nerds LLC

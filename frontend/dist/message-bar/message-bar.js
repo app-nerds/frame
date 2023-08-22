@@ -1,4 +1,4 @@
-/* Copyright © 2023 App Nerds LLC v1.4.0 */
+/* Copyright © 2023 App Nerds LLC v1.4.1 */
 /**
  * MessageBar is a component used to display a message on the screen.
  * @class MessageBar
