@@ -1,0 +1,16 @@
+frame.js frame.min.js
+color-picker/color-picker.js color-picker/color-picker.min.js
+datetime/date-time-picker.js datetime/date-time-picker.min.js
+datetime/date-time-service.js datetime/date-time-service.min.js
+datetime/index.js datetime/date-time.min.js
+dialogs/index.js dialogs/dialogs.min.js
+http/fetcher.js http/fetcher.min.js
+http/graphql.js http/graphql.min.js
+http/index.js http/index.min.js
+menus/popup-menu.js menus/popup-menu.min.js
+message-bar/message-bar.js message-bar/message-bar.min.js
+sessions/session-service.js sessions/session-service.min.js
+shim/shim.js shim/shim.min.js
+spa/spa.js spa/spa.min.js
+spinner/spinner.js spinner/spinner.min.js
+utilities/index.js utilities/index.min.js

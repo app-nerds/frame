@@ -24,53 +24,20 @@ build-debug: clean rollup ## Builds a non-minified version of Nerd JS Library
 clean: ## Removes all files from the dist folder
 	@rm -rf dist/*
 
-build-library: rollup
-	uglifyjs dist/frame.js -c -m --keep-fargs -o dist/frame.min.js --comments all --source-map
-	uglifyjs dist/color-picker/color-picker.js -c -m --keep-fargs -o dist/color-picker/color-picker.min.js --comments all --source-map
-	uglifyjs dist/date-time/date-time-picker.js -c -m --keep-fargs -o dist/date-time/date-time-picker.min.js --comments all --source-map
-	uglifyjs dist/date-time/date-time-service.js -c -m --keep-fargs -o dist/date-time/date-time-service.min.js --comments all --source-map
-	uglifyjs dist/date-time/date-time.js -c -m --keep-fargs -o dist/date-time/date-time.min.js --comments all --source-map
-	uglifyjs dist/dialogs/dialogs.js -c -m --keep-fargs -o dist/dialogs/dialogs.min.js --comments all --source-map
-	uglifyjs dist/http/fetcher.js -c -m --keep-fargs -o dist/http/fetcher.min.js --comments all --source-map
-	uglifyjs dist/http/graphql.js -c -m --keep-fargs -o dist/http/graphql.min.js --comments all --source-map
-	uglifyjs dist/http/http.js -c -m --keep-fargs -o dist/http/http.min.js --comments all --source-map
-	uglifyjs dist/menus/popup-menu.js -c -m --keep-fargs -o dist/menus/popup-menu.min.js --comments all --source-map
-	uglifyjs dist/message-bar/message-bar.js -c -m --keep-fargs -o dist/message-bar/message-bar.min.js --comments all --source-map
-	uglifyjs dist/sessions/session-service.js -c -m --keep-fargs -o dist/sessions/session-service.min.js --comments all --source-map
-	uglifyjs dist/shim/shim.js -c -m --keep-fargs -o dist/shim/shim.min.js --comments all --source-map
-	uglifyjs dist/spa/spa.js -c -m --keep-fargs -o dist/spa/spa.min.js --comments all --source-map
-	uglifyjs dist/spinner/spinner.js -c -m --keep-fargs -o dist/spinner/spinner.min.js --comments all --source-map
-	uglifyjs dist/utilities.js -c -m --keep-fargs -o dist/utilities.min.js --comments all --source-map
+build-library: build-css
+	@parallel --colsep ' ' -a ./roster-js.txt ./minifyjs.sh {1} {2}
 
-rollup: build-css
-	rollup src/frame.js --name dist/frame.js --format es -o dist/frame.js --banner $(BANNER)
-	rollup src/color-picker/color-picker.js --format es -o dist/color-picker/color-picker.js --banner $(BANNER)
-	rollup src/datetime/date-time-picker.js --format es -o dist/date-time/date-time-picker.js --banner $(BANNER)
-	rollup src/datetime/date-time-service.js --format es -o dist/date-time/date-time-service.js --banner $(BANNER)
-	rollup src/datetime/index.js --format es -o dist/date-time/date-time.js --banner $(BANNER)
-	rollup src/dialogs/index.js --format es -o dist/dialogs/dialogs.js --banner $(BANNER)
-	rollup src/http/fetcher.js --format es -o dist/http/fetcher.js --banner $(BANNER)
-	rollup src/http/graphql.js --format es -o dist/http/graphql.js --banner $(BANNER)
-	rollup src/http/index.js --format es -o dist/http/http.js --banner $(BANNER)
-	rollup src/menus/popup-menu.js --format es -o dist/menus/popup-menu.js --banner $(BANNER)
-	rollup src/message-bar/message-bar.js --format es -o dist/message-bar/message-bar.js --banner $(BANNER)
-	rollup src/sessions/session-service.js --format es -o dist/sessions/session-service.js --banner $(BANNER)
-	rollup src/shim/shim.js --format es -o dist/shim/shim.js --banner $(BANNER)
-	rollup src/spa/spa.js --format es -o dist/spa/spa.js --banner $(BANNER)
-	rollup src/spinner/spinner.js --format es -o dist/spinner/spinner.js --banner $(BANNER)
-	rollup src/utilities/index.js --format es -o dist/utilities.js --banner $(BANNER)
+build-css: setup-directories
+	@parallel --colsep ',' -a ./roster-css.txt ./minifycss.sh {1} {2}
 
-build-css:
-	uglifycss --output dist/base.min.css src/css/base.css
-	uglifycss --output dist/icons.min.css src/css/icons.css
-	uglifycss --output dist/admin-left-side-nav.min.css src/css/base.css src/css/admin-left-side-nav.css
-	uglifycss --output dist/admin-top-nav.min.css src/css/base.css src/css/admin-top-nav.css
-	uglifycss --output dist/components.min.css src/dialogs/alert.css \
-		src/datetime/date-time-picker.css \
-		src/dialogs/confirm.css src/menus/popup-menu.css src/shim/shim.css \
-		src/spinner/spinner.css src/members/member-login-bar.css \
-		src/members/google-login-form.css src/message-bar/message-bar.css \
-		src/color-picker/color-picker.css
+setup-directories:
+	@mkdir -p dist/datetime
+	@mkdir -p dist/color-picker
+	@mkdir -p dist/dialogs
+	@mkdir -p dist/menus
+	@mkdir -p dist/message-bar
+	@mkdir -p dist/shim
+	@mkdir -p dist/spinner
 
 copy:
 	cp dist/*.css ../admin-static/css/
