@@ -16,8 +16,6 @@ date-time-picker p {
 	display: grid;
 	grid-template-rows: 0fr 1fr;
 	border: 1px solid var(--border-color);
-	max-width: 20em;
-	width: 20em;
 	box-shadow: var(--shadow-color) 0px 7px 29px 0px;
 	background-color: var(--date-time-picker-background-color);
 	position: absolute;
@@ -33,8 +31,10 @@ date-time-picker p {
 	display: none !important;
 }
 
-.date-time-picker-popup a {
+.date-time-picker-popup button {
 	cursor: pointer;
+	border: none;
+	background-color: transparent;
 }
 
 .date-time-picker-popup > header {
