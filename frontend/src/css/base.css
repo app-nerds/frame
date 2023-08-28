@@ -198,7 +198,7 @@ input:focus, textarea:focus, select:focus {
 form input, form textarea, form select { margin-bottom: 0.5rem; }
 form small { position: relative; top: -5px; opacity: 0.8; display: block; }
 
-form nav {
+form footer {
 	display: flex;
 	gap: 0.5rem;
 	width: 100%;

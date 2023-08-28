@@ -1,0 +1,29 @@
+:root {
+	--prompter-background-color: white;
+}
+
+prompter-ui::part(prompter) {
+	border: 1px solid var(--border-color);
+	max-width: 50%;
+	max-height: 50%;
+	box-shadow: var(--shadow-color) 0px 7px 29px 0px;
+	background-color: var(--prompter-background-color);
+	position: fixed;
+	z-index: 100;
+	left: 50%;
+	top: 50%;
+	transform: translateY(-50%) translateX(-50%);
+	padding: 2em;
+}
+
+prompter-ui::part(buttons) {
+	display: flex;
+	justify-content: flex-end;
+	gap: 1em;
+	margin: 1em 0 0 0;
+	padding:0;
+}
+
+.hidden {
+	visibility: hidden !important;
+}

@@ -1,4 +1,4 @@
-/* Copyright © 2023 App Nerds LLC v1.4.1 */
+/* Copyright © 2023 App Nerds LLC v1.4.2 */
 /** @typedef {object & { position: AlertPosition, duration: number, closable: boolean, focusable: boolean }} AlertOptions */
 
 /**
@@ -679,6 +679,7 @@ class DateTimePicker extends HTMLElement {
 
 		if (this.date === "") {
 			this.date = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0);
+			this.yearBlockStart = this._getYear() - 5;
 		}
 
 		this.popupEl = this._createPopupEl();
@@ -688,6 +689,12 @@ class DateTimePicker extends HTMLElement {
 		this.insertAdjacentElement("beforeend", this.inputEl);
 		this.insertAdjacentElement("beforeend", formatP);
 		this.insertAdjacentElement("beforeend", this.popupEl);
+
+		document.addEventListener("click", e => {
+			if (!e.target.contains(this.popupEl) && !e.target.contains(this.inputEl)) {
+				this.hide();
+			}
+		});
 	}
 
 	/****************************************************
@@ -714,13 +721,16 @@ class DateTimePicker extends HTMLElement {
 	 * Moves the calendar forward or backward one month. A positive number moves forward, a negative number moves backward.
 	 * @param {number} direction
 	 */
-	moveMonth(direction) {
+	moveMonth(e, direction) {
+		e.preventDefault();
+		e.stopPropagation();
+
 		let newDate = new Date(this.date);
 		newDate.setMonth(newDate.getMonth() + direction);
 
 		this.date = newDate;
-		/** @type {HTMLAnchorElement} */ (this.popupEl.querySelector("header a:nth-child(2)")).innerText = this._getMonthName();
-		/** @type {HTMLAnchorElement} */ (this.popupEl.querySelector("header a:nth-child(3)")).innerText = this._getYear().toString();
+		this.popupEl.querySelector("header button:nth-child(2)").innerText = this._getMonthName();
+		this.popupEl.querySelector("header button:nth-child(3)").innerText = this._getYear().toString();
 		this.popupEl.querySelector(".calendar-body").remove();
 		this._drawCalendarBody();
 	}
@@ -737,12 +747,16 @@ class DateTimePicker extends HTMLElement {
 	}
 
 	/**
-	 * toggleCalendar shows or hides the calendar.
+	 * toggle shows or hides the calendar.
 	 * @returns {void}
 	 */
-	toggleCalendar() {
+	toggle() {
 		this.popupEl.classList.toggle("calendar-hidden");
 		this.inputEl.focus();
+	}
+
+	hide() {
+		this.popupEl.classList.add("calendar-hidden");
 	}
 
 	/****************************************************
@@ -866,33 +880,43 @@ class DateTimePicker extends HTMLElement {
 	/**
 	 * @param {number} day
 	 */
-	_onCalendarDayClick(day) {
+	_onCalendarDayClick(e, day) {
+		e.preventDefault();
+		e.stopPropagation();
+
 		this.day = day;
 		this._setInputDate();
 
 		if (!this.showTimeSelector) {
-			this.toggleCalendar();
+			this.toggle();
 			this.inputEl.focus();
 		} else {
 			this._createTimeSelectorOptions();
 		}
 	}
 
-	_onHeaderMonthClick() {
+	_onHeaderMonthClick(e) {
+		e.preventDefault();
+		e.stopPropagation();
 		this._drawMonthListBody();
 	}
 
 	/**
 	 * @returns {void}
 	 */
-	_onHeaderYearClick() {
+	_onHeaderYearClick(e) {
+		e.preventDefault();
+		e.stopPropagation();
 		this._drawYearListBody();
 	}
 
 	/**
 	 * @param {number} monthIndex
 	 */
-	_onMonthClick(monthIndex) {
+	_onMonthClick(e, monthIndex) {
+		e.preventDefault();
+		e.stopPropagation();
+
 		this.date = new Date(this._getYear(), monthIndex, 1);
 		this._setInputDate();
 		this._drawHeaderEl();
@@ -912,19 +936,28 @@ class DateTimePicker extends HTMLElement {
 	/**
 	 * @param {number} year
 	 */
-	_onYearClick(year) {
+	_onYearClick(e, year) {
+		e.preventDefault();
+		e.stopPropagation();
+
 		this.date = new Date(year, this._getMonth(), 1);
 		this._setInputDate();
 		this._drawHeaderEl();
 		this._drawCalendarBody();
 	}
 
-	_onYearDownClick() {
+	_onYearDownClick(e) {
+		e.preventDefault();
+		e.stopPropagation();
+
 		this.yearBlockStart += 10;
 		this._drawYearListBody();
 	}
 
-	_onYearUpClick() {
+	_onYearUpClick(e) {
+		e.preventDefault();
+		e.stopPropagation();
+
 		this.yearBlockStart -= 10;
 		this._drawYearListBody();
 	}
@@ -962,10 +995,10 @@ class DateTimePicker extends HTMLElement {
 		if (started) {
 			let d = dayIndex - firstDayOfWeek + 1;
 
-			let a = document.createElement("a");
-			a.href = "javascript:void(0)";
+			let a = document.createElement("button");
 			a.innerText = `${d}`;
-			a.addEventListener("click", this._onCalendarDayClick.bind(this, d));
+			a.setAttribute("type", "button");
+			a.addEventListener("click", e => this._onCalendarDayClick.call(this, e, d));
 
 			let thisDay = new Date(this._getYear(), this._getMonth(), d);
 			if (thisDay === this.today) {
@@ -987,18 +1020,18 @@ class DateTimePicker extends HTMLElement {
 	}
 
 	_createCurrentMonthButton() {
-		let el = document.createElement("a");
-		el.href = "javascript:void(0)";
+		let el = document.createElement("button");
 		el.innerHTML = this._getMonthName();
-		el.addEventListener("click", this._onHeaderMonthClick.bind(this));
+		el.setAttribute("type", "button");
+		el.addEventListener("click", e => this._onHeaderMonthClick.call(this, e));
 		return el;
 	}
 
 	_createCurrentYearButton() {
-		let el = document.createElement("a");
-		el.href = "javascript:void(0)";
+		let el = document.createElement("button");
 		el.innerHTML = this._getYear().toString();
-		el.addEventListener("click", this._onHeaderYearClick.bind(this));
+		el.setAttribute("type", "button");
+		el.addEventListener("click", e => this._onHeaderYearClick.call(this, e));
 		return el;
 	}
 
@@ -1020,7 +1053,7 @@ class DateTimePicker extends HTMLElement {
 
 			}
 
-			this.toggleCalendar();
+			this.toggle();
 		});
 
 		return el;
@@ -1038,27 +1071,27 @@ class DateTimePicker extends HTMLElement {
 	 * @returns {HTMLAnchorElement}
 	 */
 	_createMonthButton(monthIndex) {
-		let month = document.createElement("a");
-		month.href = "javascript:void(0)";
+		let month = document.createElement("button");
 		month.innerText = this._months[monthIndex];
-		month.addEventListener("click", this._onMonthClick.bind(this, monthIndex));
+		month.setAttribute("type", "button");
+		month.addEventListener("click", e => this._onMonthClick.call(this, e, monthIndex));
 		return month;
 	}
 
 	_createNextMonthButton() {
-		let el = document.createElement("a");
-		el.href = "javascript:void(0)";
+		let el = document.createElement("button");
 		el.innerHTML = `<i class="icon--mdi icon--mdi--arrow-right"></i>`;
-		el.addEventListener("click", this.moveMonth.bind(this, 1));
+		el.setAttribute("type", "button");
+		el.addEventListener("click", e => this.moveMonth.call(this, e, 1));
 		return el;
 	}
 
 	_createOkButton() {
-		let el = document.createElement("a");
-		el.href = "javascript:void(0)";
+		let el = document.createElement("button");
 		el.innerText = "OK";
+		el.setAttribute("type", "button");
 		el.classList.add("ok");
-		el.addEventListener("click", this.toggleCalendar.bind(this));
+		el.addEventListener("click", this.toggle.bind(this));
 		return el;
 	}
 
@@ -1079,10 +1112,10 @@ class DateTimePicker extends HTMLElement {
 	}
 
 	_createPreviousMonthButton() {
-		let el = document.createElement("a");
-		el.href = "javascript:void(0)";
+		let el = document.createElement("button");
 		el.innerHTML = `<i class="icon--mdi icon--mdi--arrow-left"></i>`;
-		el.addEventListener("click", this.moveMonth.bind(this, -1));
+		el.setAttribute("type", "button");
+		el.addEventListener("click", e => this.moveMonth.call(this, e, -1));
 		return el;
 	}
 
@@ -1163,26 +1196,26 @@ class DateTimePicker extends HTMLElement {
 	 * @returns {HTMLAnchorElement}
 	 */
 	_createYearButton(year) {
-		let el = document.createElement("a");
-		el.href = "javascript:void(0)";
+		let el = document.createElement("button");
 		el.innerText = year.toString();
-		el.addEventListener("click", this._onYearClick.bind(this, year));
+		el.setAttribute("type", "button");
+		el.addEventListener("click", e => this._onYearClick.call(this, e, year));
 		return el;
 	}
 
 	_createYearDownButton() {
-		const el = document.createElement("a");
-		el.href = "javascript:void(0)";
+		const el = document.createElement("button");
 		el.innerHTML = `<i class="icon--mdi icon--mdi--arrow-down"></i>`;
-		el.addEventListener("click", this._onYearDownClick.bind(this));
+		el.setAttribute("type", "button");
+		el.addEventListener("click", e => this._onYearDownClick.call(this, e));
 		return el;
 	}
 
 	_createYearUpButton() {
-		const el = document.createElement("a");
-		el.href = "javascript:void(0)";
+		const el = document.createElement("button");
 		el.innerHTML = `<i class="icon--mdi icon--mdi--arrow-up"></i>`;
-		el.addEventListener("click", this._onYearUpClick.bind(this));
+		el.setAttribute("type", "button");
+		el.addEventListener("click", e => this._onYearUpClick.call(this, e));
 		return el;
 	}
 
@@ -1603,6 +1636,147 @@ const objectToMap = (o = {}) => {
 
 	return result;
 };
+
+/**
+ * Callback used to validate the values entered into a Prompter
+ * @callback ValidatorFunc
+ * @param {Object} promptValues - The values entered into the prompter
+ * @return {Object} { validationErrors: Array, isValid: boolean }
+ */
+
+/**
+ * Prompter displays a modal dialog using the contents provided in the web component slots.
+ * It allows you to put whatever elements you want into the dialog, and then retrieve the
+ * contents of the dialog when the user clicks the confirm button.
+ * @class Prompter
+ * @extends {HTMLElement}
+ */
+class Prompter extends HTMLElement {
+	constructor() {
+		super();
+		this.attachShadow({ mode: "open" });
+
+		this.windowEl = null;
+		this.shim = new Shim(false);
+		this.width = this.getAttribute("width") || "";
+		this.height = this.getAttribute("height") || "";
+		this.actionButtonID = this.getAttribute("action-button") || "";
+		this.cancelButtonID = this.getAttribute("cancel-button") || "";
+		/** @type {ValidatorFunc} */ this.validatorFunc = null;
+
+		if (!this.actionButtonID) {
+			throw new Error("Prompter requires an action button ID");
+		}
+
+		if (!this.cancelButtonID) {
+			throw new Error("Prompter requires a cancel button ID");
+		}
+
+		this.classList.add("hidden");
+
+		this.shadowRoot.innerHTML = `
+			<div id="window" part="prompter" role="dialog" aria-modal="true" aria-label="Prompt" style="width: ${this.width}; height: ${this.height};">
+				<slot name="title"></slot>
+				<slot name="body"></slot>
+				<nav part="buttons">
+					<slot name="buttons"></slot>
+				</nav>
+			</div>
+		`;
+
+	}
+
+	connectedCallback() {
+		this.querySelector(this.cancelButtonID).addEventListener("click", this._onCancelClick.bind(this));
+		this.querySelector(this.actionButtonID).addEventListener("click", this._onConfirmClick.bind(this));
+	}
+
+	hide() {
+		this.classList.add("hidden");
+		this.shim.hide();
+		this._clearAllInputs();
+	}
+
+	show() {
+		this.shim.show();
+		this.classList.remove("hidden");
+		this.querySelector(`div[slot="body"]>input, div[slot="body"]>select, div[slot="body"]>textarea, div[slot="body"]>form>input,div[slot="body"]>form>select,div[slot="body"]>form>textarea`).focus();
+	}
+
+	/**
+	 * Add a validation function to the prompter. This function will be called when
+	 * the confirm button is clicked.
+	 * @param {ValidatorFunc} f
+	 * @returns {void}
+	 */
+	addValidatorFunc(f) {
+		this.validatorFunc = f;
+	}
+
+	_onCancelClick() {
+		this.hide();
+		this.dispatchEvent(new CustomEvent("cancel"));
+	}
+
+	_onConfirmClick() {
+		let result = {};
+
+		this.querySelectorAll("input, select, textarea").forEach((el) => {
+			let key = "";
+
+			if (el.hasAttribute("name")) {
+				key = el.getAttribute("name");
+			} else if (el.hasAttribute("id")) {
+				key = el.getAttribute("id");
+			}
+
+			result[key] = el.value;
+		});
+
+		if (this.validatorFunc) {
+			const { validationErrors, isValid } = this.validatorFunc(result);
+
+			if (!isValid) {
+				this.dispatchEvent(new CustomEvent("validation-failed", {
+					detail: {
+						result,
+						validationErrors,
+					}
+				}));
+
+				return;
+			}
+		}
+
+		this.hide();
+		this.dispatchEvent(new CustomEvent("confirm", { detail: result }));
+	}
+
+	_renderWindow() {
+		this.windowEl = document.createElement("div");
+		this.windowEl.classList.add("prompter");
+		this.windowEl.setAttribute("role", "dialog");
+		this.windowEl.setAttribute("aria-modal", "true");
+		this.windowEl.setAttribute("aria-label", "Prompt");
+		this.windowEl.style.width = this.width;
+		this.windowEl.style.height = this.height;
+
+		this.windowEl.innerHTML = `
+			<slot name="title"></slot>
+			<slot name="body"></slot>
+		`;
+	}
+
+	_clearAllInputs() {
+		this.querySelectorAll("input, select, textarea").forEach((el) => {
+			el.value = "";
+		});
+	}
+}
+
+if (!customElements.get("prompter-ui")) {
+	customElements.define("prompter-ui", Prompter);
+}
 
 const ErrTokenExpired = "token expired";
 
@@ -2510,4 +2684,4 @@ if (!customElements.get("color-picker")) {
 	customElements.define("color-picker", ColorPicker);
 }
 
-export { AlertPosition, Alerter, BaseView, ColorPicker, Confirmer, DateFormats, DateTimePicker, ErrTokenExpired, GoogleLoginForm, GraphQL, MemberLoginBar, MemberService, MessageBar, PopupMenu, PopupMenuItem, SessionService, Shim, Spinner, application, debounce, fetcher, formatDateTime, hidePopup, objectToMap, parseDateTime, showPopup };
+export { AlertPosition, Alerter, BaseView, ColorPicker, Confirmer, DateFormats, DateTimePicker, ErrTokenExpired, GoogleLoginForm, GraphQL, MemberLoginBar, MemberService, MessageBar, PopupMenu, PopupMenuItem, Prompter, SessionService, Shim, Spinner, application, debounce, fetcher, formatDateTime, hidePopup, objectToMap, parseDateTime, showPopup };

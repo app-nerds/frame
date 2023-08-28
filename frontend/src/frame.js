@@ -9,6 +9,7 @@ import { fetcher } from "./http/fetcher.js";
 import { GraphQL } from "./http/graphql.js";
 import { debounce } from "./utilities/debounce.js";
 import { objectToMap } from "./utilities/objectToMap.js";
+import { Prompter } from "./dialogs/prompt.js";
 import SessionService, { ErrTokenExpired } from "./sessions/session-service.js";
 import { application } from "./spa/spa.js";
 import { BaseView } from "./spa/base-view.js";
@@ -36,6 +37,7 @@ export {
 	debounce,
 	objectToMap,
 	parseDateTime,
+	Prompter,
 	SessionService,
 	ErrTokenExpired,
 	application,

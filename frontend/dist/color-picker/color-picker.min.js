@@ -1,4 +1,4 @@
-/* Copyright © 2023 App Nerds LLC v1.4.1 */
+/* Copyright © 2023 App Nerds LLC v1.4.2 */
 /**
  * ColorPicker is a component used to display a color picker on the screen.
  * If the color the user wants is not there, they can type a hex code into the box to get

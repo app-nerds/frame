@@ -87,10 +87,10 @@
 			<date-time-picker date-format="yyyy-mm-dd hh:mm" time-increment="30minute" date="2022-04-05"
 				name="fourth"></date-time-picker>
 
-			<nav>
+			<footer>
 				<button type="button"><i class="icon--mdi icon--mdi--arrow-left" alt="Left arrow"></i> Cancel</button>
 				<button type="button" class="action-button">Action!</button>
-			</nav>
+			</footer>
 		</form>
 
 		<section>
@@ -248,6 +248,7 @@
 		<ul>
 			<li>Alert Dialog</li>
 			<li>Confirmation dialog</li>
+			<li>Prompt dialog</li>
 		</ul>
 
 		<div style="margin-bottom: 1rem;">
@@ -256,6 +257,7 @@
 			<button id="showWarnAlert">Show Warn Alert</button>
 			<button id="showErrorAlert">Show Error Alert</button>
 			<button id="showConfirm">Show Confirm</button>
+			<button id="showPrompt">Show Prompt</button>
 		</div>
 
 		<h3>Menus</h3>
@@ -319,11 +321,35 @@
 				</section>
 			</div>
 		</div>
+
+		<prompter-ui width="20em" action-button="#promptSaveAction" cancel-button="#promptCancelAction" id="prompt">
+			<h4 slot="title" style="margin:0;">Say Hi</h4>
+			<div slot="body">
+				<form>
+					<label for="greetingChoice">Greeting</label>
+					<select id="greetingChoice" style="width: 100%;">
+						<option value="Hello">Hello</option>
+						<option value="Howdy">Howdy</option>
+						<option value="Hi">Hi</option>
+					</select>
+
+					<label for="yourName">Your Name</label>
+					<input type="text" id="yourName" style="width: 100%;" />
+
+				</form>
+			</div>
+
+			<nav slot="buttons" part="buttons">
+				<button type="button" id="promptCancelAction">Cancel</button>
+				<button type="button" class="action-button" id="promptSaveAction">Go</button>
+			</nav>
+		</prompter-ui>
 	</main>
 
-
 	<script type="module">
-		import {Alerter, Confirmer, Spinner, showPopup, hidePopup} from "/static/frame.js";
+		import {Alerter, Confirmer, Spinner, showPopup, hidePopup, Prompter} from "/static/frame.js";
+
+		/** @type {import("../dist/frame.js").ValidatorFunc} */
 
 		document.addEventListener("DOMContentLoaded", () => {
 			const alerter = new Alerter();
@@ -355,6 +381,34 @@
 			document.getElementById("showConfirm").addEventListener("click", async () => {
 				const result = await confirmer.yesNo("Are you sure?");
 				alerter.info(`You chose "${result}"`);
+			});
+
+			/*
+			 * Click to show prompt
+			 */
+			document.querySelector("#showPrompt").addEventListener("click", () => {
+				document.querySelector("#prompt").show();
+			});
+
+			const prompterEl = document.querySelector("#prompt");
+
+			prompterEl.addValidatorFunc((values) => {
+				if (values.yourName === "") {
+					return {
+						validationErrors: ["Your name is required"],
+						isValid: false,
+					};
+				}
+
+				return {validationErrors: [], isValid: true};
+			});
+
+			prompterEl.addEventListener("validation-failed", (e) => {
+				alerter.error(e.detail.validationErrors.join("<br />"));
+			});
+
+			prompterEl.addEventListener("confirm", e => {
+				alerter.info(`${e.detail.greetingChoice} ${e.detail.yourName}!`);
 			});
 
 			/*

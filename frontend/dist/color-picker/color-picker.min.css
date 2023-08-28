@@ -1,0 +1,1 @@
+.color-picker{display:flex;flex-direction:column;width:6rem}.color-picker .grid{display:flex;flex-wrap:wrap;gap:.1rem}.color-picker .grid .grid-item{width:1rem;height:1rem;border:1px solid #888;cursor:pointer}.grid-item-selected{border:3px outset #888 !important}.color-picker .color-input{margin-top:.4rem;width:100%}

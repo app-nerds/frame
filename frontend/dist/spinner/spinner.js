@@ -1,4 +1,4 @@
-/* Copyright © 2023 App Nerds LLC v1.4.1 */
+/* Copyright © 2023 App Nerds LLC v1.4.2 */
 /**
  * Spinner is a simple library for displaying a loading spinner. It makes use
  * of the whole page to display the spinner. The spinner is pure CSS, SVG, and JavaScript.
