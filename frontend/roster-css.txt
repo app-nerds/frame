@@ -12,4 +12,4 @@ menus/popup-menu.min.css,src/menus/popup-menu.css
 message-bar/message-bar.min.css,src/message-bar/message-bar.css
 shim/shim.min.css,src/shim/shim.css
 spinner/spinner.min.css,src/spinner/spinner.css
-components.min.css,src/datetime/date-time-picker.css src/dialogs/alert.css src/dialogs/confirm.css src/dialogs/prompt.css src/menus/popup-menu.css src/message-bar/message-bar.css src/shim/shim.css src/spinner/spinner.css
+components.min.css,src/color-picker/color-picker.css src/datetime/date-time-picker.css src/dialogs/alert.css src/dialogs/confirm.css src/dialogs/prompt.css src/menus/popup-menu.css src/message-bar/message-bar.css src/shim/shim.css src/spinner/spinner.css
