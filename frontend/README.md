@@ -161,6 +161,19 @@ a heading. This will likely be a **H3** or lower (never an H1 for sure). The bod
 can be whatever content you want. Finally, add a footer with buttons to take
 actions if you wish.
 
+## Icons
+Icons make use of a library provided by <a href="https://icon-sets.iconify.design/mdi/">Iconify</a>.
+A few icons are already included in **icons.css** from the Material Design set. To include new ones, 
+search for the icons you want and add them to the <em>icons.css</em> file by URL like 
+`https://api.iconify.design/mdi.css?icons=home,arrow-left,arrow-right,cog`.
+
 ## Components
 Components are either custom web components or Javascript libraries to enhance
 your application.
+
+### Color Picker
+The Color Picker component can be used to allow a user to pick a color. 
+
+![Color Picker Screenshot](./screenshots/screenshot-color-picker.png)
+
+
