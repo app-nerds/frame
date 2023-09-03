@@ -1,10 +1,9 @@
-import frame from "/admin-static/js/frame.min.js";
+import { Spinner, Alerter, Confirmer } from "/admin-static/js/frame.min.js";
 
-window.spinner = frame.spinner();
-window.alert = frame.alert();
-window.confirm = frame.confirm();
+window.spinner = new Spinner();
+window.alert = new Alerter();
+window.confirm = new Confirmer();
 
 document.addEventListener("DOMContentLoaded", () => {
-  feather.replace();
 });
 

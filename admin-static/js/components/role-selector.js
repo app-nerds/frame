@@ -1,4 +1,4 @@
-import frame from "../frame.min.js";
+import { fetcher } from "../frame.min.js";
 
 export default class RoleSelector extends HTMLElement {
   constructor() {
@@ -26,7 +26,7 @@ export default class RoleSelector extends HTMLElement {
       },
     };
 
-    const response = await frame.fetcher(`/admin/api/member/role`, options, window.spinner);
+    const response = await fetcher(`/admin/api/member/role`, options, window.spinner);
     const result = await response.json();
 
     if (!response.ok) {

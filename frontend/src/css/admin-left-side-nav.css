@@ -51,7 +51,7 @@ header h1 {
   margin-top: 0;
 }
 
-div:last-child, member-login-bar:last-child {
+member-login-bar:last-child {
 	margin-left: auto;
 	margin-right: 2rem;
 }

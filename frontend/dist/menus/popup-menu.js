@@ -33,18 +33,19 @@ class PopupMenu extends HTMLElement {
 			);
 		}
 
-		this.style.visibility = "hidden";
+		this.classList.add("popup-menu-hidden");
 
 		document.addEventListener("click", (e) => {
 			if (e.target !== this && !this.contains(e.target)) {
-				if (e.target !== document.querySelector(this._trigger)) {
+				const t = document.querySelector(this._trigger);
+
+				if (e.target !== t && !t.contains(e.target)) {
 					this._hide();
-				} else {
-					this.toggle();
 				}
 			}
 		});
 
+		document.querySelector(this._trigger).addEventListener("click", this.toggle.bind(this));
 		const menuItemEls = document.querySelectorAll("popup-menu-item");
 
 		menuItemEls.forEach((el) => {
@@ -88,7 +89,7 @@ class PopupMenu extends HTMLElement {
 
 	_hide() {
 		this.isVisible = false;
-		this.style.visibility = "hidden";
+		this.classList.add("popup-menu-hidden");
 	}
 
 	_show() {
@@ -98,20 +99,18 @@ class PopupMenu extends HTMLElement {
 		let thisRect = this.getBoundingClientRect();
 		let buffer = 3;
 
-		if (thisRect.right > window.innerWidth) {
-			this.style.left =
-				"" +
-				(triggerRect.x + (window.innerWidth - thisRect.right) - buffer) +
-				"px";
-		} else {
-			this.style.left = "" + triggerRect.x + "px";
+		let left = triggerRect.left;
+
+		if (left + thisRect.width > window.innerWidth) {
+			left = triggerRect.left - ((triggerRect.left + thisRect.width) - window.innerWidth) - buffer;
 		}
 
+		this.style.left = `${left}px`;
 		this.style.top =
 			"" + (triggerRect.y + triggerRect.height + buffer) + "px";
 
 		this.isVisible = true;
-		this.style.visibility = "visible";
+		this.classList.remove("popup-menu-hidden");
 	}
 }
 
@@ -162,7 +161,7 @@ class PopupMenuItem extends HTMLElement {
  * @returns {void}
  */
 const showPopup = (el) => {
-	document.querySelector(el).style.visibility = "visible";
+	document.querySelector(el)._show();
 };
 
 /**
@@ -170,7 +169,7 @@ const showPopup = (el) => {
  * @param {string} el The query selector for the popup menu
  */
 const hidePopup = (el) => {
-	document.querySelector(el).style.visibility = "hidden";
+	document.querySelector(el)._hide();
 };
 
 if (!customElements.get("popup-menu")) {

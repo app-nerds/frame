@@ -1,4 +1,4 @@
-import frame from "../frame.min.js";
+import { fetcher, PopupMenu } from "../frame.min.js";
 import { PendingApproval, Active, Inactive } from "../constants/member-constants.js";
 
 export default class MembersTable extends HTMLElement {
@@ -14,7 +14,6 @@ export default class MembersTable extends HTMLElement {
     const table = this.createTable(members);
 
     this.insertAdjacentElement("beforeend", table);
-    feather.replace();
   }
 
   createTable(members) {
@@ -138,37 +137,46 @@ export default class MembersTable extends HTMLElement {
     button.classList.add("action-button");
     button.setAttribute("alt", "Action Menu");
     button.setAttribute("title", "Action Menu");
-    button.innerHTML = `<i data-feather="menu"></i>`;
+    button.innerHTML = `<i class="icon--mdi icon--mdi--menu"></i>`;
 
     const popup = document.createElement("popup-menu");
     popup.setAttribute("trigger", `#${buttonID}`);
 
     let menuItems = [
-      { id: `member-edit-button-${member.id}`, text: `Edit`, icon: "edit-3", handler: () => { this.onEditMemberClick(member.id); } },
+      { id: `member-edit-button-${member.id}`, text: `Edit`, icon: "icon--mdi icon--mdi--pencil", handler: () => { this.onEditMemberClick(member.id); } },
     ];
 
     if (member.memberStatus.id === PendingApproval) {
-      menuItems.push({ id: `member-status-button-${member.id}`, text: `Approve`, icon: "user-check", handler: () => { this.onActionButtonClick(member); } });
+      menuItems.push({ id: `member-status-button-${member.id}`, text: `Approve`, icon: "icon--mdi icon--mdi--check", handler: () => { this.onActionButtonClick(member); } });
     }
 
     if (member.memberStatus.id === Inactive) {
-      menuItems.push({ id: `member-status-button-${member.id}`, text: `Inactivate`, icon: "user-minus", handler: () => { this.onActionButtonClick(member); } });
+      menuItems.push({ id: `member-status-button-${member.id}`, text: `Inactivate`, icon: "icon--mdi icon--mdi--minus", handler: () => { this.onActionButtonClick(member); } });
     }
 
     if (member.memberStatus.id === Inactive) {
-      menuItems.push({ id: `member-status-button-${member.id}`, text: `Activate`, icon: "user-check", handler: () => { this.onActionButtonClick(member); } });
+      menuItems.push({ id: `member-status-button-${member.id}`, text: `Activate`, icon: "icon--mdi icon--mdi--check", handler: () => { this.onActionButtonClick(member); } });
     }
 
-    menuItems.push({ id: `member-delete-button-${member.id}`, text: `Delete`, icon: "x", handler: () => { this.onDeleteButtonClick(member); } });
+    menuItems.push({ id: `member-delete-button-${member.id}`, text: `Delete`, icon: "icon--mdi icon--mdi--delete", handler: () => { this.onDeleteButtonClick(member); } });
 
     menuItems.forEach(data => {
       const menuItem = document.createElement("popup-menu-item");
       menuItem.setAttribute("id", data.id);
       menuItem.setAttribute("text", data.text);
       menuItem.setAttribute("icon", data.icon);
-      menuItem.addEventListener("click", data.handler);
 
       popup.insertAdjacentElement("beforeend", menuItem);
+    });
+
+    popup.addEventListener("menu-item-click", e => {
+      if (e.detail.id === `member-edit-button-${member.id}`) {
+        this.onEditMemberClick.call(this, member.id);
+      } else if (e.detail.id === `member-delete-button-${member.id}`) {
+        this.onDeleteButtonClick.call(this, member);
+      } else {
+        this.onActionButtonClick.call(this, member)
+      }
     });
 
     return [button, popup];
@@ -182,7 +190,7 @@ export default class MembersTable extends HTMLElement {
       },
     };
 
-    const response = await frame.fetcher(`/admin/api/members?page=${this._page}`, options);
+    const response = await fetcher(`/admin/api/members?page=${this._page}`, options);
     const result = await response.json();
     return result;
   }
@@ -193,14 +201,12 @@ export default class MembersTable extends HTMLElement {
 
   async onActionButtonClick(member) {
     let result;
-    console.log(member);
 
     switch (member.memberStatus.id) {
       case PendingApproval:
         result = await this.activateMember(member);
 
         if (!result.success) {
-          console.log(result);
           window.alert.error(result.message);
         } else {
           window.alert.success("Member approved!");
@@ -216,7 +222,6 @@ export default class MembersTable extends HTMLElement {
         result = await this.activateMember(member);
 
         if (!result.success) {
-          console.log(result);
           window.alert.error(result.message);
         } else {
           window.alert.success("Member approved!");
@@ -242,7 +247,7 @@ export default class MembersTable extends HTMLElement {
       },
     };
 
-    const response = await frame.fetcher(`/admin/api/member/delete/${member.id}`, options, window.spinner);
+    const response = await fetcher(`/admin/api/member/delete/${member.id}`, options, window.spinner);
     const result = await response.json();
 
     if (!response.ok) {
@@ -263,7 +268,7 @@ export default class MembersTable extends HTMLElement {
       body: data,
     }
 
-    const response = await fetch(`/admin/api/member/activate`, options);
+    const response = await fetcher(`/admin/api/member/activate`, options, window.spinner);
     const result = await response.json();
     return result;
   }

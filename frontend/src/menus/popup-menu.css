@@ -27,3 +27,6 @@ popup-menu popup-menu-item a:hover {
 	color: var(--popup-menu-item-hover-color);
 }
 
+.popup-menu-hidden {
+	left: -2000px !important;
+}
