@@ -1110,9 +1110,8 @@ func (s MemberService) GetMemberRoles() ([]MemberRole, error) {
 
 func (s MemberService) CreateMemberRole(role MemberRole) (MemberRole, error) {
 	var (
-		err       error
-		sqlResult sql.Result
-		newID     int64
+		err   error
+		newID int64
 	)
 
 	query := `
@@ -1125,13 +1124,10 @@ func (s MemberService) CreateMemberRole(role MemberRole) (MemberRole, error) {
 			$2,
 			$3
 		)
+		RETURNING id
 	`
 
-	if sqlResult, err = s.db.Exec(query, time.Now().UTC(), role.Color, role.Role); err != nil {
-		return MemberRole{}, err
-	}
-
-	if newID, err = sqlResult.LastInsertId(); err != nil {
+	if err = s.db.QueryRow(query, time.Now().UTC(), role.Color, role.Role).Scan(&newID); err != nil {
 		return MemberRole{}, err
 	}
 
