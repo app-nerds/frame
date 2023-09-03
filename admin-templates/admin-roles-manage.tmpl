@@ -24,8 +24,8 @@
         <td>
           {{if gt .ID 2}}
             <button class="action-button" alt="Action menu" title="Action menu" id="action-menu-{{.ID}}"><i class="icon--mdi icon--mdi--menu"></i></button>
-            <popup-menu trigger="#action-menu-{{.ID}}">
-              <popup-menu-item id="edit-role_{{.ID}}" text="Edit" icon="edit-3" class="role-popup-menu-item"></popup-menu-item>
+            <popup-menu trigger="#action-menu-{{.ID}}" id="role-menu-{{.ID}}">
+              <popup-menu-item id="edit-role_{{.ID}}" text="Edit" icon="icon--mdi icon--mdi--pencil" class="role-popup-menu-item"></popup-menu-item>
             </popup-menu>
           {{else}}
             &nbsp;

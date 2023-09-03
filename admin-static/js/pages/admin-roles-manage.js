@@ -1,12 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const popupMenuItems = document.querySelectorAll(".role-popup-menu-item");
+  const popupMenuEls = document.querySelectorAll(`popup-menu[id*="role-menu"]`);
 
-  for (let i = 0; i < popupMenuItems.length; i++) {
-    popupMenuItems[i].addEventListener("click", onPopupMenuItemClicked);
-  }
+  popupMenuEls.forEach(el => {
+    el.addEventListener("menu-item-click", onPopupMenuItemClicked);
+  })
 
   function onPopupMenuItemClicked(e) {
-    const [_, id] = e.target.id.split("_");
+    const [_, id] = e.detail.id.split("_");
     window.location = `/admin/roles/edit/${id}`;
   }
 });
