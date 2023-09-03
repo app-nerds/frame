@@ -764,6 +764,36 @@ func (mm *MemberManagement) handleAdminRolesEdit(w http.ResponseWriter, r *http.
 	 * POST
 	 */
 	if r.Method == http.MethodPost {
+		_ = r.ParseForm()
+
+		roleName := r.FormValue("roleName")
+		color := r.FormValue("color")
+
+		if roleName == "" {
+			data.Success = false
+			data.Message = "Please provide a name for your role."
+			goto renderrolesedit
+		}
+
+		if color == "" {
+			data.Success = false
+			data.Message = "Please select a color to represent this role."
+			goto renderrolesedit
+		}
+
+		data.Role.Role = roleName
+		data.Role.Color = color
+
+		if err = mm.memberService.UpdateMemberRole(data.Role); err != nil {
+			mm.logger.WithError(err).Error("error updating role in handleAdminRolesEdit")
+
+			data.Success = false
+			data.Message = "There was a problem updating your role. Please try again."
+			goto renderrolesedit
+		}
+
+		http.Redirect(w, r, "/admin/roles/manage", http.StatusFound)
+		return
 	}
 
 renderrolesedit:
@@ -1133,6 +1163,19 @@ func (s MemberService) CreateMemberRole(role MemberRole) (MemberRole, error) {
 
 	role.ID = uint(newID)
 	return role, nil
+}
+
+func (s MemberService) UpdateMemberRole(role MemberRole) error {
+	query := `
+		UPDATE member_roles SET
+			updated_at = $1,
+			color = $2,
+			role = $3
+		WHERE id = $4
+	`
+
+	_, err := s.db.Exec(query, time.Now().UTC(), role.Color, role.Role, role.ID)
+	return err
 }
 
 func (s MemberService) InactivateMember(id uint) error {

@@ -1,0 +1,26 @@
+{{template "admin-layout" .}}
+{{define "title"}}Edit Role{{end}}
+
+{{define "content"}}
+<div class="admin-roles-edit-page">
+  <h2>Edit Role</h2>
+
+  {{- if .Message}}
+    <message-bar message-type="{{if .Success}}success{{else}}error{{end}}" message="{{.Message}}"></message-bar>
+  {{end}}
+
+  <form method="POST">
+    <label for="roleName">Role Name</label>
+    <input type="text" name="roleName" value="{{.Role.Role}}" required autofocus />
+
+    <label for="color">Color</label>
+    <color-picker id="colorPicker" name="color" color="{{.Role.Color}}"></color-picker>
+
+    <footer>
+      <button type="button" id="close">Close</button>
+      <button class="action-button">Update</button>
+    </footer>
+  </form>
+</div>
+{{end}}
+
