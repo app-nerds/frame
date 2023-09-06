@@ -53,12 +53,13 @@ export class Confirmer {
 	 * @returns {void}
 	 */
 	show(type, message, callback) {
-		const container = document.createElement("dialog");
-		container.classList.add("confirm-container");
-
 		let shim = new Shim(true, () => { this._close(container, callback, false); });
 
-		container.innerHTML += `<p>${message}</p>`;
+		const container = Object.assign(document.createElement("dialog"), {
+			className: "confirm-container",
+			innerHTML: `<p>${message}</p>`,
+		});
+
 		this._addButtons(container, type, shim, callback);
 
 		shim.show();
@@ -77,9 +78,11 @@ export class Confirmer {
 
 		switch (type) {
 			case "yesno":
-				const noB = document.createElement("button");
-				noB.innerText = "No";
-				noB.classList.add("cancel-button");
+				const noB = Object.assign(document.createElement("button"), {
+					innerText: "No",
+					className: "cancel-button",
+				});
+
 				noB.addEventListener("click", (e) => {
 					e.preventDefault();
 					e.stopPropagation();
@@ -88,9 +91,11 @@ export class Confirmer {
 					this._close(container, callback, false)
 				});
 
-				const yesB = document.createElement("button");
-				yesB.innerText = "Yes";
-				yesB.classList.add("action-button");
+				const yesB = Object.assign(document.createElement("button"), {
+					innerText: "Yes",
+					className: "action-button",
+				});
+
 				yesB.addEventListener("click", (e) => {
 					e.preventDefault();
 					e.stopPropagation();
@@ -99,14 +104,15 @@ export class Confirmer {
 					this._close(container, callback, true);
 				});
 
-				buttons.push(noB);
-				buttons.push(yesB);
+				buttons.push(noB, yesB);
 				break;
 
 			default:
-				const b = document.createElement("button");
-				b.innerText = "Close";
-				b.classList.add("action-button");
+				const b = Object.assign(document.createElement("button"), {
+					innerText: "Close",
+					className: "action-button",
+				});
+
 				b.addEventListener("click", (e) => {
 					e.preventDefault();
 					e.stopPropagation();
@@ -119,10 +125,8 @@ export class Confirmer {
 				break;
 		}
 
-		const buttonContainer = document.createElement("div");
-		buttonContainer.classList.add("button-row");
-
-		buttons.forEach((button) => { buttonContainer.appendChild(button); });
+		const buttonContainer = Object.assign(document.createElement("div"), { className: "button-row" });
+		buttonContainer.append(...buttons);
 		container.appendChild(buttonContainer);
 	}
 }

@@ -28,14 +28,11 @@ export default class ColorPicker extends HTMLElement {
 	}
 
 	_createOuterContainer() {
-		const el = document.createElement("div");
-		el.classList.add("color-picker");
-		return el;
+		return Object.assign(document.createElement("div"), { className: "color-picker" });
 	}
 
 	_createColorGrid(colors, selectedColor) {
-		const grid = document.createElement("div");
-		grid.classList.add("grid");
+		const grid = Object.assign(document.createElement("div"), { className: "grid" });
 
 		colors.forEach(color => {
 			const el = this._createColorItem(color, selectedColor);
@@ -46,9 +43,11 @@ export default class ColorPicker extends HTMLElement {
 	}
 
 	_createColorItem(color, selectedColor) {
-		const el = document.createElement("div");
-		el.classList.add("grid-item");
-		el.style.backgroundColor = color;
+		const el = Object.assign(document.createElement("div"), {
+			className: "grid-item",
+			style: `background-color: ${color}`,
+		});
+
 		el.setAttribute("data-color", color);
 
 		if (selectedColor === color) {
@@ -60,13 +59,14 @@ export default class ColorPicker extends HTMLElement {
 	}
 
 	_createInput(name, color) {
-		const el = document.createElement("input");
-		el.setAttribute("type", "text");
-		el.setAttribute("name", name);
-		el.setAttribute("aria-label", "Selected color hexidecimal value");
-		el.setAttribute("autocomplete", "on");
-		el.classList.add("color-input");
-		el.value = color;
+		const el = Object.assign(document.createElement("input"), {
+			type: "text",
+			name: name,
+			"aria-label": "Selected color hexidecimal value",
+			autocomplete: "on",
+			className: "color-input",
+			value: color,
+		});
 
 		return el;
 	}

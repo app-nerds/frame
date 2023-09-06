@@ -19,7 +19,7 @@ date-time-picker p {
 	box-shadow: var(--shadow-color) 0px 7px 29px 0px;
 	background-color: var(--date-time-picker-background-color);
 	position: absolute;
-	z-index: 1;
+	z-index: 99;
 	transform: translateY(-2em);
 }
 

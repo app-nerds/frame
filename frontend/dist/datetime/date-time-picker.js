@@ -291,7 +291,7 @@ class DateTimePicker extends HTMLElement {
 		this.insertAdjacentElement("beforeend", this.popupEl);
 
 		document.addEventListener("click", e => {
-			if (!e.target.contains(this.popupEl) && !e.target.contains(this.inputEl)) {
+			if (!e.target.contains(this.popupEl) && !e.target.contains(this.inputEl) && !this.popupEl.contains(e.target)) {
 				this.hide();
 			}
 		});
@@ -589,15 +589,12 @@ class DateTimePicker extends HTMLElement {
 	 * @returns {HTMLDivElement}
 	 */
 	_createCalendarBodyDayDiv(started, dayIndex, firstDayOfWeek) {
-		let el = document.createElement("div");
-		el.classList.add("day");
+		const el = Object.assign(document.createElement("div"), { className: "day" });
 
 		if (started) {
 			let d = dayIndex - firstDayOfWeek + 1;
 
-			let a = document.createElement("button");
-			a.innerText = `${d}`;
-			a.setAttribute("type", "button");
+			const a = Object.assign(document.createElement("button"), { innerText: `${d}`, type: "button" });
 			a.addEventListener("click", e => this._onCalendarDayClick.call(this, e, d));
 
 			let thisDay = new Date(this._getYear(), this._getMonth(), d);
@@ -614,36 +611,36 @@ class DateTimePicker extends HTMLElement {
 	}
 
 	_createCalendarBodyWeekDiv() {
-		let el = document.createElement("div");
-		el.classList.add("week");
-		return el;
+		return Object.assign(document.createElement("div"), { className: "week" });
 	}
 
 	_createCurrentMonthButton() {
-		let el = document.createElement("button");
-		el.innerHTML = this._getMonthName();
-		el.setAttribute("type", "button");
+		const el = Object.assign(document.createElement("button"), {
+			innerHTML: this._getMonthName(),
+			type: "button",
+		});
+
 		el.addEventListener("click", e => this._onHeaderMonthClick.call(this, e));
 		return el;
 	}
 
 	_createCurrentYearButton() {
-		let el = document.createElement("button");
-		el.innerHTML = this._getYear().toString();
-		el.setAttribute("type", "button");
+		const el = Object.assign(document.createElement("button"), {
+			innerHTML: this._getYear().toString(),
+			type: "button",
+		});
+
 		el.addEventListener("click", e => this._onHeaderYearClick.call(this, e));
 		return el;
 	}
 
 	_createInputEl() {
-		let el = document.createElement("input");
-		el.setAttribute("type", "datetime");
-		el.setAttribute("name", this.name);
-		el.setAttribute("aria-describedby", `${this.name}-format`);
-
-		if (this.date instanceof Date) {
-			el.value = formatDateTime(this.date, this.dateFormat);
-		}
+		const el = Object.assign(document.createElement("input"), {
+			type: "text",
+			name: this.name,
+			"aria-describedby": `${this.name}-format`,
+			value: this.date instanceof Date ? formatDateTime(this.date, this.dateFormat) : "",
+		});
 
 		el.addEventListener("click", () => {
 			if (this.date === "") {
@@ -660,9 +657,7 @@ class DateTimePicker extends HTMLElement {
 	}
 
 	_createInputLabel() {
-		let el = document.createElement("p");
-		el.innerText = `(${this.dateFormat})`;
-		el.id = `${this.name}-format`;
+		const el = Object.assign(document.createElement("p"), { innerText: `(${this.dateFormat})`, id: `${this.name}-format` });
 		return el;
 	}
 
@@ -671,39 +666,46 @@ class DateTimePicker extends HTMLElement {
 	 * @returns {HTMLAnchorElement}
 	 */
 	_createMonthButton(monthIndex) {
-		let month = document.createElement("button");
-		month.innerText = this._months[monthIndex];
-		month.setAttribute("type", "button");
+		const month = Object.assign(document.createElement("button"), {
+			innerText: this._months[monthIndex],
+			type: "button",
+		});
+
 		month.addEventListener("click", e => this._onMonthClick.call(this, e, monthIndex));
 		return month;
 	}
 
 	_createNextMonthButton() {
-		let el = document.createElement("button");
-		el.innerHTML = `<i class="icon--mdi icon--mdi--arrow-right"></i>`;
-		el.setAttribute("type", "button");
+		const el = Object.assign(document.createElement("button"), {
+			innerHTML: `<i class="icon--mdi icon--mdi--arrow-right"></i>`,
+			type: "button",
+		});
+
 		el.addEventListener("click", e => this.moveMonth.call(this, e, 1));
 		return el;
 	}
 
 	_createOkButton() {
-		let el = document.createElement("button");
-		el.innerText = "OK";
-		el.setAttribute("type", "button");
-		el.classList.add("ok");
+		const el = Object.assign(document.createElement("button"), {
+			innerText: "OK",
+			type: "button",
+			className: "ok",
+		});
+
 		el.addEventListener("click", this.toggle.bind(this));
 		return el;
 	}
 
 	_createPopupEl() {
-		let el = document.createElement("div");
 		this.headerEl = document.createElement("header");
 		this.bodyEl = document.createElement("section");
 
-		el.classList.add("date-time-picker-popup", "calendar-hidden");
-		el.setAttribute("role", "dialog");
-		el.setAttribute("aria-modal", "true");
-		el.setAttribute("aria-label", `Choose Date`);
+		const el = Object.assign(document.createElement("div"), {
+			className: "date-time-picker-popup calendar-hidden",
+			role: "dialog",
+			"aria-modal": "true",
+			"aria-label": `Choose Date`,
+		});
 
 		el.insertAdjacentElement("beforeend", this.headerEl);
 		el.insertAdjacentElement("beforeend", this.bodyEl);
@@ -712,9 +714,11 @@ class DateTimePicker extends HTMLElement {
 	}
 
 	_createPreviousMonthButton() {
-		let el = document.createElement("button");
-		el.innerHTML = `<i class="icon--mdi icon--mdi--arrow-left"></i>`;
-		el.setAttribute("type", "button");
+		const el = Object.assign(document.createElement("button"), {
+			innerHTML: `<i class="icon--mdi icon--mdi--arrow-left"></i>`,
+			type: "button",
+		});
+
 		el.addEventListener("click", e => this.moveMonth.call(this, e, -1));
 		return el;
 	}
@@ -796,25 +800,31 @@ class DateTimePicker extends HTMLElement {
 	 * @returns {HTMLAnchorElement}
 	 */
 	_createYearButton(year) {
-		let el = document.createElement("button");
-		el.innerText = year.toString();
-		el.setAttribute("type", "button");
+		const el = Object.assign(document.createElement("button"), {
+			innerText: year.toString(),
+			type: "button",
+		});
+
 		el.addEventListener("click", e => this._onYearClick.call(this, e, year));
 		return el;
 	}
 
 	_createYearDownButton() {
-		const el = document.createElement("button");
-		el.innerHTML = `<i class="icon--mdi icon--mdi--arrow-down"></i>`;
-		el.setAttribute("type", "button");
+		const el = Object.assign(document.createElement("button"), {
+			innerHTML: `<i class="icon--mdi icon--mdi--arrow-down"></i>`,
+			type: "button",
+		});
+
 		el.addEventListener("click", e => this._onYearDownClick.call(this, e));
 		return el;
 	}
 
 	_createYearUpButton() {
-		const el = document.createElement("button");
-		el.innerHTML = `<i class="icon--mdi icon--mdi--arrow-up"></i>`;
-		el.setAttribute("type", "button");
+		const el = Object.assign(document.createElement("button"), {
+			innerHTML: `<i class="icon--mdi icon--mdi--arrow-up"></i>`,
+			type: "button",
+		});
+
 		el.addEventListener("click", e => this._onYearUpClick.call(this, e));
 		return el;
 	}

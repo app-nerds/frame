@@ -96,17 +96,18 @@ export class Alerter {
 	show(message, type, callback) {
 		const col = document.getElementsByClassName(this.options.position)[0];
 
-		const card = document.createElement("div");
-		card.className = `alert-card ${type}`;
-		card.innerHTML += svgs[type];
-		card.options = {
-			...this.options, ...{
-				message,
-				type: type,
-				yPos: this.options.position.indexOf("top") > -1 ? "top" : "bottom",
-				inFocus: false,
+		const card = Object.assign(document.createElement("div"), {
+			className: `alert-card ${type}`,
+			innerHTML: `${svgs[type]}`,
+			options: {
+				...this.options, ...{
+					message,
+					type: type,
+					yPos: this.options.position.indexOf("top") > -1 ? "top" : "bottom",
+					inFocus: false,
+				},
 			},
-		};
+		});
 
 		this._setContent(card);
 		this._setIntroAnimation(card);
@@ -117,14 +118,19 @@ export class Alerter {
 	}
 
 	_setContent(card) {
-		const div = document.createElement("div");
-		div.className = "text-group";
+		let inner = "";
 
 		if (card.options.title) {
-			div.innerHTML = `<h4>${card.options.title}</h3>`;
+			inner += `<h4>${card.options.title}</h4>`;
 		}
 
-		div.innerHTML += `<p>${card.options.message}</p>`;
+		inner += `<p>${card.options.message}</p>`;
+
+		const div = Object.assign(document.createElement("div"), {
+			className: "text-group",
+			innerHTML: inner,
+		});
+
 		card.appendChild(div);
 	}
 
@@ -195,17 +201,13 @@ export class Alerter {
 	}
 
 	_setup() {
-		const container = document.createElement("div");
-		container.className = "alert-container";
+		const container = Object.assign(document.createElement("div"), { className: "alert-container" });
 
 		for (const rowIndex of [0, 1]) {
-			const row = document.createElement("div");
-			row.className = "alert-row";
+			const row = Object.assign(document.createElement("div"), { className: "alert-row" });
 
 			for (const colIndex of [0, 1, 2]) {
-				const col = document.createElement("div");
-				col.className = `alert-col ${alertPositionIndex[rowIndex][colIndex]}`;
-
+				const col = Object.assign(document.createElement("div"), { className: `alert-col ${alertPositionIndex[rowIndex][colIndex]}` });
 				row.appendChild(col);
 			}
 

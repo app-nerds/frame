@@ -131,11 +131,6 @@ class PopupMenuItem extends HTMLElement {
 	_render() {
 		let text = this.getAttribute("text");
 		let icon = this.getAttribute("icon");
-
-		const a = document.createElement("a");
-		a.href = "javascript:void(0)";
-		a.classList.add("popup-menu-item");
-
 		let inner = "";
 
 		if (icon) {
@@ -143,7 +138,12 @@ class PopupMenuItem extends HTMLElement {
 		}
 
 		inner += text;
-		a.innerHTML = inner;
+
+		const a = Object.assign(document.createElement("a"), {
+			href: "javascript:void(0)",
+			classList: ["popup-menu-item"],
+			innerHTML: inner,
+		});
 
 		a.addEventListener("click", (e) => {
 			e.preventDefault();
