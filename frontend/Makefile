@@ -17,7 +17,8 @@ run: ## Runs the example
 watch: ## Watches for changes and rebuilds
 	watchman-make -p 'src/**/*.css' 'src/**/*.js' -t build
 
-build: clean build-library copy ## Builds Nerd JS Library for distribution
+build: clean build-library copy clean-dist-after ## Builds Nerd JS Library for distribution
+	npx -p typescript tsc dist/frame.min.js --declaration --allowJs --emitDeclarationOnly --outDir dist
 
 build-debug: clean rollup ## Builds a non-minified version of Nerd JS Library
 
@@ -27,8 +28,11 @@ clean: ## Removes all files from the dist folder
 build-library: build-css
 	@parallel --colsep ' ' -a ./roster-js.txt ./minifyjs.sh {1} {2}
 
-build-css: setup-directories
+build-css: build-type-files
 	@parallel --colsep ',' -a ./roster-css.txt ./minifycss.sh {1} {2}
+
+build-type-files: setup-directories
+	npx -p typescript tsc src/**/*.js --declaration --allowJs --emitDeclarationOnly --outDir dist
 
 setup-directories:
 	@mkdir -p dist/datetime
@@ -45,3 +49,5 @@ copy:
 	cp dist/*.css ../cmd/frame/templates
 	cp dist/frame.min.js ../cmd/frame/templates
 
+clean-dist-after:
+	cd dist && find . -type f -name "*.js" ! -name "*.min.js" -exec rm -f {} +
