@@ -9,5 +9,5 @@ output="./dist/$1"
 minoutput="./dist/$2"
 
 rollup $input --format es -o $output --banner "$banner"
-uglifyjs $output -c -m --keep-fargs -o $minoutput --comments all --source-map
+uglifyjs $output -c -m --keep-fargs -o $minoutput --source-map
 
