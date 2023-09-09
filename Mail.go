@@ -31,6 +31,7 @@ type EmailServicer interface {
 	Send(templateID string) error
 	TemplateData(to string, data map[string]interface{}) EmailServicer
 	To(email, name string) EmailServicer
+	ToMultipleAddresses(emails []string) EmailServicer
 }
 
 type emailServiceConfig struct {
