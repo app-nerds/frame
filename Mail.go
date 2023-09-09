@@ -136,3 +136,13 @@ func (s *emailService) To(email, name string) EmailServicer {
 
 	return s
 }
+
+func (s *emailService) ToMultipleAddresses(emails []string) EmailServicer {
+	for _, email := range emails {
+		s.to = append(s.to, emailAddress{
+			Email: email,
+		})
+	}
+
+	return s
+}
